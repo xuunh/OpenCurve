@@ -1,0 +1,906 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="A visual tour of math, from Pre-Algebra to Topology.">
+<meta name="theme-color" content="#030306">
+<title>Scalar Space</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@200;300;400&family=Geist+Mono:wght@400&display=swap">
+<style>
+/* Layout: a fixed full-screen glowing realm; each subject is a station with one monumental light-drawn form, ordered from first steps to advanced. Minimal HUD on top. Single dark look by design. */
+:root {
+  --void: #030306;
+  --ink: #FFFFFF;
+  --mist: #9097A8;
+  --line: rgba(220, 225, 240, 0.14);
+  --accent: #E4E8F0;
+  --display: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --hud: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: dark;
+}
+html, body { background: var(--void); color: var(--ink); }
+html { scroll-snap-type: y mandatory; }
+body { font-family: var(--display); font-weight: 300; }
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
+
+#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
+.vignette { position: fixed; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(120% 90% at 55% 45%, transparent 50%, rgba(0,0,0,0.7) 100%); }
+
+.hud { position: fixed; z-index: 5; font-family: var(--hud); font-size: 11px; letter-spacing: 0.04em; color: var(--mist); pointer-events: none; }
+.hud a, .hud button { pointer-events: auto; }
+.hud-top {
+  top: env(safe-area-inset-top, 0px); left: 0; right: 0;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px;
+  padding-block: 24px;
+  padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px));
+}
+.mark { font-family: var(--display); font-weight: 400; font-size: 15px; letter-spacing: -0.01em; color: var(--ink); justify-self: start; display: inline-flex; align-items: center; gap: 10px; }
+.mark { transition: opacity .5s, transform .5s; }
+html.on-cover .mark { opacity: 0; transform: translateY(-6px); pointer-events: none; } /* the cover already shows the big title */
+.picker { display: inline-flex; align-items: center; gap: 10px; font: inherit; letter-spacing: inherit; color: var(--ink); background: rgba(0,0,0,0.35); border: 1px solid var(--line); border-radius: 999px; padding: 11px 18px; min-height: 44px; cursor: pointer; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: border-color .3s; }
+.picker:hover { border-color: var(--accent); }
+.picker svg { transition: transform .3s; }
+.picker[aria-expanded="true"] svg { transform: rotate(180deg); }
+.menu { position: fixed; inset: 0; z-index: 20; background: rgba(3,3,6,0.9); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); overflow-y: auto; box-sizing: border-box;
+  padding-block: calc(env(safe-area-inset-top, 0px) + 28px) 64px;
+  padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
+.menu-inner { max-width: 1240px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; }
+.menu-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; font-family: var(--hud); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--mist); margin-bottom: 56px; }
+.menu-close { font: inherit; letter-spacing: inherit; text-transform: inherit; color: var(--ink); background: none; border: 0; padding: 12px 0; min-height: 44px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; }
+.menu-close::after { content: '\00d7'; font-size: 18px; letter-spacing: 0; line-height: 1; transition: transform .4s; }
+.menu-close:hover::after { transform: rotate(90deg); }
+.menu-body { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 72px; flex: 1; }
+.menu ol { list-style: none; margin: 0; padding: 0; columns: 2 300px; column-gap: 48px; }
+.menu li { break-inside: avoid; }
+.menu li button { --c: var(--ink); width: 100%; display: grid; grid-template-columns: 28px 1fr auto; align-items: baseline; gap: 4px 12px; text-align: left; background: none; border: 0; padding: 12px 0; color: var(--ink); font-family: var(--display); font-weight: 200; font-size: clamp(24px, 2.6vw, 34px); line-height: 1.05; letter-spacing: -0.035em; cursor: pointer; transition: color .3s, transform .4s cubic-bezier(.6,0,.2,1); }
+.menu li button .n { font-family: var(--hud); font-size: 10px; letter-spacing: 0.06em; color: var(--mist); transition: color .3s; }
+.menu li button .tbd { font-family: var(--hud); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(144,151,168,0.6); }
+.menu li button .d { grid-column: 2 / -1; font-family: var(--display); font-weight: 300; font-size: 13px; letter-spacing: 0; color: var(--mist); max-height: 0; opacity: 0; overflow: hidden; transition: max-height .4s, opacity .4s; }
+.menu li button:hover, .menu li button:focus-visible { color: var(--c); transform: translateX(6px); }
+.menu li button:hover .n, .menu li button[aria-current="true"] .n { color: var(--c); }
+.menu li button:hover .d, .menu li button:focus-visible .d { max-height: 40px; opacity: 1; }
+.menu li button[aria-current="true"] { color: var(--c); }
+.menu aside { border-left: 1px solid var(--line); padding-left: 32px; display: flex; flex-direction: column; gap: 36px; font-size: 14px; line-height: 1.6; color: var(--mist); }
+.menu aside h3 { margin: 0 0 10px; font-family: var(--hud); font-weight: 400; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--mist); }
+.menu aside p { margin: 0; }
+.menu aside .who { font-family: var(--display); font-weight: 300; font-size: 22px; letter-spacing: -0.02em; color: var(--ink); }
+.menu aside ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.menu aside a { color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; min-height: 32px; }
+.menu aside a::after { content: '\2197'; font-size: 12px; color: var(--mist); transition: transform .3s; }
+.menu aside a:hover::after { transform: translate(2px, -2px); color: var(--ink); }
+.menu-foot { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-family: var(--hud); font-size: 10px; letter-spacing: 0.08em; color: var(--mist); }
+@media (max-width: 900px) { .menu-body { grid-template-columns: 1fr; gap: 48px; } .menu aside { border-left: 0; border-top: 1px solid var(--line); padding: 32px 0 0; } }
+@media (prefers-reduced-motion: reduce) { .menu li button, .menu li button .d, .menu-close::after { transition: none; } }
+.hud-gh { justify-self: end; }
+.hud-gh:hover { color: var(--ink); }
+
+.hud-bottom {
+  bottom: env(safe-area-inset-bottom, 0px); left: 0; right: 0;
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 16px;
+  padding-block: 24px;
+  padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px));
+}
+.eq { color: var(--accent); font-size: 12px; transition: color .8s; }
+.count { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.stepper { display: flex; align-items: center; gap: 12px; }
+.stepper button { pointer-events: auto; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: rgba(0,0,0,0.35); color: var(--ink); font: inherit; font-size: 14px; cursor: pointer; display: grid; place-items: center; transition: border-color .3s; }
+.stepper button:hover { border-color: var(--accent); }
+
+main { position: relative; z-index: 2; }
+.chapter {
+  min-height: 100svh; display: flex; flex-direction: column; justify-content: flex-end;
+  padding-block: 120px 140px;
+  scroll-snap-align: start; scroll-snap-stop: always;
+  padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px));
+  box-sizing: border-box;
+}
+.chapter-inner { max-width: 1280px; width: 100%; margin: 0 auto; display: grid; gap: 28px; }
+.kicker { font-family: var(--hud); font-size: 11px; letter-spacing: 0.06em; color: var(--mist); display: flex; align-items: center; gap: 10px; margin: 0; }
+.kicker i { width: 24px; height: 1px; background: var(--accent); transition: background .8s; }
+h1, h2 { margin: 0; font-weight: 200; letter-spacing: -0.055em; line-height: 0.86; text-wrap: balance; text-shadow: 0 0 40px rgba(0,0,0,0.6); }
+h1 { font-size: clamp(72px, 15vw, 232px); }
+h2 { font-size: clamp(52px, 9.5vw, 156px); }
+.sub { margin: 0; font-size: 17px; line-height: 1.5; color: var(--mist); max-width: 34ch; }
+@media (min-width: 721px) { .chapter:not(#intro) .sub { max-width: none; white-space: nowrap; } } /* course descriptions stay on one line on laptops */
+.row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 24px; }
+/* View topics: a quiet text link — small caps, an accent arrow, and a hairline underline that draws across on hover */
+.cta { position: relative; display: inline-flex; align-items: center; gap: 14px; min-height: 44px; font-family: var(--hud); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink); text-decoration: none; pointer-events: auto; }
+.cta::before { content: ''; position: absolute; left: 0; right: 30px; bottom: 10px; height: 1px; background: var(--ink); transform: scaleX(0); transform-origin: left; transition: transform .5s cubic-bezier(.6,0,.2,1); }
+.cta::after { content: '\2192'; font-size: 14px; letter-spacing: 0; color: var(--accent); transition: transform .4s cubic-bezier(.6,0,.2,1); }
+.cta:hover::before { transform: scaleX(1); }
+.cta:hover::after { transform: translateX(6px); }
+@media (prefers-reduced-motion: reduce) { .cta::before, .cta::after { transition: none; } }
+.next { display: inline-flex; align-items: center; gap: 12px; margin-top: 36px; min-height: 44px; font-family: var(--hud); font-size: 11px; letter-spacing: 0.06em; color: var(--mist); text-decoration: none; pointer-events: auto; }
+.next-n { color: var(--ink); font-size: 13px; }
+.next svg { color: var(--accent); animation: nudge 2.4s ease-in-out infinite; }
+.next:hover .next-n { color: var(--accent); }
+@keyframes nudge { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
+@media (prefers-reduced-motion: reduce) { .next svg { animation: none; } }
+
+@media (max-width: 720px) {
+  .hud-top { grid-template-columns: 1fr auto; }
+  .hud-gh { display: none; }
+  .picker { justify-self: end; }
+  .chapter { padding-block: 150px 120px; }
+}
+@media (prefers-reduced-motion: reduce) { .tabs button, .cta, .eq, .mark, .kicker i { transition: none; } }
+
+/* Custom cursor: dashed axis lines across the screen through the pointer (x and y read off the edges),
+   plus a trailing ring with its polar reading (r, θ). Fixed neutral color. Mouse and trackpad only. */
+.cur-svg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 49; pointer-events: none; opacity: 0; transition: opacity .3s; overflow: visible; }
+.cur-svg .ax { stroke: #D6DAE3; stroke-width: 1; stroke-dasharray: 4 6; opacity: 0.38; }
+.cur-svg .ring { fill: none; stroke: #FFFFFF; stroke-width: 1.25; opacity: 0.85; transition: r .25s; }
+.cur-svg .pt { fill: #FFFFFF; }
+.cur-ax, .cur-ay, .cur-xy { position: fixed; z-index: 50; pointer-events: none; opacity: 0; transition: opacity .3s; font-family: var(--hud); font-size: 10px; letter-spacing: 0.04em; color: #D6DAE3; font-variant-numeric: tabular-nums; white-space: nowrap; padding: 3px 6px; border-radius: 4px; background: rgba(3,3,6,0.62); }
+.cur-ax { top: 78px; left: 0; transform: translateX(-50%); }
+.cur-ay { right: 14px; top: 0; transform: translateY(-50%); }
+.cur-xy { left: 0; top: 0; margin: 18px 0 0 18px; color: #9097A8; will-change: transform; }
+html.has-cur, html.has-cur a, html.has-cur button { cursor: none; }
+html.has-cur .cur-svg, html.has-cur .cur-ax, html.has-cur .cur-ay, html.has-cur .cur-xy { opacity: 1; }
+html.cur-off .cur-svg, html.cur-off .cur-ax, html.cur-off .cur-ay, html.cur-off .cur-xy { opacity: 0; }
+
+/* Scroll cue: super minimal — a tiny word and a hairline that slowly breathes */
+.scroll-cue { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px 16px; color: var(--mist); text-decoration: none; pointer-events: auto; opacity: 0.45; transition: opacity .4s; }
+.scroll-cue .lbl { font-family: var(--hud); font-size: 9px; letter-spacing: 0.3em; text-transform: lowercase; margin-right: -0.3em; }
+.scroll-cue .hair { width: 1px; height: 28px; background: linear-gradient(to bottom, currentColor, transparent); transform-origin: top; animation: breathe 3.2s ease-in-out infinite; }
+.scroll-cue:hover { opacity: 0.9; }
+@keyframes breathe { 0%, 100% { transform: scaleY(0.35); opacity: 0.4; } 50% { transform: scaleY(1); opacity: 1; } }
+#intro { position: relative; }
+#intro .scroll-cue { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); }
+@media (max-width: 720px) { #intro .scroll-cue { bottom: 84px; } }
+@media (prefers-reduced-motion: reduce) { .scroll-cue .hair { animation: none; } }
+
+/* Loading screen: a sine curve draws itself while the count runs to 100, then the curtain lifts */
+.loader { position: fixed; inset: 0; z-index: 100; background: var(--void); display: grid; grid-template-rows: 1fr auto; padding: max(28px, env(safe-area-inset-top)) clamp(20px, 4vw, 48px) max(28px, env(safe-area-inset-bottom)); box-sizing: border-box; transition: opacity .9s cubic-bezier(.7,0,.2,1), transform 1.1s cubic-bezier(.7,0,.2,1); }
+.loader.done { opacity: 0; transform: translateY(-3%); pointer-events: none; }
+.loader-plot { align-self: center; justify-self: center; width: min(720px, 86vw); }
+.loader-plot svg { width: 100%; height: auto; overflow: visible; display: block; }
+.loader-plot .axis { stroke: rgba(220,225,240,0.16); stroke-width: 1; }
+.loader-plot .tick { stroke: rgba(220,225,240,0.22); stroke-width: 1; }
+.loader-plot .curve { fill: none; stroke: #E4E8F0; stroke-width: 1.4; stroke-linecap: round; filter: drop-shadow(0 0 6px rgba(228,232,240,0.55)); }
+.loader-plot .dot { fill: #fff; filter: drop-shadow(0 0 8px #fff); }
+.loader-plot .fx { font-family: var(--hud); font-size: 11px; letter-spacing: 0.06em; fill: var(--mist); }
+.loader-foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
+.loader-num { font-family: var(--display); font-weight: 200; font-size: clamp(64px, 11vw, 148px); line-height: 0.82; letter-spacing: -0.05em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.loader-side { text-align: right; font-family: var(--hud); font-size: 11px; letter-spacing: 0.06em; color: var(--mist); line-height: 1.8; }
+.loader-side b { display: block; font-family: var(--display); font-weight: 400; font-size: 15px; letter-spacing: -0.01em; color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .loader { transition: opacity .3s; } .loader.done { transform: none; } }
+
+.cta.soon { color: var(--mist); pointer-events: none; }
+.cta.soon::before, .cta.soon::after { display: none; }
+
+/* ---------- Type system pass: one set of sizes, tracking and rhythm for every piece of text ----------
+   Mono labels (mixed case): 11px, 0.04em.  Mono caps labels: 10px, 0.18em (trailing space trimmed so they line up at edges).
+   Display headings get a small negative indent so their thin first letter lines up with the text under it. */
+.hud, .kicker, .next, .loader-side, .loader-plot .fx, .count, .picker, .menu li button .n { font-size: 11px; letter-spacing: 0.04em; line-height: 1.4; }
+.eq { font-size: 11px; letter-spacing: 0.04em; }
+.cta, .menu-head, .menu-close, .menu aside h3, .menu li button .tbd, .scroll-cue .lbl, .menu-foot { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; }
+.cta, .menu-close { margin-right: -0.18em; }
+.scroll-cue .lbl { text-transform: lowercase; margin-right: -0.18em; }
+.menu-foot { letter-spacing: 0.04em; text-transform: none; font-size: 11px; }
+.cur-ax, .cur-ay, .cur-xy { font-size: 10px; letter-spacing: 0.04em; }
+h1, h2, .loader-num { margin-left: -0.045em; }
+.chapter-inner { gap: 24px; }
+.row { align-items: baseline; }
+.next { margin-top: 12px; align-items: center; }
+body { margin: 0; } /* the browser's default 8px margin was pushing all page text right of the top bar */
+.sub { font-size: 17px; line-height: 1.5; }
+.menu aside .who { line-height: 1.2; }
+.menu aside .handle { margin: 2px 0 12px; font-family: var(--hud); font-size: 11px; letter-spacing: 0.04em; color: var(--mist); }
+.menu aside h3 { margin-bottom: 12px; }
+.menu li button { padding-block: 12px; }
+
+/* Top-left slot: "Math You Can See" on the cover, the "Scalar Space" mark everywhere else */
+.mark, .tagline { grid-column: 1; grid-row: 1; justify-self: start; }
+.tagline { font-family: var(--hud); font-size: 11px; letter-spacing: 0.04em; color: var(--mist); opacity: 0; transform: translateY(-6px); transition: opacity .5s, transform .5s; pointer-events: none; }
+html.on-cover .tagline { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .tagline { transition: none; } }
+
+
+/* Top bar: a little more room above, and every item centered on one line */
+.hud-top { padding-block: 32px 24px; align-items: center; }
+.tagline, .mark, .hud-gh { line-height: 1; align-self: center; }
+
+/* Cover type: two-line title with the second line stepped in, then a short lead and a quiet mono meta line */
+#intro h1 { display: grid; line-height: 0.84; letter-spacing: -0.06em; }
+#intro h1 .l2 { padding-left: 0.62em; }
+#intro .chapter-inner { gap: 36px; }
+#intro .intro-copy { display: grid; gap: 14px; }
+#intro .sub { font-size: clamp(17px, 1.5vw, 20px); line-height: 1.4; color: #D3D7E0; max-width: 40ch; letter-spacing: -0.01em; }
+#intro .meta { margin: 0; display: flex; flex-wrap: wrap; gap: 6px 0; font-family: var(--hud); font-size: 11px; letter-spacing: 0.04em; color: var(--mist); }
+#intro .meta span + span::before { content: '\00b7'; margin: 0 10px; opacity: 0.6; }
+@media (max-width: 720px) { #intro h1 .l2 { padding-left: 0.4em; } #intro .scroll-cue { display: none; } }
+@media (hover: none) { #intro .meta .m-hover { display: none; } }
+
+/* Top center: a minimal index bar — number, subject name, a two-line menu icon, and a hairline showing how far through the subjects you are */
+.picker { position: relative; gap: 14px; background: none; border: 0; border-radius: 0; padding: 12px 4px 14px; backdrop-filter: none; -webkit-backdrop-filter: none; font-family: var(--hud); font-size: 11px; letter-spacing: 0.04em; }
+.picker .pk-n { color: var(--accent); font-variant-numeric: tabular-nums; transition: color .8s; }
+.picker .pk-name { color: var(--ink); min-width: 9ch; text-align: center; }
+.picker .pk-ic { display: grid; gap: 4px; width: 14px; }
+.picker .pk-ic i { display: block; height: 1px; background: var(--ink); transition: transform .35s cubic-bezier(.6,0,.2,1); }
+.picker .pk-ic i + i { width: 9px; justify-self: end; }
+.picker:hover .pk-ic i + i { transform: scaleX(1.55); transform-origin: right; }
+.picker[aria-expanded="true"] .pk-ic i:first-child { transform: translateY(2.5px) rotate(45deg); }
+.picker[aria-expanded="true"] .pk-ic i + i { width: 14px; transform: translateY(-2.5px) rotate(-45deg); }
+.picker .pk-bar { position: absolute; left: 4px; right: 4px; bottom: 6px; height: 1px; background: rgba(220,225,240,0.14); overflow: hidden; }
+.picker .pk-bar b { position: absolute; inset: 0; background: var(--accent); transform-origin: left; transform: scaleX(0); transition: background .8s; }
+.picker:hover { border: 0; }
+@media (prefers-reduced-motion: reduce) { .picker .pk-ic i { transition: none; } }
+</style>
+</head>
+<body>
+
+
+<canvas id="scene" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="All subjects" hidden>
+  <div class="menu-inner">
+    <div class="menu-head"><span>Index · 19 subjects</span><button type="button" class="menu-close" id="menuClose">Close</button></div>
+    <div class="menu-body">
+      <nav aria-label="Subjects"><ol id="menuList"></ol></nav>
+      <aside aria-label="Credits">
+        <div><h3>Made by</h3><p class="who">Junayed Haider</p><p class="handle">@xuunh</p><p>Bachelor of Engineering in Biomedical Engineering, The City College of New York</p></div>
+        <div><h3>Links</h3><ul>
+          <li><a href="https://github.com/xuunh/ScalarSpace" target="_blank" rel="noopener">GitHub repository</a></li>
+          <li><a href="https://github.com/xuunh" target="_blank" rel="noopener">@xuunh on GitHub</a></li>
+        </ul></div>
+        <div><h3>Credits</h3><p>3D rendering by Three.js. Type set in Geist and Geist Mono by Vercel.</p></div>
+        <div><h3>Open source</h3><p>Free to use. Found a mistake or want a topic? Open an issue on GitHub.</p></div>
+      </aside>
+    </div>
+    <div class="menu-foot"><span>Scalar Space</span><span>Math You Can See</span></div>
+  </div>
+</div>
+
+<div class="loader" id="loader" role="status" aria-live="polite" aria-label="Loading Scalar Space">
+  <div class="loader-plot" aria-hidden="true">
+    <svg viewBox="0 0 720 240">
+      <line class="axis" x1="0" y1="120" x2="720" y2="120"/><line class="axis" x1="0" y1="20" x2="0" y2="220"/>
+      <g id="ldTicks"></g>
+      <path class="curve" id="ldCurve"/>
+      <circle class="dot" id="ldDot" r="3.5" cx="0" cy="120"/>
+      <text class="fx" x="0" y="14">y = sin x</text>
+    </svg>
+  </div>
+  <div class="loader-foot">
+    <div class="loader-num" id="ldNum">000</div>
+    <div class="loader-side"><b>Scalar Space</b>Building the space</div>
+  </div>
+</div>
+<script>
+/* Loader: the count eases toward 90 while things load, then runs to 100 once the 3D scene has drawn its first frame */
+(function () {
+  var el = document.getElementById('loader'), num = document.getElementById('ldNum'), curve = document.getElementById('ldCurve'), dot = document.getElementById('ldDot'), ticks = document.getElementById('ldTicks');
+  var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  for (var i = 1; i <= 8; i++) { var x = i * 90; ticks.insertAdjacentHTML('beforeend', '<line class="tick" x1="' + x + '" y1="115" x2="' + x + '" y2="125"/>'); }
+  var p = 0, ready = false, start = performance.now(), MIN = still ? 300 : 1400, gone = false;
+  function y(x) { return 120 - Math.sin(x / 720 * Math.PI * 4) * 84; }
+  function draw(f) {
+    var n = Math.max(2, Math.round(f * 160)), d = '';
+    for (var k = 0; k <= n; k++) { var x = (k / 160) * 720; d += (k ? 'L' : 'M') + x.toFixed(1) + ' ' + y(x).toFixed(1); }
+    curve.setAttribute('d', d);
+    var xe = f * 720; dot.setAttribute('cx', xe.toFixed(1)); dot.setAttribute('cy', y(xe).toFixed(1));
+    var v = String(Math.round(f * 100)); num.textContent = ('000' + v).slice(-3);
+  }
+  function finish() {
+    if (gone) return; gone = true;
+    el.classList.add('done');
+    el.setAttribute('aria-label', 'Loaded');
+    setTimeout(function () { el.remove(); }, 1200);
+  }
+  window.ssReady = function () { ready = true; };
+  var prev = performance.now();
+  (function tick(now) {
+    if (gone) return;
+    now = now || performance.now();
+    var dt = Math.min(100, now - prev) / 16.7; prev = now;   /* time-based, so slow devices don't load slower */
+    var cap = ready && now - start > MIN ? 1 : 0.9;
+    p += (cap - p) * (1 - Math.pow(1 - (cap === 1 ? 0.12 : 0.035), dt));
+    if (cap === 1 && p > 0.998) { p = 1; draw(1); setTimeout(finish, still ? 0 : 280); return; }
+    draw(p);
+    requestAnimationFrame(tick);
+  })();
+  setTimeout(function () { ready = true; }, 7000);   /* never get stuck: give up waiting after 7s */
+})();
+</script>
+<header class="hud hud-top"><span aria-hidden="true"></span>
+  
+  <button type="button" class="picker" id="picker" aria-expanded="false" aria-controls="menu"><span class="pk-n" id="pickerNum">00</span><span class="pk-name" id="pickerLabel">Index</span><span class="pk-ic" aria-hidden="true"><i></i><i></i></span><span class="pk-bar" aria-hidden="true"><b id="pickerBar"></b></span></button>
+</header>
+
+<div class="hud hud-bottom">
+  <div class="eq" id="eq" aria-hidden="true">Torus knot (2, 3)</div>
+  <div class="stepper">
+    <button type="button" id="prev" aria-label="Previous subject">↑</button>
+    <span class="count" id="count" aria-hidden="true">01 / 20</span>
+    <button type="button" id="next" aria-label="Next subject">↓</button>
+  </div>
+</div>
+
+<svg class="cur-svg" aria-hidden="true"><line class="ax hl"/><line class="ax vl"/><circle class="pt" r="2"/></svg>
+<div class="cur-ax" aria-hidden="true"></div><div class="cur-ay" aria-hidden="true"></div><div class="cur-xy" aria-hidden="true"></div>
+<main id="chapters">
+  <section class="chapter" id="intro">
+    <div class="chapter-inner">
+      <h1><span class="l1">Scalar</span><span class="l2">Space</span></h1>
+      <div class="row">
+        <div class="intro-copy">
+          <p class="sub">A visual tour of math, from Pre-Algebra to Topology.</p>
+          <p class="meta"><span>19 subjects</span><span class="m-hover">Move to look around</span><span>Scroll to travel</span></p>
+        </div>
+        <a class="scroll-cue" href="#pre-algebra" aria-label="Scroll down to Pre-Algebra"><span class="lbl">scroll</span><span class="hair" aria-hidden="true"></span></a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script>
+/* Custom cursor. Coordinates use math axes: origin at screen center, y goes up, 1 unit = 40px. */
+(function () {
+  if (!window.matchMedia || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+  var root = document.documentElement, $ = function (q) { return document.querySelector(q); };
+  var ax = $('.cur-ax'), ay = $('.cur-ay'), xy = $('.cur-xy'), hl = $('.cur-svg .hl'), vl = $('.cur-svg .vl'), pt = $('.cur-svg .pt');
+  var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var x = -100, y = -100, rx = -100, ry = -100, seen = false, hover = false, down = false, rr = 14;
+  function fmt(v) { var r = Math.round(v * 10) / 10; return (r < 0 ? '−' : '') + Math.abs(r).toFixed(1); }
+  function at(el, a, b, c, d) { el.setAttribute('x1', a); el.setAttribute('y1', b); el.setAttribute('x2', c); el.setAttribute('y2', d); }
+  function put(el, t) { if (el.textContent !== t) el.textContent = t; }
+  window.addEventListener('pointermove', function (e) {
+    if (e.pointerType && e.pointerType !== 'mouse') return;
+    x = e.clientX; y = e.clientY;
+    if (!seen) { seen = true; rx = x; ry = y; root.classList.add('has-cur'); }
+    root.classList.remove('cur-off');
+    hover = !!(e.target && e.target.closest && e.target.closest('a, button'));
+  }, { passive: true });
+  document.addEventListener('pointerleave', function () { root.classList.add('cur-off'); });
+  window.addEventListener('blur', function () { root.classList.add('cur-off'); });
+  window.addEventListener('pointerdown', function () { down = true; });
+  window.addEventListener('pointerup', function () { down = false; });
+  var last = performance.now();
+  (function loop(now) {
+    now = now || performance.now();
+    var k = still ? 1 : 1 - Math.pow(0.8, Math.min(6, (now - last) / 16.7)); /* same trailing speed at any frame rate */
+    last = now;
+    rx += (x - rx) * k; ry += (y - ry) * k;
+    var target = down ? 9 : hover ? 24 : 14; rr += (target - rr) * (still ? 1 : 0.25);
+    var W = window.innerWidth, H = window.innerHeight, X = (x - W / 2) / 40, Y = (H / 2 - y) / 40;
+    at(hl, 0, y, W, y); at(vl, x, 0, x, H);
+    pt.setAttribute('cx', x); pt.setAttribute('cy', y);
+    ax.style.left = x + 'px'; ay.style.top = y + 'px';
+    put(ax, 'x = ' + fmt(X)); put(ay, 'y = ' + fmt(Y));
+    var th = Math.atan2(Y, X) * 180 / Math.PI; if (th < 0) th += 360;
+    put(xy, 'r ' + fmt(Math.sqrt(X * X + Y * Y)) + ' · θ ' + Math.round(th) + '°');
+    var flip = x > W - 160;
+    xy.style.transform = 'translate3d(' + rx + 'px,' + ry + 'px,0)' + (flip ? ' translateX(calc(-100% - 36px))' : '');
+    requestAnimationFrame(loop);
+  })();
+})();
+</script>
+<script>
+(function () {
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var small = window.innerWidth < 720;
+
+  /* Subjects in learning order. status: 'open' = in progress now, 'tbd' = coming later.
+     Colors are deliberately unpredictable: a shuffled mix of neon and bright hues, with every neighbor
+     far apart on the color wheel so each stop is a surprise. tone: 'neon' = full strength, 'bright' = a touch softer.
+     Calculus 3 keeps its sky blue (#A9DCFF). */
+  var SUBJECTS = [
+    { id: 'intro', name: 'Scalar Space', group: '', status: 'intro', hue: 225, label: 'Torus knot (2, 3)', form: 'knot' },
+    { id: 'pre-algebra', name: 'Pre-Algebra', desc: 'Numbers, ratios, and your first variables.', group: 'Foundations', status: 'tbd', hue: 355, tone: 'neon', label: 'The number line, wound into a spiral', form: 'stairs' },
+    { id: 'algebra-1', name: 'Algebra 1', desc: 'Solve for x. Lines, slopes, and equations.', group: 'High school', status: 'open', hue: 160, tone: 'bright', label: 'Hyperboloid  x² + z² − y²/14 = c', form: 'hyperboloid' },
+    { id: 'geometry', name: 'Geometry', desc: 'Shapes, angles, and why proofs work.', group: 'High school', status: 'tbd', hue: 40, tone: 'neon', label: 'Geodesic sphere', form: 'solids' },
+    { id: 'algebra-2', name: 'Algebra 2', desc: 'Polynomials, exponents, and the functions behind them.', group: 'High school', status: 'open', hue: 210, tone: 'neon', label: 'The parabola y = x², spun into a dish', form: 'saddle' },
+    { id: 'trigonometry', name: 'Trigonometry', desc: 'Triangles and circles, told through sine and cosine.', group: 'High school', status: 'tbd', hue: 95, tone: 'neon', label: 'Sine wrapped on a circle  y = sin 5θ', form: 'helix' },
+    { id: 'pre-calculus', name: 'Pre-Calculus', desc: 'Functions in depth. Everything calculus will ask of you.', group: 'High school', status: 'open', hue: 300, tone: 'neon', label: 'Ripple  z = cos(r) / r', form: 'ripple' },
+    { id: 'statistics', name: 'Statistics', desc: 'Reading data, spotting patterns, measuring spread.', group: 'High school', status: 'tbd', hue: 15, tone: 'neon', label: 'Bivariate normal distribution', form: 'bell' },
+    { id: 'probability', name: 'Probability', desc: 'How likely is it? Chance, counted carefully.', group: 'College', status: 'tbd', hue: 120, tone: 'neon', label: 'Branching random walks', form: 'walks' },
+    { id: 'calculus-1', name: 'Calculus 1', desc: 'Limits and derivatives. The math of change.', group: 'College', status: 'tbd', hue: 260, tone: 'neon', label: 'Tangent lines of y = x², swept into a surface', form: 'tangents' },
+    { id: 'calculus-2', name: 'Calculus 2', desc: 'Integrals and series. Adding up the infinite.', group: 'College', status: 'tbd', hue: 320, tone: 'neon', label: 'Double cone  x² + z² = y²', form: 'revolve' },
+    { id: 'linear-algebra', name: 'Linear Algebra', desc: 'Vectors and matrices. How space stretches and turns.', group: 'College', status: 'tbd', hue: 45, tone: 'neon', label: 'Planes under a shear', form: 'lattice' },
+    { id: 'calculus-3', name: 'Calculus 3', desc: 'Calculus in three dimensions.', group: 'College', status: 'tbd', hue: 205, tone: 'bright', label: 'z = sin x · cos y', form: 'wave', fixed: '#A9DCFF' },
+    { id: 'differential-equations', name: 'Differential Equations', desc: 'Equations that describe motion, growth, and decay.', group: 'College', status: 'tbd', hue: 130, tone: 'neon', label: 'Lorenz system', form: 'lorenz' },
+    { id: 'discrete-math', name: 'Discrete Math', desc: 'Logic, counting, and graphs. The math of computers.', group: 'College', status: 'tbd', hue: 275, tone: 'neon', light: 0.9, label: 'Sierpinski pyramid: one shape, split into four, forever', form: 'graph' },
+    { id: 'number-theory', name: 'Number Theory', desc: 'Primes, divisibility, and the patterns hiding in integers.', group: 'Advanced', status: 'tbd', hue: 342, tone: 'neon', label: 'Times tables on a clock  n → kn (mod 120)', form: 'primes' },
+    { id: 'real-analysis', name: 'Real Analysis', desc: 'Why calculus works, proven from the ground up.', group: 'Advanced', status: 'tbd', hue: 185, tone: 'neon', label: 'A sequence converging to its limit', form: 'converge' },
+    { id: 'abstract-algebra', name: 'Abstract Algebra', desc: 'Symmetry and structure: groups, rings, fields.', group: 'Advanced', status: 'tbd', hue: 28, tone: 'neon', label: 'Symmetry group of the hexagon', form: 'dihedral' },
+    { id: 'complex-analysis', name: 'Complex Analysis', desc: 'Calculus with imaginary numbers.', group: 'Advanced', status: 'tbd', hue: 235, tone: 'neon', label: 'Conformal map  w = z²', form: 'conformal' },
+    { id: 'topology', name: 'Topology', desc: 'Shapes that stretch but never tear.', group: 'Advanced', status: 'tbd', hue: 110, tone: 'bright', label: 'Möbius strip: one side, one edge', form: 'mobius' }
+  ];
+  var LAST = SUBJECTS.length - 1;
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+  /* Build tabs and chapters from the list */
+  var menuList = document.getElementById('menuList'), main = document.getElementById('chapters');
+  var CALC1 = SUBJECTS.map(function (x) { return x.id; }).indexOf('calculus-1');
+  SUBJECTS.forEach(function (s, i) {
+    if (i === 0) return;
+    var li = document.createElement('li'), b = document.createElement('button');
+    b.type = 'button'; b.dataset.go = i;
+    var n = document.createElement('span'); n.className = 'n'; n.textContent = pad(i);
+    var nm = document.createElement('span'); nm.textContent = s.name;
+    b.appendChild(n); b.appendChild(nm);
+    var later = i > CALC1; /* everything after Calculus 1 is still coming */
+    if (later) { var tb = document.createElement('span'); tb.className = 'tbd'; tb.textContent = 'Soon'; b.appendChild(tb); }
+    if (!later) { var sp = document.createElement('span'); b.appendChild(sp); }
+    var dd = document.createElement('span'); dd.className = 'd'; dd.textContent = s.desc || ''; b.appendChild(dd);
+    li.appendChild(b); menuList.appendChild(li);
+
+    var sec = document.createElement('section');
+    sec.className = 'chapter'; sec.id = s.id;
+    var inner = document.createElement('div'); inner.className = 'chapter-inner';
+    var k = document.createElement('p'); k.className = 'kicker';
+    k.hidden = true; /* no label above the subject name */
+    var h = document.createElement('h2'); h.textContent = s.name;
+    var row = document.createElement('div'); row.className = 'row';
+    var p = document.createElement('p'); p.className = 'sub'; p.textContent = s.desc || '';
+    row.appendChild(p);
+    if (!later) {
+      var a = document.createElement('a'); a.className = 'cta'; a.href = '#' + s.id; a.textContent = 'View topics';
+      row.appendChild(a);
+    } else {
+      var sn = document.createElement('span'); sn.className = 'cta soon'; sn.textContent = 'Soon...';
+      row.appendChild(sn);
+    }
+    inner.appendChild(k); inner.appendChild(h); inner.appendChild(row);
+    var nx = SUBJECTS[i + 1] || SUBJECTS[1];
+    if (nx) {
+      var nu = document.createElement('a'); nu.className = 'next'; nu.href = '#' + (SUBJECTS[i + 1] ? nx.id : 'loop');
+      nu.innerHTML = '<span class="next-k">Next up</span><span class="next-n"></span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2v11M3 8.5 8 13.5 13 8.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      nu.querySelector('.next-n').textContent = nx.name;
+      nu.setAttribute('aria-label', 'Next up: ' + nx.name);
+      inner.appendChild(nu);
+    }
+    sec.appendChild(inner); main.appendChild(sec);
+  });
+  /* Loop: a copy of Pre-Algebra after Topology. Landing on it jumps you back to the real Pre-Algebra, so the subjects never end. */
+  var loopSec = document.getElementById('pre-algebra').cloneNode(true);
+  loopSec.id = 'loop'; loopSec.setAttribute('aria-hidden', 'true'); loopSec.inert = true;
+  main.appendChild(loopSec);
+  var STATIONS = SUBJECTS.concat([SUBJECTS[1]]), SL = STATIONS.length - 1;
+  function real(i) { return i >= SL ? 1 : i; }
+  var tabs = Array.prototype.slice.call(menuList.querySelectorAll('button'));
+  var picker = document.getElementById('picker'), menu = document.getElementById('menu'), pickerLabel = document.getElementById('pickerLabel'), pickerNum = document.getElementById('pickerNum'), pickerBar = document.getElementById('pickerBar');
+  function openMenu() {
+    menu.hidden = false; picker.setAttribute('aria-expanded', 'true');
+    (menuList.querySelector('[aria-current="true"]') || menuList.querySelector('button')).focus();
+  }
+  function closeMenu(returnFocus) {
+    menu.hidden = true; picker.setAttribute('aria-expanded', 'false');
+    if (returnFocus) picker.focus();
+  }
+  picker.addEventListener('click', function () { if (menu.hidden) openMenu(); else closeMenu(true); });
+  document.getElementById('menuClose').addEventListener('click', function () { closeMenu(true); });
+  menu.addEventListener('click', function (e) { if (e.target === menu) closeMenu(true); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !menu.hidden) closeMenu(true); });
+  tabs.forEach(function (b) {
+    b.addEventListener('click', function () {
+      closeMenu(false);
+      document.getElementById(SUBJECTS[+b.dataset.go].id).scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+    });
+  });
+  var eqEl = document.getElementById('eq'), countEl = document.getElementById('count');
+  function goTo(i) {
+    i = Math.max(0, Math.min(SL, i));
+    main.children[i].scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+  }
+  /* Where we are, measured from each chapter's real top (chapters can differ in height) */
+  function chapterPos() {
+    var secs = main.children, y = window.scrollY, n = secs.length;
+    for (var i = 0; i < n - 1; i++) {
+      var a = secs[i].offsetTop, b = secs[i + 1].offsetTop;
+      if (y < b) return i + Math.max(0, Math.min(1, (y - a) / ((b - a) || 1)));
+    }
+    return n - 1;
+  }
+  function currentIndex() { return Math.round(chapterPos()); }
+  function syncMark() { document.documentElement.classList.toggle('on-cover', chapterPos() < 0.5); }
+  window.addEventListener('scroll', syncMark, { passive: true });
+  syncMark();
+  document.getElementById('prev').addEventListener('click', function () { goTo(currentIndex() - 1); });
+  document.getElementById('next').addEventListener('click', function () { goTo(currentIndex() + 1); });
+
+  if (typeof THREE === 'undefined') { if (window.ssReady) ssReady(); return; }
+
+  /* Same brightness for every hue, so warm colors (yellow, orange) don't flood the screen */
+  function evenOut(c, target) {
+    var L = 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b;
+    if (L > target) c.multiplyScalar(target / L);
+  }
+  /* Soft pastel light per subject */
+  SUBJECTS.forEach(function (s, i) {
+    var core = new THREE.Color(), deep = new THREE.Color(), sky = new THREE.Color();
+    if (s.id === 'intro') { core.set('#E4E8F0'); deep.set('#23283A'); sky.set('#1E2436'); }
+    else if (s.fixed) { core.set(s.fixed); deep.set('#0B2E52'); sky.set('#0C2A4A'); }
+    else {
+      var neon = s.tone === 'neon';
+      core.setHSL(s.hue / 360, neon ? 0.82 : 0.68, s.light || (neon ? 0.6 : 0.68)); /* light: optional per-subject lift for colors that read dark, like purple */
+      deep.setHSL(s.hue / 360, neon ? 0.8 : 0.62, s.light ? 0.45 : 0.14);
+      sky.setHSL(s.hue / 360, 0.5, 0.09); evenOut(sky, 0.06);
+    }
+    if (i <= 5) evenOut(sky.set('#0B0C12'), 0.012); /* first six stations: plain dark sky, no colored glow */
+    s.core = core; s.deep = deep; s.sky = sky; s.css = '#' + core.getHexString();
+    if (i > 0 && tabs[i - 1]) tabs[i - 1].style.setProperty('--c', s.css);
+  });
+
+  var GAP = 60;
+  var renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('scene'), antialias: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  var scene = new THREE.Scene();
+  var fogColor = new THREE.Color('#04050A');
+  scene.fog = new THREE.FogExp2(fogColor, 0.022);
+  renderer.setClearColor(fogColor, 1);
+  var camera = new THREE.PerspectiveCamera(46, 1, 0.1, 500);
+
+  var composer = null, bloom = null;
+  try {
+    composer = new THREE.EffectComposer(renderer);
+    composer.addPass(new THREE.RenderPass(scene, camera));
+    bloom = new THREE.UnrealBloomPass(new THREE.Vector2(1, 1), 1.05, 0.75, 0.06);
+    composer.addPass(bloom);
+  } catch (e) { composer = null; }
+
+  var skyU = { uHorizon: { value: SUBJECTS[0].sky.clone() } };
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(300, 32, 16), new THREE.ShaderMaterial({
+    side: THREE.BackSide, depthWrite: false, uniforms: skyU,
+    vertexShader: 'varying vec3 vP; void main(){ vP = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+    fragmentShader: 'uniform vec3 uHorizon; varying vec3 vP; void main(){ float h = vP.y; float band = exp(-pow((h + 0.01) * 8.0, 2.0)); vec3 c = uHorizon * band * 0.7; c += uHorizon * 0.08 * (1.0 - smoothstep(-0.05, 0.5, h)); gl_FragColor = vec4(c, 1.0); }'
+  })));
+
+  var gridU = { uTint: { value: new THREE.Color('#B4BCCD') } }; /* floor grid: one fixed soft gray on every subject */
+  var ground = new THREE.Mesh(new THREE.PlaneGeometry(900, 2400), new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, uniforms: gridU, extensions: { derivatives: true },
+    vertexShader: 'varying vec3 vW; void main(){ vec4 w = modelMatrix * vec4(position,1.0); vW = w.xyz; gl_Position = projectionMatrix * viewMatrix * w; }',
+    fragmentShader: 'uniform vec3 uTint; varying vec3 vW; float line(float v, float s){ float g = abs(fract(v / s - 0.5) - 0.5) / fwidth(v / s); return 1.0 - min(g, 1.0); } void main(){ float d = length(vW.xz - cameraPosition.xz); float fade = exp(-d * 0.03); float g = max(line(vW.x, 4.0), line(vW.z, 4.0)); gl_FragColor = vec4(uTint * g * 0.44, g * fade * 0.66); }'
+  }));
+  ground.rotation.x = -Math.PI / 2; ground.position.set(0, -3, -GAP * SL / 2);
+  scene.add(ground);
+
+  /* ---------- line builders ---------- */
+  var q = small ? 0.6 : 1;
+  var V = function (x, y, z) { return new THREE.Vector3(x, y, z); };
+  function seg(out, a, b) { out.push(a.x, a.y, a.z, b.x, b.y, b.z); }
+  function isoLines(fn, nu, nv, stepsU, stepsV) {
+    var out = [], a = new THREE.Vector3(), b = new THREE.Vector3(), i, j;
+    for (j = 0; j <= nv; j++) for (i = 0; i < stepsU; i++) { fn(i / stepsU, j / nv, a); fn((i + 1) / stepsU, j / nv, b); seg(out, a, b); }
+    for (i = 0; i < nu; i++) for (j = 0; j < stepsV; j++) { fn(i / nu, j / stepsV, a); fn(i / nu, (j + 1) / stepsV, b); seg(out, a, b); }
+    return out;
+  }
+  function edgesOf(geo, out, offset) {
+    var e = new THREE.EdgesGeometry(geo).attributes.position.array;
+    for (var i = 0; i < e.length; i += 3) out.push(e[i] + (offset ? offset.x : 0), e[i + 1] + (offset ? offset.y : 0), e[i + 2] + (offset ? offset.z : 0));
+  }
+  var seed = 7;
+  function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+  function polyline(out, pts) { for (var i = 1; i < pts.length; i++) seg(out, pts[i - 1], pts[i]); }
+
+  var BUILD = {
+    knot: function () {
+      return isoLines(function (u, v, t) {
+        var s = u * Math.PI * 2;
+        function c(x) { var r = 2 + Math.cos(3 * x); return V(r * Math.cos(2 * x), Math.sin(3 * x) * 1.2, r * Math.sin(2 * x)); }
+        var p = c(s), T = c(s + 0.001).sub(p).normalize(), N = V(0, 1, 0).cross(T).normalize(), B = T.clone().cross(N), a = v * Math.PI * 2;
+        t.copy(p).addScaledVector(N, Math.cos(a) * 0.55).addScaledVector(B, Math.sin(a) * 0.55).multiplyScalar(3.4);
+      }, Math.round(160 * q), 10, Math.round(360 * q), 18);
+    },
+    stairs: function () {
+      /* The number line, wound into a spiral ramp: going around climbs through the numbers.
+         Negatives coil below zero, positives above; the spokes are the whole numbers */
+      return isoLines(function (u, v, t) {
+        var th = (u - 0.5) * Math.PI * 2 * 2.5, r = 2.2 + v * 6;
+        t.set(r * Math.cos(th), th * 1.15, r * Math.sin(th));
+      }, Math.round(60 * q), Math.round(10 * q), 320, 40);
+    },
+    hyperboloid: function () {
+      return isoLines(function (u, v, t) {
+        var a = u * Math.PI * 2, y = (v - 0.5) * 13, r = 4.2 * Math.sqrt(1 + (y * y) / 14);
+        t.set(r * Math.cos(a), y, r * Math.sin(a));
+      }, Math.round(72 * q), Math.round(28 * q), 160, 60);
+    },
+    solids: function () {
+      var out = [];
+      edgesOf(new THREE.IcosahedronGeometry(7.5, small ? 2 : 3), out);
+      return out;
+    },
+    saddle: function () {
+      /* The parabola y = x², spun around its axis into a dish (a paraboloid) */
+      return isoLines(function (u, v, t) {
+        var a = u * Math.PI * 2, r = v * 7.5;
+        t.set(r * Math.cos(a), r * r * 0.17, r * Math.sin(a));
+      }, Math.round(56 * q), Math.round(26 * q), 160, 60);
+    },
+    helix: function () {
+      /* A ribbon ring that rises and falls 5 times as it goes around: y = sin 5θ */
+      return isoLines(function (u, v, t) {
+        var a = u * Math.PI * 2, r = 8 + (v - 0.5) * 5, y = 2.8 * Math.sin(5 * a) + (v - 0.5) * 1.2 * Math.cos(5 * a);
+        t.set(r * Math.cos(a), y, r * Math.sin(a));
+      }, Math.round(150 * q), 14, 400, 30);
+    },
+    ripple: function () {
+      return isoLines(function (u, v, t) {
+        var r = 0.4 + v * 14, a = u * Math.PI * 2;
+        t.set(r * Math.cos(a), 4.2 * Math.sin(r * 0.9) / (r * 0.35 + 1), r * Math.sin(a));
+      }, Math.round(72 * q), Math.round(36 * q), 160, 60);
+    },
+    bell: function () {
+      return isoLines(function (u, v, t) {
+        var x = (u - 0.5) * 24, z = (v - 0.5) * 24;
+        t.set(x, 9 * Math.exp(-(x * x + z * z) / 40) - 2, z);
+      }, Math.round(40 * q), Math.round(40 * q), 100, 100);
+    },
+    walks: function () {
+      /* Branching random walks: every path wanders forward, then splits in two, again and again.
+         Each wobble is random; the overall spread stays inside a soft cone so the whole tree fits on screen. */
+      var out = [], depth = small ? 6 : 7, len = 26, stepX = 0.11;
+      function grow(p, vy, vz, level) {
+        var pts = [p.clone()];
+        for (var s = 0; s < len; s++) {
+          vy = vy * 0.94 + (rnd() - 0.5) * 0.035; vz = vz * 0.94 + (rnd() - 0.5) * 0.035;
+          p = p.clone(); p.x += stepX; p.y += vy; p.z += vz;
+          var env = 0.35 + (p.x + 10) * 0.32, r = Math.sqrt(p.y * p.y + p.z * p.z);
+          if (r > env) { p.y *= env / r; p.z *= env / r; vy *= 0.5; vz *= 0.5; }
+          pts.push(p);
+        }
+        polyline(out, pts);
+        if (level < depth) {
+          var a = rnd() * Math.PI * 2, kick = 0.13;
+          grow(p, vy + Math.cos(a) * kick, vz + Math.sin(a) * kick, level + 1);
+          grow(p, vy - Math.cos(a) * kick, vz - Math.sin(a) * kick, level + 1);
+        }
+      }
+      for (var k = 0; k < 3; k++) grow(V(-10, 0, 0), (rnd() - 0.5) * 0.1, (rnd() - 0.5) * 0.1, 1);
+      return out;
+    },
+    tangents: function () {
+      /* Every tangent line of y = x², each slid back a step, so together they weave one smooth surface */
+      return isoLines(function (u, v, t) {
+        var a = (u - 0.5) * 6, s = (v - 0.5) * 5;
+        t.set((a + s) * 1.4, (a * a + 2 * a * s) * 0.32, a * 2.2);
+      }, Math.round(46 * q), Math.round(26 * q), 120, 120);
+    },
+    revolve: function () {
+      /* Double cone: two cones tip to tip, the surface conic sections are cut from */
+      return isoLines(function (u, v, t) {
+        var a = u * Math.PI * 2, y = (v - 0.5) * 15;
+        t.set(Math.abs(y) * Math.cos(a), y, Math.abs(y) * Math.sin(a));
+      }, Math.round(56 * q), Math.round(30 * q), 160, 60);
+    },
+    wave: function () {
+      return isoLines(function (u, v, t) {
+        var x = (u - 0.5) * 26, z = (v - 0.5) * 26;
+        t.set(x, 2.6 * Math.sin(x * 0.35) * Math.cos(z * 0.35), z);
+      }, Math.round(44 * q), Math.round(44 * q), 120, 120);
+    },
+    lattice: function () {
+      var out = [];
+      for (var L = 0; L < 4; L++) {
+        var k = L / 3, M = new THREE.Matrix3().set(1, 0.5 * k, 0, 0.18 * k, 1, 0.3 * k, 0, 0.12 * k, 1);
+        out = out.concat(isoLines(function (u, v, t) {
+          t.set((u - 0.5) * 22, -2 + L * 2.6, (v - 0.5) * 22).applyMatrix3(M);
+        }, Math.round(22 * q), Math.round(22 * q), 60, 60));
+      }
+      return out;
+    },
+    lorenz: function () {
+      var out = [], x = 0.1, y = 0, z = 0, dt = 0.006, steps = Math.round(9000 * q), s = 0.42, prev = null;
+      for (var i = 0; i < steps; i++) {
+        var dx = 10 * (y - x), dy = x * (28 - z) - y, dz = x * y - (8 / 3) * z;
+        x += dx * dt; y += dy * dt; z += dz * dt;
+        if (i < 200) continue;
+        var p = V(x * s, (z - 25) * s, y * s);
+        if (prev) seg(out, prev, p);
+        prev = p;
+      }
+      return out;
+    },
+    graph: function () {
+      /* Sierpinski pyramid: a tetrahedron split into 4 half-size copies, again and again (recursion).
+         Its layers match Pascal's triangle with the odd numbers kept, a counting pattern from discrete math */
+      var out = [], depth = small ? 3 : 4, S = 9;
+      var top = V(0, S * 0.82, 0), b1 = V(S, -S * 0.4, 0), b2 = V(-S / 2, -S * 0.4, S * 0.866), b3 = V(-S / 2, -S * 0.4, -S * 0.866);
+      function mid(p, q) { return p.clone().add(q).multiplyScalar(0.5); }
+      function tet(a, b, c, d, n) {
+        if (n === 0) { seg(out, a, b); seg(out, a, c); seg(out, a, d); seg(out, b, c); seg(out, c, d); seg(out, d, b); return; }
+        var ab = mid(a, b), ac = mid(a, c), ad = mid(a, d), bc = mid(b, c), cd = mid(c, d), db = mid(d, b);
+        tet(a, ab, ac, ad, n - 1); tet(ab, b, bc, db, n - 1); tet(ac, bc, c, cd, n - 1); tet(ad, db, cd, d, n - 1);
+      }
+      tet(top, b1, b2, b3, depth);
+      return out;
+    },
+    primes: function () {
+      /* Times tables on a clock: 120 points on a circle, each n joined to k·n (mod 120).
+         Three stacked layers use k = 2, 3, 5 — the chords draw a cardioid, a nephroid, and a four-petal curve */
+      var out = [], N = small ? 90 : 120, R = 8, ks = [2, 3, 5];
+      ks.forEach(function (k, li) {
+        var y = (li - 1) * 6;
+        function P(n) { var a = (n % N) / N * Math.PI * 2; return V(R * Math.cos(a), y, R * Math.sin(a)); }
+        var ring = []; for (var i = 0; i <= 96; i++) { var t = i / 96 * Math.PI * 2; ring.push(V(R * Math.cos(t), y, R * Math.sin(t))); }
+        polyline(out, ring);
+        for (var n = 1; n < N; n++) seg(out, P(n), P(k * n));
+      });
+      return out;
+    },
+    converge: function () {
+      var out = [];
+      for (var s = 0; s < 6; s++) {
+        var pts = [], off = (s / 6) * Math.PI * 2;
+        for (var i = 0; i <= 500; i++) {
+          var t = i / 500 * 24, r = 9 * Math.exp(-t * 0.14);
+          pts.push(V(r * Math.cos(t + off), -3 + 12 * Math.exp(-t * 0.1), r * Math.sin(t + off)));
+        }
+        polyline(out, pts);
+      }
+      return out;
+    },
+    dihedral: function () {
+      var out = [], K = 12, R = 8;
+      for (var k = 0; k < K; k++) {
+        var c = (k / K) * Math.PI * 2, center = V(R * Math.cos(c), 3, R * Math.sin(c)), pts = [];
+        for (var j = 0; j <= 6; j++) {
+          var a = (j / 6) * Math.PI * 2 + k * (Math.PI / 6) * 0.5;
+          var local = V(Math.cos(a) * 2.2, Math.sin(a) * 2.2, 0).applyAxisAngle(V(0, 1, 0), -c + Math.PI / 2);
+          pts.push(center.clone().add(local));
+        }
+        polyline(out, pts);
+      }
+      return out;
+    },
+    conformal: function () {
+      return isoLines(function (u, v, t) {
+        var x = (u - 0.5) * 2 * 3.4, y = (v - 0.5) * 2 * 3.4, wr = x * x - y * y, wi = 2 * x * y;
+        t.set(wr * 0.75, Math.sqrt(x * x + y * y) * 1.1 - 2, wi * 0.75);
+      }, Math.round(30 * q), Math.round(30 * q), 120, 120);
+    },
+    mobius: function () {
+      return isoLines(function (u, v, t) {
+        var a = u * Math.PI * 2, w = (v - 0.5) * 5, R = 7;
+        t.set((R + w * Math.cos(a / 2)) * Math.cos(a), w * Math.sin(a / 2) + 3, (R + w * Math.cos(a / 2)) * Math.sin(a));
+      }, Math.round(120 * q), 12, 300, 40);
+    }
+  };
+  var PLACE = {
+    knot: [7, 6.5, 0, 0.35, 0, 0.1], stairs: [14.5, 4.2, -6, 0.3, 0, 0.12], hyperboloid: [12.5, 4.6, -4, 0.15, 0, 0.08],
+    solids: [11.5, 4.5, -4, 0.3, 0, 0.2], saddle: [10, 3.4, -6, 0.38, 0, 0.22], helix: [13.5, 6, -6, 0.55, 0, -0.1],
+    ripple: [12.5, 4, -6, 0.3, 0, -0.1], bell: [11.5, 3.8, -4, 0.15, 0.4, 0], walks: [10.5, 4, -6, 0.15, 0.55, 0],
+    tangents: [10.5, 4, -6, 0.3, 0.55, 0], revolve: [13.5, 4.6, -4, 0.1, 0, 0.1], wave: [9.5, 4, -8, 0.1, 0.5, 0],
+    lattice: [11.5, 5.5, -10, 0.5, 0.5, 0], lorenz: [13.5, 4.5, -8, 0.2, 0, 0], graph: [16, 5.4, -6, 0.15, 0.4, 0],
+    primes: [13.5, 5, -6, 0.68, 0, 0.22], converge: [9.5, 3.4, -3, 0.2, 0, 0.1], dihedral: [12.5, 5, -6, 0.3, 0, 0.08],
+    conformal: [12, 5, -8, 0.2, -0.4, 0], mobius: [9.5, 5.2, -5, 0.4, 0, 0.12]
+  };
+
+  var LIFT = { lattice: 2.5 };
+  var HAND_SCALE = { ripple: 1.1, primes: 0.88 }; /* sizes you asked for: Pre-Calc +10%, Number Theory −12% */ /* per-model height nudge */
+  var TUNE = { primes: 0.838, saddle: 0.918, ripple: 1.14, stairs: 1.232, tangents: 0.902, walks: 1.505, conformal: 1.904, lattice: 1.03, dihedral: 0.896, hyperboloid: 0.952, helix: 1.008, revolve: 1.064, converge: 0.952, mobius: 0.8, lorenz: 1.254, solids: 1.12, bell: 1.12, graph: 0.95 };
+  var ANCHOR = small ? V(6.5, 5.5, -4) : V(8.5, 4.2, -4), SIZE = small ? 20 : 25;
+  function linesMesh(pts, s, opacity) {
+    var geo = new THREE.BufferGeometry(), pos = new Float32Array(pts), col = new Float32Array(pts.length);
+    var minY = Infinity, maxY = -Infinity;
+    for (var i = 1; i < pts.length; i += 3) { if (pts[i] < minY) minY = pts[i]; if (pts[i] > maxY) maxY = pts[i]; }
+    var tmp = new THREE.Color();
+    for (var k = 0; k < pts.length; k += 3) {
+      var c = (pts[k + 1] - minY) / ((maxY - minY) || 1);
+      tmp.copy(s.deep).lerp(s.core, 0.25 + 0.75 * c);
+      col[k] = tmp.r; col[k + 1] = tmp.g; col[k + 2] = tmp.b;
+    }
+    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    return new THREE.LineSegments(geo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: opacity, depthWrite: false, blending: THREE.AdditiveBlending }));
+  }
+
+  var forms = STATIONS.map(function (s, i) {
+    var m = linesMesh(BUILD[s.form](), s, 0.75), pl = PLACE[s.form];
+    /* Even sizing, hand placement: every model is scaled to a matching size (so none look tiny or huge),
+       but sits at its own hand-picked spot instead of all being centered on one point */
+    if (i > 0) {
+      var g = m.geometry, box = new THREE.Box3(), c = new THREE.Vector3(), sz = new THREE.Vector3();
+      g.computeBoundingBox(); box.copy(g.boundingBox); box.getCenter(c); box.getSize(sz);
+      var k = Math.min(SIZE / Math.max(sz.x, sz.z), (SIZE * 0.62) / sz.y) * (TUNE[s.form] || 1);
+      g.translate(-c.x, -c.y, -c.z); g.scale(k, k, k);
+    }
+    m.position.set(pl[0], pl[1] + (LIFT[s.form] || 0), pl[2] - i * GAP);
+    m.rotation.set(pl[3], pl[4], pl[5]);
+    m.userData.ry = pl[4];
+    scene.add(m);
+    return m;
+  });
+
+  var D = small ? 600 : 1400, dpos = new Float32Array(D * 3);
+  for (var d = 0; d < D; d++) {
+    dpos[d * 3] = (rnd() - 0.5) * 90;
+    dpos[d * 3 + 1] = -3 + rnd() * 24;
+    dpos[d * 3 + 2] = 20 - rnd() * (GAP * SL + 60);
+  }
+  var dgeo = new THREE.BufferGeometry();
+  dgeo.setAttribute('position', new THREE.BufferAttribute(dpos, 3));
+  var dustMat = new THREE.PointsMaterial({ color: SUBJECTS[0].core.clone(), size: 0.05, transparent: true, opacity: 0.5, depthWrite: false });
+  scene.add(new THREE.Points(dgeo, dustMat));
+
+  function ease(t) { return t * t * (3 - 2 * t); }
+  var scrollF = 0, scrollTarget = 0, mx = 0, my = 0, tmx = 0, tmy = 0;
+  function readScroll() {
+    scrollTarget = chapterPos();
+  }
+  window.addEventListener('scroll', readScroll, { passive: true });
+  window.addEventListener('pointermove', function (e) {
+    tmx = (e.clientX / window.innerWidth) * 2 - 1;
+    tmy = (e.clientY / window.innerHeight) * 2 - 1;
+  }, { passive: true });
+  function resize() {
+    var w = window.innerWidth, h = window.innerHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+    if (composer) { composer.setSize(w, h); bloom.resolution.set(w, h); }
+    readScroll();
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  var shown = -1;
+  function frame(ms) {
+    var t = reduce ? 0 : ms / 1000;
+    scrollF += (scrollTarget - scrollF) * (reduce ? 1 : 0.06);
+    if (scrollTarget > SL - 0.002 && scrollF > SL - 0.2) { /* arrived at the copy: jump back to the real Pre-Algebra */
+      var h = document.documentElement, sb = h.style.scrollBehavior;
+      h.style.scrollBehavior = 'auto';
+      window.scrollTo(0, main.children[1].offsetTop);
+      h.style.scrollBehavior = sb;
+      scrollTarget = 1; scrollF -= SL - 1; /* keep the camera's leftover glide so the jump can't be seen */
+    }
+    mx += (tmx - mx) * 0.045; my += (tmy - my) * 0.045;
+    var base = Math.min(SL - 1, Math.floor(scrollF)), f = ease(Math.min(1, scrollF - base));
+    var zc = -scrollF * GAP;
+    var A = STATIONS[base], B = STATIONS[base + 1];
+
+    skyU.uHorizon.value.copy(A.sky).lerp(B.sky, f);
+    dustMat.color.copy(A.core).lerp(B.core, f);
+
+    var sway = reduce ? 0 : Math.sin(t * 0.13) * 0.8;
+    camera.position.set((small ? 4 : -2) + mx * 2.2 + sway, 2.6 - my * 1.2, zc + (small ? 38 : 22));
+    camera.lookAt(small ? 6 : 3, 4.5, zc - 2);
+
+    forms.forEach(function (m, i) {
+      var near = Math.abs(scrollF - i);
+      m.visible = near < 0.8;
+      if (!m.visible) return;
+      m.rotation.y = m.userData.ry + (reduce ? 0 : Math.sin(t * 0.25) * 0.12); /* gentle sway, not a full spin, so each model keeps the angle it was framed at */
+      var fade = Math.min(1, Math.max(0, (near - 0.3) / 0.5));
+      m.material.opacity = 0.8 * (1 - fade * fade * (3 - 2 * fade));
+    });
+
+    pickerBar.style.transform = 'scaleX(' + Math.min(1, Math.max(0, (scrollF > SL - 1 ? 1 : scrollF) / (SL - 1))).toFixed(4) + ')';
+    var ch = real(Math.round(scrollF));
+    if (ch !== shown) {
+      shown = ch;
+      eqEl.textContent = SUBJECTS[ch].label;
+      countEl.textContent = pad(ch + 1) + ' / ' + pad(LAST + 1);
+      document.documentElement.style.setProperty('--accent', SUBJECTS[ch].css);
+      pickerLabel.textContent = ch === 0 ? 'Index' : SUBJECTS[ch].name;
+      pickerNum.textContent = pad(ch);
+      tabs.forEach(function (b) { b.setAttribute('aria-current', String(+b.dataset.go === ch)); });
+    }
+
+    if (composer) composer.render(); else renderer.render(scene, camera);
+    if (!frame.drawn) { frame.drawn = true; if (window.ssReady) ssReady(); }
+    if (!reduce) requestAnimationFrame(frame);
+  }
+  if (reduce) {
+    frame(0);
+    window.addEventListener('scroll', function () { requestAnimationFrame(frame); }, { passive: true });
+  } else requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>
