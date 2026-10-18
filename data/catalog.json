@@ -1,0 +1,24 @@
+{
+  "courses": [
+    {
+      "name": "Algebra 1",
+      "topics": [
+        "algebra-1/slope-intercept-form.json",
+        "algebra-1/systems-of-equations.json",
+        "algebra-1/absolute-value-functions.json",
+        "algebra-1/quadratic-vertex-form.json",
+        "algebra-1/exponential-functions.json"
+      ]
+    },
+    {
+      "name": "Algebra 2",
+      "topics": [
+        "algebra-2/quadratic-formula.json",
+        "algebra-2/polynomial-functions.json",
+        "algebra-2/logarithmic-functions.json",
+        "algebra-2/square-root-functions.json",
+        "algebra-2/rational-functions.json"
+      ]
+    }
+  ]
+}

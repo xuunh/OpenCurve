@@ -1,0 +1,51 @@
+{
+  "id": "absolute-value-functions",
+  "course": "Algebra 1",
+  "unit": "Functions",
+  "title": "Absolute Value Functions",
+  "formula": "y = a\\,|x - h| + k",
+  "summary": "Absolute value makes a V shape. Three numbers slide, flip, and stretch the V.",
+  "explanation": [
+    "|x| means distance from zero, so it's never negative. That's why the graph bends into a V.",
+    "(h, k) is the vertex — the tip of the V.",
+    "a controls the width. Negative a flips the V upside down."
+  ],
+  "symbols": [
+    { "symbol": "a", "meaning": "Stretch and flip. |a| > 1 = skinnier, |a| < 1 = wider, a < 0 = upside down." },
+    { "symbol": "h", "meaning": "Moves the V left/right. Watch out: x - h moves it RIGHT by h." },
+    { "symbol": "k", "meaning": "Moves the V up/down." }
+  ],
+  "graph": {
+    "params": {
+      "a": { "min": -3, "max": 3, "step": 0.5, "value": 1, "label": "stretch a" },
+      "h": { "min": -6, "max": 6, "step": 1, "value": 2, "label": "shift h" },
+      "k": { "min": -6, "max": 6, "step": 1, "value": -3, "label": "shift k" }
+    },
+    "curves": [
+      { "expr": "a*abs(x - h) + k", "label": "y = a|x − h| + k" }
+    ],
+    "marks": [
+      { "type": "point", "x": "h", "y": "k", "label": "vertex" },
+      { "type": "vline", "x": "h", "label": "axis of symmetry" }
+    ],
+    "live": "y = {*a}\\,|x {-h}| {+k}",
+    "window": { "xmin": -10, "xmax": 10, "ymin": -10, "ymax": 10 }
+  },
+  "watchFor": [
+    "Set h = 3. The V moves RIGHT 3, even though the equation shows x - 3.",
+    "Drag a below zero and the V flips."
+  ],
+  "example": {
+    "problem": "Find the vertex of y = 2|x + 1| - 5.",
+    "steps": [
+      "Rewrite x + 1 as x - (-1), so h = -1.",
+      "k = -5.",
+      "Vertex is (h, k)."
+    ],
+    "answer": "(-1, -5)"
+  },
+  "practice": {
+    "problem": "Does y = -|x - 4| + 2 open up or down, and where is the vertex?",
+    "answer": "Opens down (a = -1). Vertex (4, 2)."
+  }
+}

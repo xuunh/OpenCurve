@@ -1,0 +1,53 @@
+{
+  "id": "quadratic-formula",
+  "course": "Algebra 2",
+  "unit": "Quadratics",
+  "title": "The Quadratic Formula and Discriminant",
+  "formula": "x = \\dfrac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}",
+  "summary": "Solves any ax² + bx + c = 0. The answers are where the parabola crosses the x-axis.",
+  "explanation": [
+    "The roots (solutions) are the x-values where y = 0 — where the curve touches the x-axis.",
+    "The part under the square root, b² - 4ac, is called the discriminant. It tells you how many roots before you solve.",
+    "Discriminant > 0: 2 roots. = 0: 1 root (touches). < 0: no real roots (curve misses the x-axis)."
+  ],
+  "symbols": [
+    { "symbol": "a, b, c", "meaning": "The numbers in ax² + bx + c. a can't be 0." },
+    { "symbol": "\\pm", "meaning": "Plus-or-minus: do it once with +, once with −. That's how you get 2 answers." },
+    { "symbol": "b^2 - 4ac", "meaning": "Discriminant — counts the roots." }
+  ],
+  "graph": {
+    "params": {
+      "a": { "min": -3, "max": 3, "step": 0.5, "value": 1, "label": "a" },
+      "b": { "min": -8, "max": 8, "step": 1, "value": -2, "label": "b" },
+      "c": { "min": -8, "max": 8, "step": 1, "value": -3, "label": "c" }
+    },
+    "curves": [
+      { "expr": "a*x^2 + b*x + c", "label": "y = ax² + bx + c" }
+    ],
+    "marks": [
+      { "type": "point", "x": "(-b + sqrt(b^2 - 4*a*c))/(2*a)", "y": "0", "label": "root" },
+      { "type": "point", "x": "(-b - sqrt(b^2 - 4*a*c))/(2*a)", "y": "0", "label": "root" },
+      { "type": "point", "x": "-b/(2*a)", "y": "c - b^2/(4*a)", "label": "vertex" }
+    ],
+    "live": "y = {*a}x^2 {+b}x {+c} \\qquad b^2 - 4ac = {=b^2-4*a*c}",
+    "window": { "xmin": -10, "xmax": 10, "ymin": -10, "ymax": 10 }
+  },
+  "watchFor": [
+    "Raise c slowly. Watch the two roots slide together, merge, then vanish — the discriminant hits 0, then goes negative.",
+    "The vertex is always exactly halfway between the two roots."
+  ],
+  "example": {
+    "problem": "Solve x² - 2x - 3 = 0.",
+    "steps": [
+      "a = 1, b = -2, c = -3.",
+      "Discriminant: (-2)² - 4(1)(-3) = 4 + 12 = 16. Positive, so 2 roots.",
+      "x = (2 ± √16) / 2 = (2 ± 4) / 2.",
+      "x = 6/2 = 3 or x = -2/2 = -1."
+    ],
+    "answer": "x = 3 or x = -1"
+  },
+  "practice": {
+    "problem": "How many real roots does 2x² + 4x + 5 = 0 have?",
+    "answer": "None. Discriminant = 16 - 40 = -24 < 0."
+  }
+}

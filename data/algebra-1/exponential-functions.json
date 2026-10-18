@@ -1,0 +1,52 @@
+{
+  "id": "exponential-functions",
+  "course": "Algebra 1",
+  "unit": "Exponentials",
+  "title": "Exponential Growth and Decay",
+  "formula": "y = a \\cdot b^{x}",
+  "summary": "Exponential means you MULTIPLY by the same number every step, instead of adding. That's why it explodes (or shrinks) so fast.",
+  "explanation": [
+    "a is the starting amount — the value when x = 0.",
+    "b is the growth factor — what you multiply by each step.",
+    "b > 1 = growth. 0 < b < 1 = decay. b = 1 = nothing changes."
+  ],
+  "symbols": [
+    { "symbol": "a", "meaning": "Starting value (the y-intercept)." },
+    { "symbol": "b", "meaning": "Growth factor. Example: 1.05 = grows 5% each step. 0.5 = cut in half each step." },
+    { "symbol": "x", "meaning": "Number of steps (years, days, rounds...)." }
+  ],
+  "graph": {
+    "params": {
+      "a": { "min": 0.5, "max": 5, "step": 0.5, "value": 1, "label": "start a" },
+      "b": { "min": 0.25, "max": 3, "step": 0.05, "value": 2, "label": "factor b" }
+    },
+    "curves": [
+      { "expr": "a*b^x", "label": "exponential" },
+      { "expr": "a + a*(b - 1)*x", "label": "linear (adding) — for comparison", "dashed": true }
+    ],
+    "marks": [
+      { "type": "point", "x": "0", "y": "a", "label": "start" },
+      { "type": "hline", "y": "0", "label": "never touches 0" }
+    ],
+    "live": "y = {a} \\cdot {b}^{x}",
+    "window": { "xmin": -5, "xmax": 8, "ymin": -2, "ymax": 20 }
+  },
+  "watchFor": [
+    "The dashed line ADDS the same amount every step. The solid curve MULTIPLIES. Watch the curve pull away.",
+    "Drag b below 1 and the curve flips into decay."
+  ],
+  "example": {
+    "problem": "A phone is worth $800 and loses 20% of its value each year. Write the equation and find its value after 2 years.",
+    "steps": [
+      "Start: a = 800.",
+      "Losing 20% means keeping 80%, so b = 0.8.",
+      "Equation: y = 800 · 0.8^x.",
+      "x = 2: 800 · 0.8 · 0.8 = 512."
+    ],
+    "answer": "y = 800 · 0.8^x, worth $512 after 2 years"
+  },
+  "practice": {
+    "problem": "A bacteria colony starts at 50 and doubles every hour. How many after 3 hours?",
+    "answer": "50 · 2^3 = 400"
+  }
+}
