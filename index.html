@@ -138,13 +138,13 @@ html.has-cur .cur-svg, html.has-cur .cur-ax, html.has-cur .cur-ay, html.has-cur 
 html.cur-off .cur-svg, html.cur-off .cur-ax, html.cur-off .cur-ay, html.cur-off .cur-xy { opacity: 0; }
 
 /* Scroll cue: super minimal — a tiny word and a hairline that slowly breathes */
-.scroll-cue { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px 16px; color: var(--mist); text-decoration: none; pointer-events: auto; opacity: 0.45; transition: opacity .4s; }
+.scroll-cue { display: flex; flex-direction: column-reverse; align-items: center; gap: 10px; padding: 10px 16px; color: var(--mist); text-decoration: none; pointer-events: auto; opacity: 0.45; transition: opacity .4s; }
 .scroll-cue .lbl { font-family: var(--hud); font-size: 9px; letter-spacing: 0.3em; text-transform: lowercase; margin-right: -0.3em; }
-.scroll-cue .hair { width: 1px; height: 28px; background: linear-gradient(to bottom, currentColor, transparent); transform-origin: top; animation: breathe 3.2s ease-in-out infinite; }
+.scroll-cue .hair { width: 1px; height: 28px; background: linear-gradient(to bottom, transparent, currentColor); transform-origin: top; animation: breathe 3.2s ease-in-out infinite; }
 .scroll-cue:hover { opacity: 0.9; }
 @keyframes breathe { 0%, 100% { transform: scaleY(0.35); opacity: 0.4; } 50% { transform: scaleY(1); opacity: 1; } }
 #intro { position: relative; }
-#intro .scroll-cue { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); }
+#intro .scroll-cue { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); }   /* the word sits on the same line as the bottom labels; its breathing line points down at it */
 @media (max-width: 720px) { #intro .scroll-cue { bottom: 84px; } }
 @media (prefers-reduced-motion: reduce) { .scroll-cue .hair { animation: none; } }
 
@@ -236,7 +236,7 @@ a, img, svg { -webkit-user-drag: none; }
 .beat.words.mid .chapter-inner { justify-items: center; text-align: center; }
 #project .chapter-inner { margin-top: -15vh; }   /* sits a little high, leaving the bottom of the screen to the long wave */
 /* model only: nothing to read, just the quiet scroll cue from the cover */
-.beat.model .scroll-cue { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); }
+.beat.model .scroll-cue { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .beat-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; width: min(400px, 100%); font-family: var(--hud); font-size: 11px; letter-spacing: 0.04em; color: var(--mist); text-align: left; }
 .beat-list li { display: flex; align-items: baseline; gap: 12px; }
@@ -1095,7 +1095,7 @@ a, img, svg { -webkit-user-drag: none; }
     return alpha;
   }
 
-  var coverIn = document.querySelector('#intro .chapter-inner'), coverCue = document.querySelector('#intro .scroll-cue');
+  var coverIn = document.querySelector('#intro h1')   /* only the title moves, so the scroll hint below keeps its place on the bottom line */, coverCue = document.querySelector('#intro .scroll-cue');
   var redF = 0, redAt = -1;   /* on screen 05, Pre-Algebra's red rises slowly up the spiral from the bottom (about 2.5 s) */
   var lastMs = 0, morphF = 0, HANDOFF = K + 0.995;   /* the scroll point where the intro spiral hands over to Pre-Algebra's model */
 
