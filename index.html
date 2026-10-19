@@ -182,6 +182,9 @@ h1, h2, .loader-num { margin-left: -0.045em; }
 .row { align-items: baseline; }
 .next { margin-top: 12px; align-items: center; }
 body { margin: 0; } /* the browser's default 8px margin was pushing all page text right of the top bar */
+/* nothing on the page can be highlighted or dragged out; it reads like a picture, not a document */
+html { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+a, img, svg { -webkit-user-drag: none; }
 .sub { font-size: 17px; line-height: 1.5; }
 .menu aside .who { line-height: 1.2; }
 .menu aside .handle { margin: 2px 0 12px; font-family: var(--hud); font-size: 11px; letter-spacing: 0.04em; color: var(--mist); }
@@ -234,7 +237,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
 .beat-list .v { order: 2; }
 .beat-list.stages li { opacity: 0.22; transition: opacity .6s; }
 .beat-list.stages li.on { opacity: 1; }
-.beat-list.stages i { width: 6px; height: 6px; border-radius: 50%; background: var(--dot); box-shadow: 0 0 8px var(--dot); flex: none; transform: translateY(-1px); }
+.beat-list.stages i { width: 5px; height: 5px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 6px rgba(228,232,240,0.6); flex: none; transform: translateY(-1px); }
 .beat .meta-line { font-family: var(--hud); font-size: 11px; letter-spacing: 0.04em; color: var(--mist); }
 .beat .meta-line span + span::before { content: '\00b7'; margin: 0 10px; opacity: 0.6; }
 .beat .chapter-inner > * { opacity: 0; transform: translateY(26px); filter: blur(8px); transition: opacity .55s ease, transform .7s cubic-bezier(.3,0,.2,1), filter .55s ease; }
@@ -983,7 +986,6 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
   /* the shapes, each a grid surface: u runs along it, v across it. Each is a recipe plus a few numbers (p). Between two
      steps that use the same recipe the numbers ease, so the shape bends (unwinds, unrolls, coils) instead of sliding
      point to point */
-  function leaf(u) { var e = 2 * u - 1; return 0.16 + 0.84 * Math.sqrt(Math.max(0, 1 - e * e)); }   /* the open sheet's outline: wide in the middle, narrow at the tips, like a leaf (it squares off into a rectangle once it moves right) */
   function knotAt(L, u, v, t, o) {   /* the cover's tube, built the same way as the cover model. a: how knotted (1 = torus knot, 0 = ring), m: how many times it winds */
     function c(x, out) { var r = 2 + L.a * Math.cos(3 * x); return out.set(r * Math.cos(L.m * x), L.a * 1.2 * Math.sin(3 * x), r * Math.sin(L.m * x)); }
     var x = u * Math.PI * 2; c(x, kP0); c(x + 0.001, kP1); T.copy(kP1).sub(kP0).normalize();
@@ -991,13 +993,13 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
     return o.copy(kP0).addScaledVector(kN, Math.cos(a) * 0.55).addScaledVector(kB, Math.sin(a) * 0.55).multiplyScalar(3.4);
   }
   function rollAt(R, u, v, t, o) {   /* a flat ring that unrolls. phi: how far around it still curls (2π = closed ring, 0 = open sheet) */
-    var phi = Math.max(1e-4, R.phi), q = 1 - phi / (Math.PI * 2), L = lerp(42.73, 30, q), wd = lerp(5, 8, q) * lerp(1, leaf(u), q);
+    var phi = Math.max(1e-4, R.phi), q = 1 - phi / (Math.PI * 2), L = lerp(42.73, 30, q), wd = lerp(5, 8, q);
     var Rc = L / phi, th0 = Math.PI * (1 + 0.5 * q), th = th0 + (u - 0.5) * phi, r = Rc + (v - 0.5) * wd, sc = Math.sin(phi / 2) / (phi / 2);
     var y = q * (0.5 * Math.sin(u * Math.PI * 3 + t * 0.5) * (0.7 + 0.3 * Math.cos(v * Math.PI * 2 + t * 0.3)) + 1.1 * (1 - Math.pow(2 * u - 1, 2)));   /* a soft arch and a slow ripple, so the open sheet looks like cloth, not a board */
     return o.set(r * Math.cos(th) - Rc * sc * Math.cos(th0), y, r * Math.sin(th) - Rc * sc * Math.sin(th0));   /* kept centered while it unrolls */
   }
   var WIND = 5 * Math.PI;   /* Pre-Algebra's spiral: two and a half turns */
-  function windAt(S, u, v, t, o) {   /* a strip that coils up into Pre-Algebra's spiral. s: how wound (0 = flat leaf, 1 = exactly Pre-Algebra's model) */
+  function windAt(S, u, v, t, o) {   /* a strip that coils up into Pre-Algebra's spiral. s: how wound (0 = flat strip, 1 = exactly Pre-Algebra's model) */
     var s = Math.max(1e-4, S.s), span = WIND * s, Rc = lerp(30, 5.2 * WIND, s) / span, th0 = -0.5 * Math.PI * (1 - s), th = th0 + (u - 0.5) * span;
     var r = Rc + 6 * (v - 0.5);
     o.set(r * Math.cos(th) - (Rc - 5.2) * Math.cos(th0), 1.15 * (u - 0.5) * span, r * Math.sin(th) - (Rc - 5.2) * Math.sin(th0));
@@ -1028,11 +1030,11 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
     /* 2-3 · model only: the knot loosens, then unwinds into a plain ring, a little at a time along its length */
     { s: SHAPE.loose, stagger: true, pos: [2.9, 6.1, -7], rot: [0.5, 0.24, 0.04], col: W, alpha: 1 },
     { s: SHAPE.ring, stagger: true, pos: MID, rot: [0.62, 0.18, 0], col: W, alpha: 1 },
-    /* 4-6 · model only: the tube splits along its inside and lies flat as a wide ring, which unrolls into a leaf-shaped sheet */
+    /* 4-6 · model only: the tube splits along its inside and lies flat as a wide ring, which unrolls into an open sheet */
     { s: SHAPE.flat, stagger: true, pos: MID, rot: [0.58, 0.1, 0], col: W, alpha: 1 },
     { s: SHAPE.half, pos: [3, 5.8, -9.5], rot: [0.46, 0, 0], col: W, alpha: 1 },
     { s: SHAPE.sheet, pos: [3, 4.4, -10], rot: [0.95, -0.14, 0.05], col: W, alpha: 1 },
-    /* 7 · the sheet slides to the usual right-hand spot, squares off into a rectangle, and twists */
+    /* 7 · the sheet slides to the usual right-hand spot and twists */
     { s: SHAPE.twist, pos: RIGHT, rot: [0.25, -0.35, 0.08], col: W, alpha: 1 },
     /* 8 · a curved sheet with the 19 subjects on it */
     { s: SHAPE.arc, pos: [18, 4.2, -10], rot: [0.2, -0.3, 0], col: W, alpha: 1 },
@@ -1072,10 +1074,12 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
     var i, j, k = 0, minY = Infinity, maxY = -Infinity;
     for (j = 0; j <= NV; j++) for (i = 0; i <= SU; i++) { var P = gP[j * (SU + 1) + i]; blendAt(i / SU, j / NV, P); if (P.y < minY) minY = P.y; if (P.y > maxY) maxY = P.y; }
     coreC.copy(A.c).lerp(B.c, w); deepC.copy(A.d).lerp(B.d, w);
-    function col(y) { tmpC.copy(deepC).lerp(coreC, 0.25 + 0.75 * (y - minY) / ((maxY - minY) || 1)); return tmpC; }   /* darker low down, brighter up top, like the subject models */
-    function seg(P, Q) { sArr[k] = P.x; sArr[k + 1] = P.y; sArr[k + 2] = P.z; sArr[k + 3] = Q.x; sArr[k + 4] = Q.y; sArr[k + 5] = Q.z; var c1 = col(P.y); sCol[k] = c1.r; sCol[k + 1] = c1.g; sCol[k + 2] = c1.b; var c2 = col(Q.y); sCol[k + 3] = c2.r; sCol[k + 4] = c2.g; sCol[k + 5] = c2.b; k += 6; }
-    for (j = 0; j <= NV; j++) for (i = 0; i < SU; i++) seg(gP[j * (SU + 1) + i], gP[j * (SU + 1) + i + 1]);
-    for (i = 0; i < NU; i++) { blendAt(i / NU, 0, cP); for (j = 1; j <= SV; j++) { blendAt(i / NU, j / SV, cQ); seg(cP, cQ); cP.copy(cQ); } }
+    var sw = Math.max(0, 1 - Math.abs(p - B_STAGES) * 1.6);   /* on the 19-subjects screen, unlit stages of the sheet sit dim */
+    function lightAt(u) { if (sw < 0.01) return 1; var j = Math.round(clamp01((u - 0.04) / 0.92) * (LAST - 1)); return 1 - sw * 0.7 * (1 - clamp01(reveal * 4.2 - dotStage[j])); }
+    function col(y, u) { tmpC.copy(deepC).lerp(coreC, 0.25 + 0.75 * (y - minY) / ((maxY - minY) || 1)).multiplyScalar(lightAt(u)); return tmpC; }   /* darker low down, brighter up top, like the subject models */
+    function seg(P, Q, u1, u2) { sArr[k] = P.x; sArr[k + 1] = P.y; sArr[k + 2] = P.z; sArr[k + 3] = Q.x; sArr[k + 4] = Q.y; sArr[k + 5] = Q.z; var c1 = col(P.y, u1); sCol[k] = c1.r; sCol[k + 1] = c1.g; sCol[k + 2] = c1.b; var c2 = col(Q.y, u2); sCol[k + 3] = c2.r; sCol[k + 4] = c2.g; sCol[k + 5] = c2.b; k += 6; }
+    for (j = 0; j <= NV; j++) for (i = 0; i < SU; i++) seg(gP[j * (SU + 1) + i], gP[j * (SU + 1) + i + 1], i / SU, (i + 1) / SU);
+    for (i = 0; i < NU; i++) { blendAt(i / NU, 0, cP); for (j = 1; j <= SV; j++) { blendAt(i / NU, j / SV, cQ); seg(cP, cQ, i / NU, i / NU); cP.copy(cQ); } }
     sGeo.attributes.position.needsUpdate = sGeo.attributes.color.needsUpdate = true;
     var PA = A.pos, PB = B.pos, wp = w;
     if (cam > K) { PA = KEYS[K].pos; PB = KEYS[K + 1].pos; wp = clamp01((cam - K) / (HANDOFF - K)); }   /* lands exactly on Pre-Algebra's model at the hand-over point */   /* the hand-off rides with the camera (and drifts into Pre-Algebra's spot), at the camera's even pace */
@@ -1087,14 +1091,15 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
     return alpha;
   }
 
-  /* the 19 subjects as glowing dots on the curved sheet, lit one stage at a time */
+  /* the 19 subjects as small white marks along the curved sheet. Each stage (Foundations, High school, College,
+     Advanced) lights its stretch of the sheet and its marks in turn, in step with the list beside it. No subject colors here */
+  var WHITE = new THREE.Color('#E4E8F0');
   var STAGE = { 'Foundations': 0, 'High school': 1, 'College': 2, 'Advanced': 3 };
   var stageStart = [], dotStage = SUBJECTS.slice(1).map(function (s, j) { var st = STAGE[s.group]; if (stageStart[st] === undefined) stageStart[st] = j; return st; });
   var stageRows = Array.prototype.slice.call(document.querySelectorAll('#stages [data-stage]'));
-  stageRows.forEach(function (li) { li.style.setProperty('--dot', SUBJECTS[stageStart[+li.dataset.stage] + 1].css); });
   var dGeo2 = new THREE.BufferGeometry(), dP = new Float32Array(LAST * 3), dC = new Float32Array(LAST * 3);
   dGeo2.setAttribute('position', new THREE.BufferAttribute(dP, 3)); dGeo2.setAttribute('color', new THREE.BufferAttribute(dC, 3));
-  var dotMat = new THREE.PointsMaterial({ size: 1.8, map: dotTex, vertexColors: true, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
+  var dotMat = new THREE.PointsMaterial({ size: 1.05, map: dotTex, vertexColors: true, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
   var dots = new THREE.Points(dGeo2, dotMat); dots.frustumCulled = false; surf.add(dots);
   var reveal = 0, lastMs = 0, morphF = 0, HANDOFF = K + 0.995;   /* the scroll point where the intro spiral hands over to Pre-Algebra's model */
   function drawDots(p, t, alpha) {
@@ -1103,8 +1108,8 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
     if (!dots.visible) return;
     for (var j = 0; j < LAST; j++) {
       blendAt(0.04 + 0.92 * j / (LAST - 1), 0.5, cP); dP[j * 3] = cP.x; dP[j * 3 + 1] = cP.y + 0.35; dP[j * 3 + 2] = cP.z;
-      var lit = clamp01(reveal * 4.2 - dotStage[j]) * (1 + 0.25 * Math.sin(t * 2.2 - j * 0.6));
-      tmpC.copy(SUBJECTS[j + 1].core).multiplyScalar(lit); dC[j * 3] = tmpC.r; dC[j * 3 + 1] = tmpC.g; dC[j * 3 + 2] = tmpC.b;
+      var lit = 0.14 + 0.86 * clamp01(reveal * 4.2 - dotStage[j]) * (0.85 + 0.15 * Math.sin(t * 1.6 - j * 0.5));   /* one white mark per subject: faint until its stage lights */
+      tmpC.copy(WHITE).multiplyScalar(lit); dC[j * 3] = tmpC.r; dC[j * 3 + 1] = tmpC.g; dC[j * 3 + 2] = tmpC.b;
     }
     dGeo2.attributes.position.needsUpdate = dGeo2.attributes.color.needsUpdate = true;
   }
