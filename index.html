@@ -1096,7 +1096,7 @@ a, img, svg { -webkit-user-drag: none; }
   }
 
   var coverIn = document.querySelector('#intro h1')   /* only the title moves, so the scroll hint below keeps its place on the bottom line */, coverCue = document.querySelector('#intro .scroll-cue');
-  var redF = 0, redAt = -1;   /* on screen 05, Pre-Algebra's red rises slowly up the spiral from the bottom (about 2.5 s) */
+  var redF = 0;   /* how red the spiral is: rises from the bottom on screen 05 (about 2.5 s), drains back from the top if you scroll back */
   var lastMs = 0, morphF = 0, HANDOFF = K + 0.995;   /* the scroll point where the intro spiral hands over to Pre-Algebra's model */
 
   var D = small ? 600 : 1400, dpos = new Float32Array(D * 3);
@@ -1141,7 +1141,7 @@ a, img, svg { -webkit-user-drag: none; }
       window.scrollTo(0, main.children[K + 1].offsetTop);
       h.style.scrollBehavior = sb;
       scrollTarget = K + 1; scrollF -= SL - (K + 1); /* keep the camera's leftover glide so the jump can't be seen */
-      redAt = -1e9;   /* coming round from Topology: Pre-Algebra is already red */
+      redF = 1;   /* coming round from Topology: Pre-Algebra is already red */
     }
     mx += (tmx - mx) * 0.045; my += (tmy - my) * 0.045;
     var base = Math.min(SL - 1, Math.floor(scrollF)), f = ease(Math.min(1, scrollF - base));
@@ -1156,8 +1156,8 @@ a, img, svg { -webkit-user-drag: none; }
     camera.position.set((small ? 4 : -2) + mx * 2.2 + sway, 2.6 - my * 1.2, zc + (small ? 38 : 22));
     camera.lookAt(small ? 6 : 3, 4.5, zc - 2);
 
-    if (scrollF > K - 0.12) { if (redAt < 0) redAt = t; } else if (scrollF < K - 0.5) redAt = -1;   /* screen 05: the spiral turns red, bottom to top */
-    redF = redAt < 0 ? 0 : reduce ? 1 : clamp01((t - redAt) / 2.6);
+    var redT = scrollF > K - 0.12 ? 1 : 0;   /* on screen 05 (or past it) the spiral is red; back before it, white */
+    redF = reduce ? redT : redF + Math.max(-dt / 2.6, Math.min(dt / 2.6, redT - redF));   /* moves toward that at one steady pace, either way, so it can reverse mid-fade */
     /* the white-to-red intro spiral stays up until it has arrived AND finished turning red; then Pre-Algebra's own (identical) model takes over */
     var swapped = scrollF >= HANDOFF && (redF >= 1 || scrollF > K + 1.3);
     /* cover -> intro: the cover knot and the intro's knot are the same shape in the same spot. As the knot starts gliding to the
