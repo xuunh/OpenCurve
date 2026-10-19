@@ -215,10 +215,11 @@ a, img, svg { -webkit-user-drag: none; }
 .ser { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-weight: 400; font-size: 1.08em; letter-spacing: -0.015em; line-height: 0; }
 /* "shape" also gets a hand-drawn blue curve that draws itself underneath when the screen arrives */
 .curvy { position: relative; display: inline-block; white-space: nowrap; line-height: 1; }
-.curvy svg { position: absolute; z-index: 1; left: -0.04em; right: -0.04em; bottom: -0.3em; width: calc(100% + 0.08em); height: 0.28em; overflow: visible; pointer-events: none; }
-.curvy path { fill: none; stroke: var(--blue); stroke-width: 1.05; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; filter: drop-shadow(0 0 6px rgba(76,130,255,0.65)); transition: stroke-dashoffset .4s ease; }
-.beat.on .curvy path { stroke-dashoffset: 0; transition: stroke-dashoffset 1.6s cubic-bezier(.65,0,.35,1) .8s; }
-@media (prefers-reduced-motion: reduce) { .curvy path { stroke-dashoffset: 0; transition: none; } }
+.curvy svg { position: absolute; z-index: 1; left: -0.04em; right: -0.04em; bottom: -0.2em; width: calc(100% + 0.08em); height: 0.32em; overflow: visible; pointer-events: none;
+  clip-path: inset(-60% 110% -60% -10%); transition: clip-path .4s ease; }   /* two quick swooshes, revealed left to right like a pen stroke */
+.beat.on .curvy svg { clip-path: inset(-60% -10% -60% -10%); transition: clip-path 1.6s cubic-bezier(.65,0,.35,1) .8s; }
+.curvy path { fill: none; stroke: var(--blue); stroke-width: 2.4; stroke-linecap: round; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 6px rgba(76,130,255,0.65)); }
+@media (prefers-reduced-motion: reduce) { .curvy svg, .beat.on .curvy svg { clip-path: none; transition: none; } }
 .beat .sub { margin-top: 28px; max-width: 40ch; }
 @media (min-width: 721px) { .chapter.beat .sub { white-space: normal; max-width: 40ch; } }
 .beat .beat-list { margin-top: 30px; }
@@ -237,9 +238,10 @@ a, img, svg { -webkit-user-drag: none; }
 .beat-list li::after { content: ''; order: 1; flex: 1; border-bottom: 1px dotted rgba(220,225,240,0.18); transform: translateY(-3px); }
 .beat-list .k { color: var(--ink); min-width: 12ch; }
 .beat-list .v { order: 2; }
-.beat-list.stages li { opacity: 0.22; transition: opacity .6s; }
-.beat-list.stages li.on { opacity: 1; }
-.beat-list.stages i { width: 6px; height: 6px; border-radius: 50%; background: var(--dot); box-shadow: 0 0 8px var(--dot); flex: none; transform: translateY(-1px); }
+/* live equation under the sign-flip heading: the sign (in blue) and the shape's name change with the model */
+.beat .beat-eq { margin: 30px 0 0; display: flex; align-items: baseline; gap: 12px; font-family: var(--hud); font-size: 15px; letter-spacing: 0.02em; color: var(--ink); }
+.beat-eq b { font-weight: 400; color: var(--blue); min-width: 1ch; text-align: center; text-shadow: 0 0 10px rgba(76,130,255,0.7); }
+.beat-eq i { font-style: normal; font-size: 11px; letter-spacing: 0.04em; color: var(--mist); margin-left: 10px; }
 .beat .meta-line { font-family: var(--hud); font-size: 11px; letter-spacing: 0.04em; color: var(--mist); }
 .beat .meta-line span + span::before { content: '\00b7'; margin: 0 10px; opacity: 0.6; }
 .beat .chapter-inner > * { opacity: 0; transform: translateY(26px); filter: blur(8px); transition: opacity .55s ease, transform .7s cubic-bezier(.3,0,.2,1), filter .55s ease; }
@@ -249,7 +251,7 @@ a, img, svg { -webkit-user-drag: none; }
 .beat.on .chapter-inner > :nth-child(3) { transition-delay: .42s; }
 .beat.on .chapter-inner > :nth-child(4) { transition-delay: .57s; }
 .beat.on .chapter-inner > :nth-child(5) { transition-delay: .72s; }
-@media (prefers-reduced-motion: reduce) { .beat .chapter-inner > * { opacity: 1; transform: none; filter: none; transition: none; } .beat-list.stages li { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .beat .chapter-inner > * { opacity: 1; transform: none; filter: none; transition: none; } }
 
 /* Top center: a minimal index bar — number, subject name, a two-line menu icon, and a hairline showing how far through the subjects you are */
 .picker { position: relative; gap: 14px; background: none; border: 0; border-radius: 0; padding: 12px 4px 14px; backdrop-filter: none; -webkit-backdrop-filter: none; font-family: var(--hud); font-size: 11px; letter-spacing: 0.04em; }
@@ -395,22 +397,17 @@ a, img, svg { -webkit-user-drag: none; }
   <section class="chapter beat" id="idea">
     <div class="chapter-inner">
       <p class="beat-k"><b>01</b><span>The idea</span></p>
-      <h2>Every formula is a <span class="ser curvy">shape<svg viewBox="0 0 100 11" preserveAspectRatio="none" aria-hidden="true"><path pathLength="100" d="M2 6.6 C 18 1.1, 30 1.1, 44 5.5 S 72 10.4, 98 3.3"/></svg></span> first.</h2>
+      <h2>Every formula is a <span class="ser curvy">shape<svg viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true"><path d="M1 13 C 9 5, 26 3, 38 10"/><path d="M75 18 C 85 17, 93 13, 99 7"/></svg></span> first.</h2>
       <p class="sub">OpenCurve draws the shape, so you can see what the math is doing.</p>
       <a class="next skip" href="#pre-algebra"><span class="next-k">Skip intro</span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2v11M3 8.5 8 13.5 13 8.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     </div>
   </section>
-  <section class="chapter beat" id="stages">
+  <section class="chapter beat" id="flip">
     <div class="chapter-inner">
-      <p class="beat-k"><b>02</b><span>The scope</span></p>
-      <h2>Nineteen subjects, one <span class="ser">curve.</span></h2>
-      <p class="sub">From Pre-Algebra to Topology, in the order you learn them.</p>
-      <ul class="beat-list stages">
-        <li data-stage="0"><i></i><span class="k">Foundations</span><span class="v">01</span></li>
-        <li data-stage="1"><i></i><span class="k">High School</span><span class="v">06</span></li>
-        <li data-stage="2"><i></i><span class="k">College</span><span class="v">07</span></li>
-        <li data-stage="3"><i></i><span class="k">Advanced</span><span class="v">05</span></li>
-      </ul>
+      <p class="beat-k"><b>02</b><span>Small changes</span></p>
+      <h2>Flip one sign. The whole surface <span class="ser">turns.</span></h2>
+      <p class="beat-eq" aria-live="off"><span>z = x²</span><b id="flipSign">+</b><span>y²</span><i id="flipName">a bowl</i></p>
+      <p class="sub">One character apart, two completely different shapes. Seeing it makes the difference stick.</p>
       <a class="next skip" href="#pre-algebra"><span class="next-k">Skip intro</span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2v11M3 8.5 8 13.5 13 8.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     </div>
   </section>
@@ -583,7 +580,7 @@ a, img, svg { -webkit-user-drag: none; }
     { id: 'unroll', label: 'The ring, unrolling' },
     { id: 'sheet', label: 'One open sheet' },
     { id: 'idea', label: 'The sheet, twisted' },
-    { id: 'stages', label: 'One curve, four terraces, 19 subjects' },
+    { id: 'flip', label: 'z = x² ± y²  (bowl ⇄ saddle)' },
     { id: 'look', label: 'A rolling wave  z = sin(x − t)' },
     { id: 'project', label: 'A long wave  y = sin(x − t)' },
     { id: 'coil', label: 'The sheet, starting to coil' },
@@ -974,15 +971,10 @@ a, img, svg { -webkit-user-drag: none; }
      lines, so every change is a smooth morph, never a cut. That grid matches Pre-Algebra's model line for line, so the
      last step simply becomes it. */
   var PRE = forms[K + 1], PLS = PLACE[SUBJECTS[1].form], PLK = PLACE.knot;
-  var B_STAGES = 8, B_LOOK = 9;   /* which screens have the 19 dots, and the mouse tilt */
+  var B_LOOK = 9;   /* the screen where the model tilts with the mouse */
   function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
   function easeIO(v) { return v < 0.5 ? 4 * v * v * v : 1 - Math.pow(-2 * v + 2, 3) / 2; }   /* slow start, slow finish */
   function lerp(a, b, w) { return a + (b - a) * w; }
-  var dotTex = (function () {
-    var cv = document.createElement('canvas'); cv.width = cv.height = 64; var g = cv.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.3, 'rgba(255,255,255,0.75)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
-    g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(cv);
-  })();
   var UP = new THREE.Vector3(0, 1, 0), T = new THREE.Vector3(), kN = new THREE.Vector3(), kB = new THREE.Vector3(), kP0 = new THREE.Vector3(), kP1 = new THREE.Vector3();
 
   /* the shapes, each a grid surface: u runs along it, v across it. Each is a recipe plus a few numbers (p). Between two
@@ -1008,6 +1000,8 @@ a, img, svg { -webkit-user-drag: none; }
     return PRE ? o.sub(PRE.userData.c).multiplyScalar(PRE.userData.k) : o;
   }
   function Sh(f, p) { return { f: f, p: p || {} }; }
+  function flipS(t) { return Math.tanh(3 * Math.sin(t * 0.5)) / Math.tanh(3); }   /* +1 bowl, −1 saddle: rests on each, then turns over */
+  var flipSign = document.getElementById('flipSign'), flipName = document.getElementById('flipName');
   var SHAPE = {
     knot: Sh(knotAt, { a: 1, m: 2 }),
     loose: Sh(knotAt, { a: 0.42, m: 2 }),
@@ -1016,10 +1010,8 @@ a, img, svg { -webkit-user-drag: none; }
     half: Sh(rollAt, { phi: Math.PI * 0.9 }),
     sheet: Sh(rollAt, { phi: 0 }),
     twist: Sh(function (p, u, v, t, o) { var th = (u - 0.5) * Math.PI * 1.4 + Math.sin(t * 0.35) * 0.6, w = -(v - 0.5) * 7; return o.set((u - 0.5) * 26, w * Math.sin(th), w * Math.cos(th)); }),
-    terrace: Sh(function (p, u, v, t, o) {   /* one curve, four terraces: each stage is a flat step, joined by smooth ramps */
-      var y = 0.9 * (u - 0.5);
-      for (var k = 1; k < 4; k++) y += 1.9 / (1 + Math.exp(-(u - (0.04 + 0.92 * (stageStart[k] - 0.5) / (LAST - 1))) * 40));
-      return o.set((u - 0.5) * 26, y - 2.9 + 0.12 * Math.sin(u * 14 - t * 1.2), -(u - 0.5) * 9 + 1.6 * Math.sin(u * Math.PI) - (v - 0.5) * 5);
+    flip: Sh(function (p, u, v, t, o) {   /* z = x² ± y²: a bowl that slowly flips into a saddle and back */
+      var x = (u - 0.5) * 17, z = -(v - 0.5) * 16; return o.set(x, 0.035 * x * x + flipS(t) * 0.055 * z * z - 1.4, z);
     }),
     band: Sh(function (p, u, v, t, o) {   /* a long, slow wave running the full width of the screen */
       var x = (u - 0.5) * 56; return o.set(x, 0.75 * Math.sin(0.16 * x - 0.7 * t) + 0.3 * Math.sin(0.41 * x + 0.5 * t), -(v - 0.5) * 3.2 + 0.8 * Math.cos(0.12 * x + 0.4 * t));
@@ -1044,8 +1036,8 @@ a, img, svg { -webkit-user-drag: none; }
     { s: SHAPE.sheet, pos: [3, 4.4, -10], rot: [0.95, -0.14, 0.05], col: W, alpha: 1 },
     /* 7 · the sheet slides to the usual right-hand spot and twists */
     { s: SHAPE.twist, pos: RIGHT, rot: [0.25, -0.35, 0.08], col: W, alpha: 1 },
-    /* 8 · one curve with four terraces (one per stage); the 19 subjects glow along it in their colors */
-    { s: SHAPE.terrace, pos: [16.5, 4.6, -10], rot: [0.28, -0.32, 0], col: W, alpha: 1 },
+    /* 8 · a bowl that flips into a saddle when one sign changes (z = x² ± y²) */
+    { s: SHAPE.flip, pos: [15, 5.6, -10], rot: [0.45, -0.62, 0], col: W, alpha: 1 },
     /* 9 · a rolling wave (tilts with the mouse) */
     { s: SHAPE.wave, pos: RIGHT, rot: [0.35, -0.3, 0], col: W, alpha: 1 },
     /* 10 · words centered: the wave stretches into a long band that flows across the whole screen beneath them */
@@ -1073,7 +1065,7 @@ a, img, svg { -webkit-user-drag: none; }
     shapeAt(mix.A, u, v, mix.t, bA); shapeAt(mix.B, u, v, mix.t, bB); return o.copy(bA).lerp(bB, w);
   }
   var gP = []; for (var gi = 0; gi < (SU + 1) * (NV + 1); gi++) gP.push(new THREE.Vector3());
-  var cP = new THREE.Vector3(), cQ = new THREE.Vector3(), deepC = new THREE.Color(), coreC = new THREE.Color(), tmpC = new THREE.Color(), subC = new THREE.Color();
+  var cP = new THREE.Vector3(), cQ = new THREE.Vector3(), deepC = new THREE.Color(), coreC = new THREE.Color(), tmpC = new THREE.Color();
   function drawSurface(p, t, cam) {
     var k0 = Math.min(KEYS.length - 2, Math.floor(p)), w = ease(Math.min(1, p - k0)), A = KEYS[k0], B = KEYS[k0 + 1];
     var alpha = lerp(A.alpha, B.alpha, w);
@@ -1082,18 +1074,8 @@ a, img, svg { -webkit-user-drag: none; }
     var i, j, k = 0, minY = Infinity, maxY = -Infinity;
     for (j = 0; j <= NV; j++) for (i = 0; i <= SU; i++) { var P = gP[j * (SU + 1) + i]; blendAt(i / SU, j / NV, P); if (P.y < minY) minY = P.y; if (P.y > maxY) maxY = P.y; }
     coreC.copy(A.c).lerp(B.c, w); deepC.copy(A.d).lerp(B.d, w);
-    var sw = Math.max(0, 1 - Math.abs(p - B_STAGES) * 1.6);   /* on the 19-subjects screen, unlit stages of the sheet sit dim */
-    function col(y, u) {
-      var h = (y - minY) / ((maxY - minY) || 1); tmpC.copy(deepC).lerp(coreC, 0.25 + 0.75 * h);
-      if (sw > 0.01) {   /* the sheet under each subject takes that subject's color; stages not lit yet stay dim */
-        var f = clamp01((u - 0.04) / 0.92) * (LAST - 1), j0 = Math.floor(f), j1 = Math.min(LAST - 1, j0 + 1), fr = f - j0;
-        subC.copy(SUBJECTS[j0 + 1].core).lerp(SUBJECTS[j1 + 1].core, fr);
-        var lit = clamp01(reveal * 4.2 - lerp(dotStage[j0], dotStage[j1], fr));
-        subC.multiplyScalar((0.35 + 0.65 * h) * (0.22 + 0.78 * lit)); tmpC.lerp(subC, sw);
-      }
-      return tmpC;
-    }   /* darker low down, brighter up top, like the subject models */
-    function seg(P, Q, u1, u2) { sArr[k] = P.x; sArr[k + 1] = P.y; sArr[k + 2] = P.z; sArr[k + 3] = Q.x; sArr[k + 4] = Q.y; sArr[k + 5] = Q.z; var c1 = col(P.y, u1); sCol[k] = c1.r; sCol[k + 1] = c1.g; sCol[k + 2] = c1.b; var c2 = col(Q.y, u2); sCol[k + 3] = c2.r; sCol[k + 4] = c2.g; sCol[k + 5] = c2.b; k += 6; }
+    function col(y) { tmpC.copy(deepC).lerp(coreC, 0.25 + 0.75 * (y - minY) / ((maxY - minY) || 1)); return tmpC; }   /* darker low down, brighter up top, like the subject models */
+    function seg(P, Q, u1, u2) { sArr[k] = P.x; sArr[k + 1] = P.y; sArr[k + 2] = P.z; sArr[k + 3] = Q.x; sArr[k + 4] = Q.y; sArr[k + 5] = Q.z; var c1 = col(P.y); sCol[k] = c1.r; sCol[k + 1] = c1.g; sCol[k + 2] = c1.b; var c2 = col(Q.y); sCol[k + 3] = c2.r; sCol[k + 4] = c2.g; sCol[k + 5] = c2.b; k += 6; }
     for (j = 0; j <= NV; j++) for (i = 0; i < SU; i++) seg(gP[j * (SU + 1) + i], gP[j * (SU + 1) + i + 1], i / SU, (i + 1) / SU);
     for (i = 0; i < NU; i++) { blendAt(i / NU, 0, cP); for (j = 1; j <= SV; j++) { blendAt(i / NU, j / SV, cQ); seg(cP, cQ, i / NU, i / NU); cP.copy(cQ); } }
     sGeo.attributes.position.needsUpdate = sGeo.attributes.color.needsUpdate = true;
@@ -1107,29 +1089,7 @@ a, img, svg { -webkit-user-drag: none; }
     return alpha;
   }
 
-  /* the 19 subjects as glowing dots, one per terrace step, each in its subject's color. Each stage (Foundations,
-     High school, College, Advanced) lights its terrace and its dots in turn, in step with the list beside it */
-  var STAGE = { 'Foundations': 0, 'High school': 1, 'College': 2, 'Advanced': 3 };
-  var stageStart = [], dotStage = SUBJECTS.slice(1).map(function (s, j) { var st = STAGE[s.group]; if (stageStart[st] === undefined) stageStart[st] = j; return st; });
-  var stageRows = Array.prototype.slice.call(document.querySelectorAll('#stages [data-stage]'));
-  stageRows.forEach(function (li) { li.style.setProperty('--dot', SUBJECTS[stageStart[+li.dataset.stage] + 1].css); });
-  var dGeo2 = new THREE.BufferGeometry(), dP = new Float32Array(LAST * 3), dC = new Float32Array(LAST * 3);
-  dGeo2.setAttribute('position', new THREE.BufferAttribute(dP, 3)); dGeo2.setAttribute('color', new THREE.BufferAttribute(dC, 3));
-  var dotMat = new THREE.PointsMaterial({ size: 1.5, map: dotTex, vertexColors: true, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
-  var dots = new THREE.Points(dGeo2, dotMat); dots.frustumCulled = false; surf.add(dots);
-  var reveal = 0, lastMs = 0, morphF = 0, HANDOFF = K + 0.995;   /* the scroll point where the intro spiral hands over to Pre-Algebra's model */
-  function drawDots(p, t, alpha) {
-    var w2 = Math.max(0, 1 - Math.abs(p - B_STAGES) * 1.6) * alpha;
-    dotMat.opacity = w2; dots.visible = w2 > 0.01;
-    if (!dots.visible) return;
-    for (var j = 0; j < LAST; j++) {
-      blendAt(0.04 + 0.92 * j / (LAST - 1), 0.5, cP); dP[j * 3] = cP.x; dP[j * 3 + 1] = cP.y + 0.35; dP[j * 3 + 2] = cP.z;
-      var lit = 0.08 + 0.92 * clamp01(reveal * 4.2 - dotStage[j]) * (1 + 0.2 * Math.sin(t * 2 - j * 0.6));   /* each subject in its own color, faint until its stage lights */
-      tmpC.copy(SUBJECTS[j + 1].core).multiplyScalar(lit); dC[j * 3] = tmpC.r; dC[j * 3 + 1] = tmpC.g; dC[j * 3 + 2] = tmpC.b;
-    }
-    dGeo2.attributes.position.needsUpdate = dGeo2.attributes.color.needsUpdate = true;
-  }
-
+  var lastMs = 0, morphF = 0, HANDOFF = K + 0.995;   /* the scroll point where the intro spiral hands over to Pre-Algebra's model */
 
   var D = small ? 600 : 1400, dpos = new Float32Array(D * 3);
   for (var d = 0; d < D; d++) {
@@ -1200,8 +1160,6 @@ a, img, svg { -webkit-user-drag: none; }
 
     /* intro models: each draws itself in, moves while you're on its screen, and erases as you leave */
     surf.visible = false;
-    var w2n = Math.max(0, 1 - Math.abs(scrollF - B_STAGES) * 1.6);
-    if (reduce) reveal = 1; else if (w2n > 0.45) reveal = Math.min(1, reveal + dt / 1.8); else if (w2n < 0.15) reveal = 0;
     /* the intro surface follows the scroll more slowly than the camera, so its changes unfold gently */
     /* (once the camera starts traveling to Pre-Algebra it catches up, so the spiral is finished by the time we arrive) */
     morphF += (scrollF - morphF) * (reduce ? 1 : 1 - Math.exp(-dt * (scrollF > K ? 5 : 1.05)));
@@ -1209,9 +1167,9 @@ a, img, svg { -webkit-user-drag: none; }
     if (sOp > 0.002 && scrollF < HANDOFF) {
       var pp = scrollF > K ? Math.min(K, morphF) : Math.min(K + 1, morphF), al = drawSurface(pp, t, scrollF);
       sMat.opacity = sOp * al; surf.visible = sMat.opacity > 0.002;
-      if (surf.visible) drawDots(pp, t, al); else dots.visible = false;
     }
-    stageRows.forEach(function (li) { li.classList.toggle('on', reveal * 4.2 - (+li.dataset.stage) > 0.3); });
+    var fs = flipS(t) >= 0;   /* keep the live equation in step with the bowl/saddle */
+    if (fs !== frame.fs) { frame.fs = fs; flipSign.textContent = fs ? '+' : '−'; flipName.textContent = fs ? 'a bowl' : 'a saddle'; }
 
     pickerBar.style.transform = 'scaleX(' + Math.min(1, Math.max(0, (scrollF > SL - 1 ? 1 : scrollF - K) / LAST)).toFixed(4) + ')';
     var cc = Math.round(scrollF), cur = info(cc), key = cur.beat ? 'b' + cur.beat.beat : cur.n;
