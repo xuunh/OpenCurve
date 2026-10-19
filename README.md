@@ -1,8 +1,8 @@
-# Scalar Space
+# OpenCurve
 
 A visual tour of math, from Pre-Algebra to Topology.
 
-**Live site:** https://xuunh.github.io/ScalarSpace/
+**Live site:** https://xuunh.github.io/OpenCurve/
 
 Scroll through 19 subjects, each shown as a glowing 3D model drawn from real math (the number line as a spiral, conic sections, the Lorenz system, a Möbius strip, and more). Built for students, tutors, and teachers, on laptops, Chromebooks, and classroom projectors.
 
@@ -28,7 +28,7 @@ Made by Junayed Haider ([@xuunh](https://github.com/xuunh)), Bachelor of Enginee
 
 ## Contributing
 
-Found a mistake or want a topic? [Open an issue](https://github.com/xuunh/ScalarSpace/issues).
+Found a mistake or want a topic? [Open an issue](https://github.com/xuunh/OpenCurve/issues).
 
 ## License
 
