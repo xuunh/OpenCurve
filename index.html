@@ -983,7 +983,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
   /* the shapes, each a grid surface: u runs along it, v across it. Each is a recipe plus a few numbers (p). Between two
      steps that use the same recipe the numbers ease, so the shape bends (unwinds, unrolls, coils) instead of sliding
      point to point */
-  function leaf(u) { var e = 2 * u - 1; return 0.16 + 0.84 * Math.sqrt(Math.max(0, 1 - e * e)); }   /* sheet outline: wide in the middle, narrow at the tips, like a leaf, not a rectangle */
+  function leaf(u) { var e = 2 * u - 1; return 0.16 + 0.84 * Math.sqrt(Math.max(0, 1 - e * e)); }   /* the open sheet's outline: wide in the middle, narrow at the tips, like a leaf (it squares off into a rectangle once it moves right) */
   function knotAt(L, u, v, t, o) {   /* the cover's tube, built the same way as the cover model. a: how knotted (1 = torus knot, 0 = ring), m: how many times it winds */
     function c(x, out) { var r = 2 + L.a * Math.cos(3 * x); return out.set(r * Math.cos(L.m * x), L.a * 1.2 * Math.sin(3 * x), r * Math.sin(L.m * x)); }
     var x = u * Math.PI * 2; c(x, kP0); c(x + 0.001, kP1); T.copy(kP1).sub(kP0).normalize();
@@ -999,7 +999,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
   var WIND = 5 * Math.PI;   /* Pre-Algebra's spiral: two and a half turns */
   function windAt(S, u, v, t, o) {   /* a strip that coils up into Pre-Algebra's spiral. s: how wound (0 = flat leaf, 1 = exactly Pre-Algebra's model) */
     var s = Math.max(1e-4, S.s), span = WIND * s, Rc = lerp(30, 5.2 * WIND, s) / span, th0 = -0.5 * Math.PI * (1 - s), th = th0 + (u - 0.5) * span;
-    var r = Rc + 6 * (v - 0.5) * lerp(leaf(u), 1, s);
+    var r = Rc + 6 * (v - 0.5);
     o.set(r * Math.cos(th) - (Rc - 5.2) * Math.cos(th0), 1.15 * (u - 0.5) * span, r * Math.sin(th) - (Rc - 5.2) * Math.sin(th0));
     return PRE ? o.sub(PRE.userData.c).multiplyScalar(PRE.userData.k) : o;
   }
@@ -1011,9 +1011,9 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
     flat: Sh(rollAt, { phi: Math.PI * 2 }),
     half: Sh(rollAt, { phi: Math.PI * 0.9 }),
     sheet: Sh(rollAt, { phi: 0 }),
-    twist: Sh(function (p, u, v, t, o) { var th = (u - 0.5) * Math.PI * 1.4 + Math.sin(t * 0.35) * 0.6, w = -(v - 0.5) * 7 * leaf(u); return o.set((u - 0.5) * 26, w * Math.sin(th), w * Math.cos(th)); }),
-    arc: Sh(function (p, u, v, t, o) { return o.set((u - 0.5) * 24, 2.5 * Math.sin(u * Math.PI) + (u - 0.5) * 4 + 0.4 * Math.sin(u * 9 - t), -(u - 0.5) * 14 - (v - 0.5) * 5 * leaf(u)); }),
-    wave: Sh(function (p, u, v, t, o) { var x = (u - 0.5) * 28, z = -(v - 0.5) * 9 * leaf(u); return o.set(x, 2.2 * Math.sin(0.45 * x - 1.2 * t) * (0.6 + 0.4 * Math.cos(0.5 * z + 0.5 * t)), z); }),
+    twist: Sh(function (p, u, v, t, o) { var th = (u - 0.5) * Math.PI * 1.4 + Math.sin(t * 0.35) * 0.6, w = -(v - 0.5) * 7; return o.set((u - 0.5) * 26, w * Math.sin(th), w * Math.cos(th)); }),
+    arc: Sh(function (p, u, v, t, o) { return o.set((u - 0.5) * 24, 2.5 * Math.sin(u * Math.PI) + (u - 0.5) * 4 + 0.4 * Math.sin(u * 9 - t), -(u - 0.5) * 14 - (v - 0.5) * 5); }),
+    wave: Sh(function (p, u, v, t, o) { var x = (u - 0.5) * 28, z = -(v - 0.5) * 9; return o.set(x, 2.2 * Math.sin(0.45 * x - 1.2 * t) * (0.6 + 0.4 * Math.cos(0.5 * z + 0.5 * t)), z); }),
     strip: Sh(windAt, { s: 0 }),
     coil: Sh(windAt, { s: 0.42 }),
     spiral: Sh(windAt, { s: 1 })
@@ -1032,7 +1032,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
     { s: SHAPE.flat, stagger: true, pos: MID, rot: [0.58, 0.1, 0], col: W, alpha: 1 },
     { s: SHAPE.half, pos: [3, 5.8, -9.5], rot: [0.46, 0, 0], col: W, alpha: 1 },
     { s: SHAPE.sheet, pos: [3, 4.4, -10], rot: [0.95, -0.14, 0.05], col: W, alpha: 1 },
-    /* 7 · the sheet slides to the usual right-hand spot and twists */
+    /* 7 · the sheet slides to the usual right-hand spot, squares off into a rectangle, and twists */
     { s: SHAPE.twist, pos: RIGHT, rot: [0.25, -0.35, 0.08], col: W, alpha: 1 },
     /* 8 · a curved sheet with the 19 subjects on it */
     { s: SHAPE.arc, pos: [18, 4.2, -10], rot: [0.2, -0.3, 0], col: W, alpha: 1 },
