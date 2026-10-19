@@ -207,16 +207,16 @@ a, img, svg { -webkit-user-drag: none; }
 /* Top bar: a little more room above, and every item centered on one line */
 .hud-top { padding-block: 32px 24px; align-items: center; }
 
-/* Pre-cover: a text-only screen before the cover. The OpenCurve title floats in the middle of a black screen with one
-   small line under it; as you scroll, the title glides, grows and settles into its spot on the cover, while the 3D
-   scene and the top and bottom bars fade in */
+/* Pre-cover: two text-only screens before the cover.
+   1. "Open Curve" on one line, in the middle of a black screen.
+   2. The title shrinks to the top and the quote appears.
+   3. Scrolling on, the quote leaves and the two words glide into the stacked cover title, while the 3D scene and
+      the top and bottom bars fade in. The words are the cover title itself, moved by script. */
 .pre-veil { position: fixed; inset: 0; z-index: 1; background: var(--void); pointer-events: none; }   /* covers the 3D scene on the pre-cover; fades away on the way to the cover */
-.prelude { position: relative; z-index: 2; min-height: 100svh; display: grid; place-items: end center; box-sizing: border-box; padding: 120px 24px 24vh; scroll-snap-align: start; scroll-snap-stop: always; }
-.prelude .pre-line { margin: 0; max-width: 32ch; text-align: center; text-wrap: balance; font-size: clamp(20px, 1.6vw, 28px); font-weight: 300; line-height: 1.3; letter-spacing: -0.01em; color: var(--mist);
-  opacity: 0; transform: translateY(26px); filter: blur(8px); transition: opacity 1.4s cubic-bezier(.2,.7,.2,1) .2s, transform 1.6s cubic-bezier(.16,1,.3,1) .2s, filter 1.4s cubic-bezier(.2,.7,.2,1) .2s; }
-.prelude.on .pre-line { opacity: 1; transform: none; filter: blur(0); }
+.prelude { position: relative; z-index: 2; min-height: 100svh; display: grid; place-items: center; box-sizing: border-box; padding: 120px 24px; scroll-snap-align: start; scroll-snap-stop: always; }
+.prelude .pre-quote { margin: 0; max-width: 14ch; text-align: center; text-wrap: balance; font-size: clamp(52px, 6vw, 112px); font-weight: 200; line-height: 1; letter-spacing: -0.045em; color: var(--ink); opacity: 0; }
 .prelude .scroll-cue { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); }
-@media (prefers-reduced-motion: reduce) { .prelude .pre-line { opacity: 1; transform: none; filter: none; transition: none; } }
+#intro h1 > span { justify-self: start; transform-origin: 0 0; }   /* each word measures to its own width, so it can travel on its own */
 
 /* Cover type: two-line title, "Open" thin over a bolder "Curve", flush left */
 #intro h1 { display: grid; width: max-content; line-height: 0.84; letter-spacing: -0.02em; transform-origin: 0 0; transition: opacity 1.4s cubic-bezier(.2,.7,.2,1) .1s; }
@@ -376,8 +376,11 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
 
 <svg class="cur-svg" aria-hidden="true"><line class="ax hl"/><line class="ax vl"/><circle class="pt" r="2"/></svg>
 <div class="cur-ax" aria-hidden="true"></div><div class="cur-ay" aria-hidden="true"></div><div class="cur-xy" aria-hidden="true"></div>
-<section class="prelude" id="prelude" aria-label="Welcome">
-  <p class="pre-line">Some math only clicks once you <span class="ser">see</span> it.</p>
+<section class="prelude" id="prelude" aria-label="OpenCurve">
+  <a class="scroll-cue" href="#prelude2" aria-label="Scroll down"><span class="lbl">scroll</span><span class="hair" aria-hidden="true"></span></a>
+</section>
+<section class="prelude" id="prelude2">
+  <p class="pre-quote">Some Math Only Clicks Once You <span class="ser">See</span> It</p>
   <a class="scroll-cue" href="#intro" aria-label="Scroll down"><span class="lbl">scroll</span><span class="hair" aria-hidden="true"></span></a>
 </section>
 <main id="chapters">
@@ -1113,9 +1116,13 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
     return alpha;
   }
 
-  var prelude = document.getElementById('prelude'), preLine = prelude.querySelector('.pre-line'), preVeil = document.getElementById('preVeil'), huds = Array.prototype.slice.call(document.querySelectorAll('.hud'));
-  var titleNat = null, titleTravel = false;   /* where the title rests on the cover (page coordinates, no transform) */
-  function measureTitle() { var tr = coverIn.style.transform; coverIn.style.transform = ''; var r = coverIn.getBoundingClientRect(); titleNat = { left: r.left, top: r.top + window.scrollY, w: r.width, h: r.height }; coverIn.style.transform = tr; }
+  var prelude = document.getElementById('prelude'), preQuote = document.querySelector('.pre-quote'), preVeil = document.getElementById('preVeil'), huds = Array.prototype.slice.call(document.querySelectorAll('.hud'));
+  var words = null, wordEls = [], titleTravel = false, q2Top = 1, titleFs = 1;   /* where each title word rests on the cover (page coordinates, no transform) */
+  function measureTitle() {
+    wordEls = Array.prototype.slice.call(coverIn.children); titleFs = parseFloat(getComputedStyle(coverIn).fontSize) || 1;
+    words = wordEls.map(function (w) { var tr = w.style.transform; w.style.transform = ''; var r = w.getBoundingClientRect(); w.style.transform = tr; return { left: r.left, top: r.top + window.scrollY, w: r.width, h: r.height }; });
+    q2Top = document.getElementById('prelude2').getBoundingClientRect().top + window.scrollY || 1;
+  }
   var coverIn = document.querySelector('#intro h1')   /* only the title moves, so the scroll hint below keeps its place on the bottom line */, coverCue = document.querySelector('#intro .scroll-cue');
   measureTitle(); window.addEventListener('resize', measureTitle); if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureTitle);
   var redF = 0;   /* how red the spiral is: rises from the bottom on screen 05 (about 2.5 s), drains back from the top if you scroll back */
@@ -1186,20 +1193,28 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
        middle they move together and slowly blend from one to the other, so the hand-over can't be seen */
     var cx = reduce ? (scrollF > 0.05 ? 1 : 0) : ease(clamp01((morphF - 0.02) / 0.5));
     /* pre-cover: until you scroll down from it, only its words show; the scene and bars fade in on the way to the cover */
-    var preT = clamp01(window.scrollY / (main.offsetTop || 1)), sh = ease(clamp01((preT - 0.15) / 0.75));
+    var preT = clamp01(window.scrollY / (main.offsetTop || 1)), sh = ease(clamp01((preT - 0.6) / 0.38));   /* the scene stays hidden through both pre-cover screens */
     if (sh !== frame.sh) {
       frame.sh = sh; preVeil.style.opacity = String(Math.min(0.995, 1 - sh));   /* never fully opaque: a completely hidden canvas can stop being drawn in some browsers */ preVeil.style.display = sh >= 1 ? 'none' : '';
       huds.forEach(function (h) { h.style.opacity = sh < 1 ? sh.toFixed(3) : ''; h.style.visibility = sh < 0.02 ? 'hidden' : ''; });
-      var pe = ease(clamp01(preT / 0.6)); preLine.style.transition = pe > 0 ? 'none' : ''; preLine.style.opacity = pe > 0 ? String(1 - pe) : ''; preLine.style.transform = pe > 0 ? 'translateY(' + (-pe * 56).toFixed(1) + 'px)' : ''; preLine.style.filter = pe > 0.01 ? 'blur(' + (pe * 8).toFixed(2) + 'px)' : '';
     }
-    /* the title's trip: centered, smaller and gently floating on the pre-cover; glides and grows into its cover spot as you scroll down */
-    var mo = main.offsetTop || 1, sy = window.scrollY;
-    if (titleNat && sy < mo - 0.5) {
-      var vw = window.innerWidth, vh = window.innerHeight, k = easeIO(clamp01(sy / mo)), s0 = Math.min(0.62, vw * 0.7 / titleNat.w), sc = lerp(s0, 1, k), fl = reduce ? 0 : 1 - k;
-      var x0 = (vw - titleNat.w * s0) / 2 + Math.sin(t * 0.37) * 10 * fl, y0 = vh * 0.43 - titleNat.h * s0 / 2 + Math.sin(t * 0.6 + 1) * 7 * fl;
-      var dx = lerp(x0, titleNat.left, k) - titleNat.left, dy = lerp(y0, titleNat.top - mo, k) - (titleNat.top - sy);
-      coverIn.style.transform = 'translate(' + dx.toFixed(2) + 'px,' + dy.toFixed(2) + 'px) scale(' + sc.toFixed(4) + ')'; titleTravel = true;
-    } else if (titleTravel) { coverIn.style.transform = ''; titleTravel = false; frame.ce = -1; }
+    /* the pre-cover trip. u: first screen -> second (0..1), v: second screen -> cover (0..1) */
+    var mo = main.offsetTop || 1, sy = window.scrollY, pu = clamp01(sy / q2Top), pv = clamp01((sy - q2Top) / ((mo - q2Top) || 1));
+    var qin = ease(clamp01((pu - 0.45) / 0.5)), qout = ease(clamp01(pv / 0.55)), qo = qin * (1 - qout);   /* the quote: in on the second screen, out on the way to the cover */
+    if (qo !== frame.qo) { frame.qo = qo; preQuote.style.opacity = qo.toFixed(3); preQuote.style.transform = 'translateY(' + ((1 - qin) * 30 - qout * 56).toFixed(1) + 'px)'; preQuote.style.filter = qo < 0.99 ? 'blur(' + ((1 - qin) * 8 + qout * 8).toFixed(2) + 'px)' : ''; }
+    if (words && sy < mo - 0.5) {   /* the title words: side by side in the middle, then small at the top, then into the stacked cover title */
+      var vw = window.innerWidth, vh = window.innerHeight, gap = titleFs * 0.24, w0 = words[0], w1 = words[1], tot = w0.w + gap + w1.w;
+      var sA = Math.min(0.5, vw * 0.78 / tot), sB = Math.min(0.12, vw * 0.3 / tot), fl = reduce ? 0 : 1 - pu;
+      var side = function (sc, top, fx) { var x = (vw - tot * sc) / 2 + fx; return [{ x: x, y: top, s: sc }, { x: x + (w0.w + gap) * sc, y: top, s: sc }]; };
+      var A = side(sA, vh * 0.5 - w0.h * sA / 2 + Math.sin(t * 0.6 + 1) * 7 * fl, Math.sin(t * 0.37) * 10 * fl), B = side(sB, 58, 0);
+      var C = words.map(function (w) { return { x: w.left, y: w.top - mo, s: 1 }; });
+      var from = sy <= q2Top ? A : B, to = sy <= q2Top ? B : C, kk = easeIO(sy <= q2Top ? pu : pv);
+      wordEls.forEach(function (el, i) {
+        var x = lerp(from[i].x, to[i].x, kk), y = lerp(from[i].y, to[i].y, kk), sc = lerp(from[i].s, to[i].s, kk);
+        el.style.transform = 'translate(' + (x - words[i].left).toFixed(2) + 'px,' + (y - (words[i].top - sy)).toFixed(2) + 'px) scale(' + sc.toFixed(4) + ')';
+      });
+      titleTravel = true;
+    } else if (titleTravel) { wordEls.forEach(function (el) { el.style.transform = ''; }); titleTravel = false; frame.ce = -1; }
     var ce = ease(clamp01(scrollF / 0.55));   /* the cover title drifts up, fades and softens as you scroll away */
     if (ce !== frame.ce) {
       frame.ce = ce;
