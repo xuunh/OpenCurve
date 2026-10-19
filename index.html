@@ -209,13 +209,12 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
 .bold { font-weight: 600; letter-spacing: -0.05em; }
 .monoword { font-family: var(--hud); font-weight: 400; font-size: 0.78em; letter-spacing: -0.04em; text-transform: uppercase; }
 /* one word, a different typeface for every letter */
-.mix { white-space: nowrap; }
-.mix span { display: inline-block; }
-.mix .a { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-weight: 400; }
-.mix .b { font-family: var(--hud); font-size: 0.8em; text-transform: uppercase; }
-.mix .c { font-weight: 600; }
-.mix .d { font-family: "Instrument Serif", Georgia, serif; font-weight: 400; }
-.mix .e { font-weight: 300; color: transparent; -webkit-text-stroke: 1.5px var(--ink); text-shadow: none; }   /* outline letter */
+/* "shape": bold, with a hand-drawn curve that draws itself underneath when the screen arrives */
+.curvy { position: relative; display: inline-block; font-weight: 600; letter-spacing: -0.05em; white-space: nowrap; }
+.curvy svg { position: absolute; left: -0.04em; right: -0.04em; bottom: -0.2em; width: calc(100% + 0.08em); height: 0.32em; overflow: visible; pointer-events: none; }
+.curvy path { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; vector-effect: non-scaling-stroke; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset .4s ease; }
+.beat.on .curvy path { stroke-dashoffset: 0; transition: stroke-dashoffset 1.6s cubic-bezier(.65,0,.35,1) .7s; }
+@media (prefers-reduced-motion: reduce) { .curvy path { stroke-dashoffset: 0; transition: none; } }
 .beat .sub { max-width: 46ch; }
 @media (min-width: 721px) { .chapter.beat .sub { white-space: normal; max-width: 46ch; } }
 /* words only: bigger, set in the middle of the screen's height */
@@ -366,6 +365,10 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
   </section>
   <section class="chapter beat model" id="center">
     <div class="chapter-inner"><h2 class="sr-only">The knot, on its own.</h2></div>
+    <a class="scroll-cue" href="#unwind" aria-label="Scroll down"><span class="lbl">scroll</span><span class="hair" aria-hidden="true"></span></a>
+  </section>
+  <section class="chapter beat model" id="unwind">
+    <div class="chapter-inner"><h2 class="sr-only">The knot unwinds into a ring.</h2></div>
     <a class="scroll-cue" href="#plane" aria-label="Scroll down"><span class="lbl">scroll</span><span class="hair" aria-hidden="true"></span></a>
   </section>
   <section class="chapter beat model" id="plane">
@@ -375,7 +378,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
   <section class="chapter beat" id="idea">
     <div class="chapter-inner">
       <p class="beat-k">The idea</p>
-      <h2 aria-label="Every formula is a shape first.">Every formula is a <span class="mix" aria-hidden="true"><span class="a">s</span><span class="b">h</span><span class="c">a</span><span class="d">p</span><span class="e">e</span></span> first.</h2>
+      <h2>Every formula is a <span class="curvy">shape<svg viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true"><path pathLength="100" d="M2 12 C 18 2, 30 2, 44 10 S 72 20, 98 6"/></svg></span> first.</h2>
       <p class="sub">OpenCurve draws the shape, so you can see what the math is doing.</p>
       <a class="next skip" href="#pre-algebra"><span class="next-k">Skip intro</span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2v11M3 8.5 8 13.5 13 8.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     </div>
@@ -553,11 +556,12 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
      doesn't travel during them: the cover knot opens up and changes shape in place instead. */
   var BEATS = [
     { id: 'center', label: 'Torus knot (2, 3)' },
-    { id: 'plane', label: 'The knot, unwound and flattened into a plane' },
+    { id: 'unwind', label: 'The knot, unwinding into a ring' },
+    { id: 'plane', label: 'The ring, opened flat into a plane' },
     { id: 'idea', label: 'A plane, twisted' },
     { id: 'stages', label: '19 subjects on one sheet' },
     { id: 'look', label: 'A rolling wave  z = sin(x − t)' },
-    { id: 'project', label: 'OpenCurve' },
+    { id: 'project', label: 'The plane, drifting back to the middle' },
     { id: 'begin', label: 'The number line, wound into a spiral' }
   ];
   BEATS.forEach(function (b, i) { b.beat = i + 1; });
@@ -945,7 +949,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
      lines, so every change is a smooth morph, never a cut. That grid matches Pre-Algebra's model line for line, so the
      last step simply becomes it. */
   var PRE = forms[K + 1], PLS = PLACE[SUBJECTS[1].form], PLK = PLACE.knot;
-  var B_STAGES = 4, B_LOOK = 5;   /* which screens have the 19 dots, and the mouse tilt */
+  var B_STAGES = 5, B_LOOK = 6;   /* which screens have the 19 dots, and the mouse tilt */
   function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
   function easeIO(v) { return v < 0.5 ? 4 * v * v * v : 1 - Math.pow(-2 * v + 2, 3) / 2; }   /* slow start, slow finish */
   function lerp(a, b, w) { return a + (b - a) * w; }
@@ -967,6 +971,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
     knot: { knot: { a: 1, m: 2 } },
     ring: { knot: { a: 0, m: 1 } },
     plane: function (u, v, t, o) { return o.set((u - 0.5) * 30, 0, (v - 0.5) * 8); },
+    big: function (u, v, t, o) { return o.set((u - 0.5) * 64, 0.25 * Math.sin(u * 7 + t * 0.6) * Math.sin(v * 4), (v - 0.5) * 18); },   /* the plane, large and close, so we zoom into it */
     twist: function (u, v, t, o) { var th = (u - 0.5) * Math.PI * 1.4 + Math.sin(t * 0.35) * 0.6, w = (v - 0.5) * 7; return o.set((u - 0.5) * 26, w * Math.sin(th), w * Math.cos(th)); },
     arc: function (u, v, t, o) { return o.set((u - 0.5) * 24, 2.5 * Math.sin(u * Math.PI) + (u - 0.5) * 4 + 0.4 * Math.sin(u * 9 - t), -(u - 0.5) * 14 + (v - 0.5) * 5); },
     wave: function (u, v, t, o) { var x = (u - 0.5) * 28, z = (v - 0.5) * 9; return o.set(x, 2.2 * Math.sin(0.45 * x - 1.2 * t) * (0.6 + 0.4 * Math.cos(0.5 * z + 0.5 * t)), z); },
@@ -979,18 +984,20 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
     { s: SHAPE.knot, pos: [PLK[0], PLK[1], PLK[2]], rot: [PLK[3], PLK[4], PLK[5]], col: W, alpha: 1 },
     /* 1 · model only: the knot glides to the middle; every word has faded away */
     { s: SHAPE.knot, pos: [2.8, 4.6, -5], rot: [0.5, 0.3, 0.12], col: W, alpha: 1 },
-    /* 2 · model only: it relaxes into a ring, then flattens into a flat grid */
-    { s: SHAPE.plane, via: SHAPE.ring, pos: [6, 3.4, -6], rot: [0.5, -0.35, 0.04], col: W, alpha: 1 },
-    /* 3 · the grid twists */
+    /* 2 · model only: the knot slowly unwinds into a plain ring, a little at a time along its length */
+    { s: SHAPE.ring, stagger: true, pos: [3, 4.6, -4], rot: [1.15, 0.2, 0], col: W, alpha: 1 },
+    /* 3 · model only: the ring opens at one point and unrolls into a big flat plane right in front of us */
+    { s: SHAPE.big, stagger: true, pos: [3, 0.2, 4], rot: [0.1, -0.15, 0], col: W, alpha: 1 },
+    /* 4 · the plane settles into the usual right-hand spot and twists */
     { s: SHAPE.twist, pos: RIGHT, rot: [0.25, -0.35, 0.08], col: W, alpha: 1 },
-    /* 4 · a curved sheet with the 19 subjects on it */
-    { s: SHAPE.arc, pos: [15, 3.4, -8], rot: [0.2, -0.3, 0], col: W, alpha: 1 },
-    /* 5 · a rolling wave (tilts with the mouse) */
+    /* 5 · a curved sheet with the 19 subjects on it */
+    { s: SHAPE.arc, pos: [18, 4.2, -10], rot: [0.2, -0.3, 0], col: W, alpha: 1 },
+    /* 6 · a rolling wave (tilts with the mouse) */
     { s: SHAPE.wave, pos: RIGHT, rot: [0.35, -0.3, 0], col: W, alpha: 1 },
-    /* 6 · words only: the wave sinks back and fades */
-    { s: SHAPE.wave, pos: [RIGHT[0], RIGHT[1], -46], rot: [0.35, -0.3, 0], col: W, alpha: 0 },
-    /* 7 · Pre-Algebra's spiral, in Pre-Algebra's spot */
-    { s: SHAPE.spiral, pos: [PLS[0], PLS[1], PLS[2]], rot: [PLS[3], PLS[4], PLS[5]], col: SUBJECTS[1].css, alpha: 1 }
+    /* 7 · words only: the wave flattens back into the plane and drifts, faint, to the middle */
+    { s: SHAPE.plane, pos: [4, 3.2, -26], rot: [0.55, -0.1, 0], col: W, alpha: 0.3 },
+    /* 8 · from the middle, the plane winds into Pre-Algebra's spiral */
+    { s: SHAPE.spiral, pos: [7, PLS[1], PLS[2]], rot: [PLS[3], PLS[4], PLS[5]], col: SUBJECTS[1].css, alpha: 1 }
   ];
   KEYS.push(Object.assign({}, KEYS[K], { pos: [PLS[0], PLS[1], PLS[2] - GAP] }));   /* rides along as the camera travels to Pre-Algebra */
   KEYS.forEach(function (k) { k.c = new THREE.Color(k.col); });
@@ -1000,22 +1007,22 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
   sGeo.setAttribute('position', new THREE.BufferAttribute(sArr, 3)); sGeo.setAttribute('color', new THREE.BufferAttribute(sCol, 3));
   var sMat = new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
   var surf = new THREE.LineSegments(sGeo, sMat); surf.frustumCulled = false; surf.visible = false; scene.add(surf);
-  var bA = new THREE.Vector3(), bB = new THREE.Vector3(), mix = { A: null, B: null, w: 0, t: 0, L: null, mode: 0 };
+  var bA = new THREE.Vector3(), bB = new THREE.Vector3(), mix = { A: null, B: null, w: 0, t: 0, stag: false }, mixL = { a: 0, m: 0 };
+  /* staggered timing: on the unwinding steps, each part of the shape moves a little after the part before it, starting
+     where the ends meet, so it unwinds and unrolls like something real instead of all at once */
+  function stagW(w, u) { if (!mix.stag) return w; var d = 0.5 - 0.5 * Math.cos(u * Math.PI * 2); return easeIO(clamp01(w * 1.6 - d * 0.6)); }
   function blendAt(u, v, o) {   /* the in-between shape at this scroll position */
-    if (mix.L) return knotAt(mix.L, u, v, o);
-    shapeAt(mix.A, u, v, mix.t, bA); shapeAt(mix.B, u, v, mix.t, bB); return o.copy(bA).lerp(bB, mix.w);
+    var w = stagW(mix.w, u);
+    if (mix.A.knot && mix.B.knot) { mixL.a = lerp(mix.A.knot.a, mix.B.knot.a, w); mixL.m = lerp(mix.A.knot.m, mix.B.knot.m, w); return knotAt(mixL, u, v, o); }   /* knot to ring: ease its numbers, so it unwinds instead of tearing */
+    shapeAt(mix.A, u, v, mix.t, bA); shapeAt(mix.B, u, v, mix.t, bB); return o.copy(bA).lerp(bB, w);
   }
   var gP = []; for (var gi = 0; gi < (SU + 1) * (NV + 1); gi++) gP.push(new THREE.Vector3());
   var cP = new THREE.Vector3(), cQ = new THREE.Vector3(), deepC = new THREE.Color(), coreC = new THREE.Color(), tmpC = new THREE.Color();
-  function drawSurface(p, t) {
+  function drawSurface(p, t, cam) {
     var k0 = Math.min(KEYS.length - 2, Math.floor(p)), w = ease(Math.min(1, p - k0)), A = KEYS[k0], B = KEYS[k0 + 1];
     var alpha = lerp(A.alpha, B.alpha, w);
     if (alpha < 0.004) return 0;
-    mix.t = t; mix.L = null;
-    var from = A.s, to = B.s, ww = w;
-    if (B.via) { if (w < 0.5) { to = B.via; ww = ease(w * 2); } else { from = B.via; ww = ease((w - 0.5) * 2); } }   /* two steps: knot -> ring -> flat grid */
-    if (from.knot && to.knot) mix.L = { a: lerp(from.knot.a, to.knot.a, ww), m: lerp(from.knot.m, to.knot.m, ww) };   /* knot to ring: ease its numbers, so it unwinds instead of tearing */
-    mix.A = from; mix.B = to; mix.w = ww;
+    mix.t = t; mix.A = A.s; mix.B = B.s; mix.stag = !!B.stagger; mix.w = B.stagger ? Math.min(1, p - k0) : w;
     var i, j, k = 0, minY = Infinity, maxY = -Infinity;
     for (j = 0; j <= NV; j++) for (i = 0; i <= SU; i++) { var P = gP[j * (SU + 1) + i]; blendAt(i / SU, j / NV, P); if (P.y < minY) minY = P.y; if (P.y > maxY) maxY = P.y; }
     coreC.copy(A.c).lerp(B.c, w); deepC.copy(coreC).multiplyScalar(0.16);
@@ -1024,8 +1031,9 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
     for (j = 0; j <= NV; j++) for (i = 0; i < SU; i++) seg(gP[j * (SU + 1) + i], gP[j * (SU + 1) + i + 1]);
     for (i = 0; i < NU; i++) { blendAt(i / NU, 0, cP); for (j = 1; j <= SV; j++) { blendAt(i / NU, j / SV, cQ); seg(cP, cQ); cP.copy(cQ); } }
     sGeo.attributes.position.needsUpdate = sGeo.attributes.color.needsUpdate = true;
-    var wp = k0 === KEYS.length - 2 ? Math.min(1, p - k0) : w;   /* the hand-off rides with the camera, which moves at an even pace */
-    surf.position.set(lerp(A.pos[0], B.pos[0], wp), lerp(A.pos[1], B.pos[1], wp), lerp(A.pos[2], B.pos[2], wp));
+    var PA = A.pos, PB = B.pos, wp = w;
+    if (cam > K) { PA = KEYS[K].pos; PB = KEYS[K + 1].pos; wp = clamp01(cam - K); }   /* the hand-off rides with the camera (and drifts into Pre-Algebra's spot), at the camera's even pace */
+    surf.position.set(lerp(PA[0], PB[0], wp), lerp(PA[1], PB[1], wp), lerp(PA[2], PB[2], wp));
     var tilt = Math.max(0, 1 - Math.abs(p - B_LOOK) * 1.5), mid = Math.max(0, 1 - Math.abs(p - 1) * 1.4);
     surf.rotation.set(lerp(A.rot[0], B.rot[0], w) + my * 0.3 * tilt,
       lerp(A.rot[1], B.rot[1], w) + (reduce ? 0 : Math.sin(t * 0.25) * 0.12 + Math.sin(t * 0.3) * 0.5 * mid) + mx * 0.6 * tilt,   /* same gentle sway as every model; the centered knot turns a little more */
@@ -1042,7 +1050,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
   dGeo2.setAttribute('position', new THREE.BufferAttribute(dP, 3)); dGeo2.setAttribute('color', new THREE.BufferAttribute(dC, 3));
   var dotMat = new THREE.PointsMaterial({ size: 1.8, map: dotTex, vertexColors: true, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
   var dots = new THREE.Points(dGeo2, dotMat); dots.frustumCulled = false; surf.add(dots);
-  var reveal = 0, lastMs = 0;
+  var reveal = 0, lastMs = 0, morphF = 0;
   function drawDots(p, t, alpha) {
     var w2 = Math.max(0, 1 - Math.abs(p - B_STAGES) * 1.6) * alpha;
     dotMat.opacity = w2; dots.visible = w2 > 0.01;
@@ -1127,9 +1135,11 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
     surf.visible = false;
     var w2n = Math.max(0, 1 - Math.abs(scrollF - B_STAGES) * 1.6);
     if (reduce) reveal = 1; else if (w2n > 0.45) reveal = Math.min(1, reveal + dt / 1.8); else if (w2n < 0.15) reveal = 0;
+    /* the intro surface follows the scroll more slowly than the camera, so its changes unfold gently */
+    morphF += (scrollF - morphF) * (reduce ? 1 : 1 - Math.exp(-dt * 1.4));
     var sOp = 0.8 * clamp01((scrollF - 0.02) / 0.12) * (1 - clamp01((scrollF - K - 0.72) / 0.28));
     if (sOp > 0.002 && scrollF < K + 1) {
-      var pp = Math.min(K + 1, scrollF), al = drawSurface(pp, t);
+      var pp = Math.min(K + 1, morphF), al = drawSurface(pp, t, scrollF);
       sMat.opacity = sOp * al; surf.visible = sMat.opacity > 0.002;
       if (surf.visible) drawDots(pp, t, al); else dots.visible = false;
     }
