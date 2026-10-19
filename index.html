@@ -216,13 +216,6 @@ a, img, svg { -webkit-user-drag: none; }
 .beat h2 { font-size: clamp(44px, 4.9vw, 92px); font-weight: 200; line-height: 1; letter-spacing: -0.045em; max-width: 12ch; }
 /* the one accent word per heading: Instrument Serif italic, a touch larger so it sits level with the thin sans */
 .ser { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-weight: 400; font-size: 1.08em; letter-spacing: -0.015em; line-height: 0; }
-/* "shape" also gets a hand-drawn blue curve that draws itself underneath when the screen arrives */
-.curvy { position: relative; display: inline-block; white-space: nowrap; line-height: 1; }
-.curvy svg { position: absolute; z-index: 1; left: -0.04em; right: -0.04em; bottom: -0.2em; width: calc(100% + 0.08em); height: 0.32em; overflow: visible; pointer-events: none;
-  clip-path: inset(-60% 110% -60% -10%); transition: clip-path .4s ease; }   /* two quick swooshes, revealed left to right like a pen stroke */
-.beat.on .curvy svg { clip-path: inset(-60% -10% -60% -10%); transition: clip-path 1.6s cubic-bezier(.65,0,.35,1) .8s; }
-.curvy path { fill: none; stroke: var(--blue); stroke-width: 2.4; stroke-linecap: round; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 6px rgba(76,130,255,0.65)); }
-@media (prefers-reduced-motion: reduce) { .curvy svg, .beat.on .curvy svg { clip-path: none; transition: none; } }
 .beat .sub { margin-top: 28px; max-width: 40ch; }
 @media (min-width: 721px) { .chapter.beat .sub { white-space: normal; max-width: 40ch; } }
 .beat .beat-list { margin-top: 30px; }
@@ -396,7 +389,7 @@ a, img, svg { -webkit-user-drag: none; }
   <section class="chapter beat" id="idea">
     <div class="chapter-inner">
       <p class="beat-k"><b>01</b><span>The idea</span></p>
-      <h2>Every formula is a <span class="ser curvy">shape<svg viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true"><path d="M1 13 C 9 5, 26 3, 38 10"/><path d="M75 18 C 85 17, 93 13, 99 7"/></svg></span> first.</h2>
+      <h2>Every formula is a <span class="ser">shape</span> first.</h2>
       <p class="sub">OpenCurve draws the shape, so you can see what the math is doing.</p>
       <a class="next skip" href="#pre-algebra"><span class="next-k">Skip intro</span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2v11M3 8.5 8 13.5 13 8.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     </div>
@@ -1093,6 +1086,7 @@ a, img, svg { -webkit-user-drag: none; }
     return alpha;
   }
 
+  var coverIn = document.querySelector('#intro .chapter-inner'), coverCue = document.querySelector('#intro .scroll-cue');
   var redF = 0, redAt = -1;   /* arriving at Pre-Algebra: its red rises slowly up the spiral from the bottom (about 2.5 s), however fast you scroll */
   var lastMs = 0, morphF = 0, HANDOFF = K + 0.995;   /* the scroll point where the intro spiral hands over to Pre-Algebra's model */
 
@@ -1157,15 +1151,25 @@ a, img, svg { -webkit-user-drag: none; }
     redF = redAt < 0 ? 0 : reduce ? 1 : clamp01((t - redAt) / 2.6);
     /* the white-to-red intro spiral stays up until it has arrived AND finished turning red; then Pre-Algebra's own (identical) model takes over */
     var swapped = scrollF >= HANDOFF && (redF >= 1 || scrollF > K + 1.3);
+    /* cover -> intro: the cover knot and the intro's knot are the same shape in the same spot. As the knot starts gliding to the
+       middle they move together and slowly blend from one to the other, so the hand-over can't be seen */
+    var cx = reduce ? (scrollF > 0.05 ? 1 : 0) : ease(clamp01((morphF - 0.02) / 0.5));
+    var ce = ease(clamp01(scrollF / 0.55));   /* the cover title drifts up, fades and softens as you scroll away */
+    if (ce !== frame.ce) {
+      frame.ce = ce;
+      coverIn.style.opacity = ce > 0 ? String(1 - ce) : ''; coverIn.style.transform = ce > 0 ? 'translateY(' + (-ce * 56).toFixed(1) + 'px)' : ''; coverIn.style.filter = ce > 0.01 ? 'blur(' + (ce * 8).toFixed(2) + 'px)' : '';
+      coverCue.style.opacity = ce > 0 ? String(0.45 * (1 - ce)) : '';
+    }
     forms.forEach(function (m, i) {
       if (!m) return;
-      var near = i === 0 ? scrollF * 4 :   /* the cover knot hands over to the intro surface (the same knot, same spot) as soon as you scroll */
+      var near = i === 0 ? 0 :   /* the cover knot: blended into the intro knot below */
         i === K + 1 && !swapped ? 9 : Math.abs(u - STATIONS[i].t);   /* Pre-Algebra's model takes over only once the camera has arrived; until then the intro spiral (identical to it) is shown */
       m.visible = near < 0.8;
       if (!m.visible) return;
       m.rotation.y = m.userData.ry + (reduce ? 0 : Math.sin(t * 0.25) * 0.12); /* gentle sway, not a full spin, so each model keeps the angle it was framed at */
       var fade = Math.min(1, Math.max(0, (near - 0.3) / 0.5));
       m.material.opacity = 0.8 * (1 - fade * fade * (3 - 2 * fade));
+      if (i === 0) { m.visible = cx < 0.999; m.material.opacity = 0.8 * (1 - cx); }
     });
 
     /* intro models: each draws itself in, moves while you're on its screen, and erases as you leave */
@@ -1173,11 +1177,12 @@ a, img, svg { -webkit-user-drag: none; }
     /* the intro surface follows the scroll more slowly than the camera, so its changes unfold gently */
     /* (once the camera starts traveling to Pre-Algebra it catches up, so the spiral is finished by the time we arrive) */
     morphF += (scrollF - morphF) * (reduce ? 1 : 1 - Math.exp(-dt * (scrollF > K ? 5 : 1.05)));
-    var sOp = 0.8 * clamp01((scrollF - 0.02) / 0.12);
+    var sOp = 0.8 * cx, cov = forms[0];
     if (sOp > 0.002 && !swapped) {
       var pp = scrollF > K ? Math.min(K, morphF) : Math.min(K + 1, morphF), al = drawSurface(pp, t, scrollF);
       sMat.opacity = sOp * al; surf.visible = sMat.opacity > 0.002;
-    }
+      if (cov.visible) { cov.position.copy(surf.position); cov.rotation.copy(surf.rotation); }   /* the cover knot rides along while it fades */
+    } else if (cov.visible) { cov.position.set(PLK[0], PLK[1], PLK[2]); cov.rotation.set(PLK[3], cov.rotation.y, PLK[5]); }   /* back on the cover: exactly where it always sits */
 
     pickerBar.style.transform = 'scaleX(' + Math.min(1, Math.max(0, (scrollF > SL - 1 ? 1 : scrollF - K) / LAST)).toFixed(4) + ')';
     var cc = Math.round(scrollF), cur = info(cc), key = cur.beat ? 'b' + cur.beat.beat : cur.n;
