@@ -206,14 +206,16 @@ html.on-cover .tagline { opacity: 1; transform: none; }
 .tagline, .mark, .hud-gh { line-height: 1; align-self: center; }
 
 /* Cover type: two-line title with the second line stepped in, then a short lead and a quiet mono meta line */
-#intro h1 { display: grid; line-height: 0.84; letter-spacing: -0.06em; }
-#intro h1 .l2 { padding-left: 0.62em; }
+#intro h1 { display: grid; line-height: 0.84; letter-spacing: -0.02em; } /* cover title: "Open" thin, "Curve" bolder, stacked flush left */
+#intro h1 .l1 { font-weight: 200; }
+#intro h1 .l2 { font-weight: 400; letter-spacing: -0.01em; }
+#intro h1 .l2 { padding-left: 0; }
 #intro .chapter-inner { gap: 36px; }
 #intro .intro-copy { display: grid; gap: 14px; }
 #intro .sub { font-size: clamp(17px, 1.5vw, 20px); line-height: 1.4; color: #D3D7E0; max-width: 40ch; letter-spacing: -0.01em; }
 #intro .meta { margin: 0; display: flex; flex-wrap: wrap; gap: 6px 0; font-family: var(--hud); font-size: 11px; letter-spacing: 0.04em; color: var(--mist); }
 #intro .meta span + span::before { content: '\00b7'; margin: 0 10px; opacity: 0.6; }
-@media (max-width: 720px) { #intro h1 .l2 { padding-left: 0.4em; } #intro .scroll-cue { display: none; } }
+@media (max-width: 720px) { #intro h1 .l2 { padding-left: 0; } #intro .scroll-cue { display: none; } }
 @media (hover: none) { #intro .meta .m-hover { display: none; } }
 
 /* Top center: a minimal index bar — number, subject name, a two-line menu icon, and a hairline showing how far through the subjects you are */
