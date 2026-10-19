@@ -58,7 +58,7 @@ a:focus-visible, button:focus-visible { color: var(--accent); }
 .menu ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(10, auto); grid-auto-flow: column; column-gap: 48px; align-content: start; }
 @media (max-width: 900px) { .menu ol { grid-template-columns: 1fr; grid-template-rows: none; grid-auto-flow: row; } }
 .menu li button { --c: var(--ink); width: 100%; display: grid; grid-template-columns: 28px 1fr auto; align-items: baseline; gap: 4px 12px; text-align: left; background: none; border: 0; padding: 12px 0; color: var(--ink); font-family: var(--display); font-weight: 200; font-size: clamp(24px, 2.6vw, 34px); line-height: 1.05; letter-spacing: -0.035em; cursor: pointer; transition: color .3s, transform .4s cubic-bezier(.6,0,.2,1); }
-.menu li button .n { font-family: var(--hud); font-size: 10px; letter-spacing: 0.06em; color: var(--mist); transition: color .3s; }
+.menu li button .n { font-family: var(--hud); font-size: 10px; letter-spacing: 0.06em; color: var(--mist); font-variant-numeric: tabular-nums; transition: color .3s; }
 .menu li button .tbd { font-family: var(--hud); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--mist); }
 .menu li button .d { display: none; }   /* the hovered subject's description shows in the footer instead, so nothing in the list moves */
 .menu li button:hover, .menu li button:focus-visible { color: var(--c); transform: translateX(6px); }
@@ -175,6 +175,15 @@ html.cur-off .cur-svg, html.cur-off .cur-ax, html.cur-off .cur-ay, html.cur-off 
 .cta, .menu-head, .menu-close, .menu aside h3, .scroll-cue .lbl, .menu-foot { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; }
 .cta, .menu-close { margin-right: -0.18em; }
 .menu li button .tbd { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; }
+/* Type audit fixes:
+   - Geist Mono is loaded in one weight (400), so every mono label declares 400 instead of asking for lighter weights that don't exist
+   - the 13px subject name in "Next up" gets its own tracking instead of inheriting the 11px label's (it was 0.034em by accident)
+   - a centered heading skips the left-edge optical nudge, which only makes sense for left-aligned headings */
+.hud, .next, .count, .picker, .eq, .cta, .menu-head, .menu-close, .menu-foot, .menu li button .n, .menu li button .tbd, .menu aside .handle,
+.scroll-cue .lbl, .beat .beat-k, .beat-list, .beat .meta-line, .cur-ax, .cur-ay, .cur-xy, .loader-side, .loader-plot .fx { font-weight: 400; }
+.next-n { letter-spacing: 0.02em; }
+.beat .beat-k, .beat-list, .beat .meta-line, .menu-foot, .menu-head { line-height: 1.4; }   /* every one-line mono label shares one line height */
+.beat.words.mid h2 { margin-left: 0; }
 .scroll-cue .lbl { text-transform: lowercase; margin-right: -0.18em; }
 .menu-foot { letter-spacing: 0.04em; text-transform: none; font-size: 11px; }
 .cur-ax, .cur-ay, .cur-xy { font-size: 10px; letter-spacing: 0.04em; }
@@ -269,16 +278,16 @@ a, img, svg { -webkit-user-drag: none; }
 
 <div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="All subjects" hidden>
   <div class="menu-inner">
-    <div class="menu-head"><span>Index · 19 subjects</span><button type="button" class="menu-close" id="menuClose">Close</button></div>
+    <div class="menu-head"><span>Index</span><button type="button" class="menu-close" id="menuClose">Close</button></div>
     <div class="menu-body">
       <nav aria-label="Subjects"><ol id="menuList"></ol></nav>
       <aside aria-label="Credits">
-        <div><h3>Made by</h3><p class="who">Junayed Haider</p><p class="handle">@xuunh</p><p>Bachelor of Engineering in Biomedical Engineering, The City College of New York</p></div>
+        <div><h3>Made by</h3><p class="who">Junayed Haider</p><p class="handle">@xuunh</p><p>Bachelor of Engineering in Biomedical Engineering, The City College of New&nbsp;York</p></div>
         <div><h3>Links</h3><ul>
           <li><a href="https://github.com/xuunh/OpenCurve" target="_blank" rel="noopener">GitHub repository</a></li>
           <li><a href="https://github.com/xuunh" target="_blank" rel="noopener">@xuunh on GitHub</a></li>
         </ul></div>
-        <div><h3>Credits</h3><p>3D rendering by Three.js. Type set in Geist and Geist Mono by Vercel.</p></div>
+        <div><h3>Credits</h3><p>3D rendering by Three.js. Type set in Geist and Geist Mono by Vercel, with Instrument Serif by Instrument.</p></div>
         <div><h3>Open source</h3><p>Free to use. Found a mistake or want a topic? Open an issue on GitHub.</p></div>
       </aside>
     </div>
@@ -416,7 +425,7 @@ a, img, svg { -webkit-user-drag: none; }
   </section>
   <section class="chapter beat words mid" id="project">
     <div class="chapter-inner">
-      <p class="beat-k"><b>04</b><span>Who it's for</span></p>
+      <p class="beat-k"><b>04</b><span>Who it’s for</span></p>
       <h2>Made for anyone who struggles to <span class="ser">picture</span> math.</h2>
       <p class="sub">Not a textbook. A place to see the ideas first, then study them anywhere.</p>
       <p class="meta-line"><span>Open source</span><span>Free to use</span><span>Made by Junayed Haider</span></p>
@@ -543,7 +552,7 @@ a, img, svg { -webkit-user-drag: none; }
       var a = document.createElement('a'); a.className = 'cta'; a.href = '#' + s.id; a.textContent = 'View topics';
       row.appendChild(a);
     } else {
-      var sn = document.createElement('span'); sn.className = 'cta soon'; sn.textContent = 'Soon...';
+      var sn = document.createElement('span'); sn.className = 'cta soon'; sn.textContent = 'Soon';
       row.appendChild(sn);
     }
     inner.appendChild(h); inner.appendChild(row);
@@ -573,7 +582,7 @@ a, img, svg { -webkit-user-drag: none; }
     { id: 'idea', label: 'The sheet, twisted' },
     { id: 'open', label: 'A folded sheet, opening' },
     { id: 'look', label: 'A rolling wave  z = sin(x − t)' },
-    { id: 'project', label: 'A long wave  y = sin(x − t)' },
+    { id: 'project', label: 'A long, slow wave' },
     { id: 'coil', label: 'The sheet, starting to coil' },
     { id: 'begin', label: 'The number line, wound into a spiral' }
   ];
@@ -958,7 +967,7 @@ a, img, svg { -webkit-user-drag: none; }
   /* ---------- Intro surface ----------
      After the cover, the cover's own knot carries the intro. It glides to the middle of the screen, relaxes into a
      ring and flattens into a flat grid, then keeps reshaping in the usual right-hand spot (a twist, a curved sheet with
-     the 19 subjects on it, a rolling wave) and finally winds into Pre-Algebra's spiral. It is always the same grid of
+     an accordion fold, a rolling wave) and finally winds into Pre-Algebra's spiral. It is always the same grid of
      lines, so every change is a smooth morph, never a cut. That grid matches Pre-Algebra's model line for line, so the
      last step simply becomes it. */
   var PRE = forms[K + 1], PLS = PLACE[SUBJECTS[1].form], PLK = PLACE.knot;
@@ -1000,8 +1009,8 @@ a, img, svg { -webkit-user-drag: none; }
     sheet: Sh(rollAt, { phi: 0 }),
     twist: Sh(function (p, u, v, t, o) { var th = (u - 0.5) * Math.PI * 1.4 + Math.sin(t * 0.35) * 0.6, w = -(v - 0.5) * 7; return o.set((u - 0.5) * 26, w * Math.sin(th), w * Math.cos(th)); }),
     fold: Sh(function (p, u, v, t, o) {   /* the sheet folded like an accordion (six panels), slowly opening flat and folding back */
-      var n = 6, w = 4.4, a = 0.1 + 0.55 * (0.5 - 0.5 * Math.cos(t * 0.45)), q = u * n, k = Math.min(n - 1, Math.floor(q)), f = q - k;
-      return o.set((q - n / 2) * w * Math.cos(a), w * Math.sin(a) * (k % 2 ? 1 - f : f) - 1.4, -(v - 0.5) * 8);
+      var n = 6, w = 6, a = 0.1 + 0.55 * (0.5 - 0.5 * Math.cos(t * 0.45)), q = u * n, k = Math.min(n - 1, Math.floor(q)), f = q - k;
+      return o.set((q - n / 2) * w * Math.cos(a), w * Math.sin(a) * (k % 2 ? 1 - f : f) - 2, -(v - 0.5) * 11);
     }),
     band: Sh(function (p, u, v, t, o) {   /* a long, slow wave across the full width of the screen: a few gentle waves layered at different speeds, with a soft twist across its width, so it drifts like cloth instead of sliding */
       var x = (u - 0.5) * 56, c = v - 0.5, wd = 3.4 * (1 + 0.2 * Math.sin(0.09 * x + 0.22 * t));
@@ -1030,7 +1039,7 @@ a, img, svg { -webkit-user-drag: none; }
     /* 7 · the sheet slides to the usual right-hand spot and twists */
     { s: SHAPE.twist, pos: RIGHT, rot: [0.25, -0.35, 0.08], col: W, alpha: 1 },
     /* 8 · the sheet folds up like an accordion and slowly opens out again, like a topic being opened */
-    { s: SHAPE.fold, pos: [15, 5, -9], rot: [0.32, -0.45, 0], col: W, alpha: 1 },
+    { s: SHAPE.fold, pos: [18, 5.6, -8], rot: [0.32, -0.45, 0], col: W, alpha: 1 },
     /* 9 · a rolling wave (tilts with the mouse) */
     { s: SHAPE.wave, pos: RIGHT, rot: [0.35, -0.3, 0], col: W, alpha: 1 },
     /* 10 · words centered: the wave stretches into a long band that flows across the whole screen beneath them */
@@ -1087,7 +1096,7 @@ a, img, svg { -webkit-user-drag: none; }
   }
 
   var coverIn = document.querySelector('#intro .chapter-inner'), coverCue = document.querySelector('#intro .scroll-cue');
-  var redF = 0, redAt = -1;   /* arriving at Pre-Algebra: its red rises slowly up the spiral from the bottom (about 2.5 s), however fast you scroll */
+  var redF = 0, redAt = -1;   /* on screen 05, Pre-Algebra's red rises slowly up the spiral from the bottom (about 2.5 s) */
   var lastMs = 0, morphF = 0, HANDOFF = K + 0.995;   /* the scroll point where the intro spiral hands over to Pre-Algebra's model */
 
   var D = small ? 600 : 1400, dpos = new Float32Array(D * 3);
@@ -1147,7 +1156,7 @@ a, img, svg { -webkit-user-drag: none; }
     camera.position.set((small ? 4 : -2) + mx * 2.2 + sway, 2.6 - my * 1.2, zc + (small ? 38 : 22));
     camera.lookAt(small ? 6 : 3, 4.5, zc - 2);
 
-    if (scrollF > K + 0.1) { if (redAt < 0) redAt = t; } else if (scrollF < K + 0.05) redAt = -1;
+    if (scrollF > K - 0.12) { if (redAt < 0) redAt = t; } else if (scrollF < K - 0.5) redAt = -1;   /* screen 05: the spiral turns red, bottom to top */
     redF = redAt < 0 ? 0 : reduce ? 1 : clamp01((t - redAt) / 2.6);
     /* the white-to-red intro spiral stays up until it has arrived AND finished turning red; then Pre-Algebra's own (identical) model takes over */
     var swapped = scrollF >= HANDOFF && (redF >= 1 || scrollF > K + 1.3);
