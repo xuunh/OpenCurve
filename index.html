@@ -1039,13 +1039,13 @@ a, img, svg { -webkit-user-drag: none; }
     { s: SHAPE.wave, pos: RIGHT, rot: [0.35, -0.3, 0], col: W, alpha: 1 },
     /* 10 · words centered: the wave stretches into a long band that flows across the whole screen beneath them */
     { s: SHAPE.band, pos: BAND, rot: [0.18, 0, 0], col: W, alpha: 0.85 },
-    /* 11 · model only: from the middle, the strip slowly starts to coil */
-    { s: SHAPE.coil, pos: [5, 6.6, -12], rot: [lerp(0.5, PLS[3], 0.6), lerp(-0.1, PLS[4], 0.6), lerp(0, PLS[5], 0.6)], col: SUBJECTS[1].css, pre: true, alpha: 0.9 },
-    /* 12 · and finishes as Pre-Algebra's spiral, in its own spot */
-    { s: SHAPE.spiral, pos: [7, PLS[1], PLS[2]], rot: [PLS[3], PLS[4], PLS[5]], col: SUBJECTS[1].css, pre: true, alpha: 1 }
+    /* 11 · model only: from the middle, the strip slowly starts to coil (white) */
+    { s: SHAPE.coil, pos: [5, 6.6, -12], rot: [lerp(0.5, PLS[3], 0.6), lerp(-0.1, PLS[4], 0.6), lerp(0, PLS[5], 0.6)], col: W, alpha: 0.9 },
+    /* 12 · and finishes as Pre-Algebra's spiral, still white; it turns red only once we arrive at Pre-Algebra */
+    { s: SHAPE.spiral, pos: [7, PLS[1], PLS[2]], rot: [PLS[3], PLS[4], PLS[5]], col: W, alpha: 1 }
   ];
   KEYS.push(Object.assign({}, KEYS[K], { pos: [PLS[0], PLS[1], PLS[2] - GAP] }));   /* rides along as the camera travels to Pre-Algebra */
-  KEYS.forEach(function (k) { k.c = new THREE.Color(k.col); k.d = (k.pre ? SUBJECTS[1].deep : SUBJECTS[0].deep).clone(); });
+  KEYS.forEach(function (k) { k.c = new THREE.Color(k.col); k.d = SUBJECTS[0].deep.clone(); });   /* every intro step is white; color starts at Pre-Algebra */
 
   var SU = 320, SV = 40, NU = 60, NV = 10;   /* the same grid as Pre-Algebra's model */
   var segs = (NV + 1) * SU + NU * SV, sArr = new Float32Array(segs * 6), sCol = new Float32Array(segs * 6), sGeo = new THREE.BufferGeometry();
@@ -1149,10 +1149,15 @@ a, img, svg { -webkit-user-drag: none; }
       var near = i === 0 ? scrollF * 4 :   /* the cover knot hands over to the intro surface (the same knot, same spot) as soon as you scroll */
         i === K + 1 && scrollF < HANDOFF ? 9 : Math.abs(u - STATIONS[i].t);   /* Pre-Algebra's model takes over only once the camera has arrived; until then the intro spiral (identical to it) is shown */
       m.visible = near < 0.8;
+      if (i === K + 1) { if (m.visible && !PRE.userData.on) PRE.userData.popAt = t; PRE.userData.on = m.visible; }   /* note when Pre-Algebra's red model takes over from the white intro spiral */
       if (!m.visible) return;
       m.rotation.y = m.userData.ry + (reduce ? 0 : Math.sin(t * 0.25) * 0.12); /* gentle sway, not a full spin, so each model keeps the angle it was framed at */
       var fade = Math.min(1, Math.max(0, (near - 0.3) / 0.5));
       m.material.opacity = 0.8 * (1 - fade * fade * (3 - 2 * fade));
+      if (i === K + 1) {   /* the pop: as the white spiral turns red, it flashes a little brighter and swells slightly, then settles */
+        var pk = reduce || PRE.userData.popAt === undefined ? 0 : Math.max(0, 1 - (t - PRE.userData.popAt) / 0.9), e = pk * pk;
+        m.material.opacity = Math.min(1, m.material.opacity + 0.2 * e); m.scale.setScalar(1 + 0.045 * e);
+      }
     });
 
     /* intro models: each draws itself in, moves while you're on its screen, and erases as you leave */
