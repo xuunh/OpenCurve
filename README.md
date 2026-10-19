@@ -1,6 +1,6 @@
 # OpenCurve
 
-A visual tour of math, from Pre-Algebra to Topology.
+Math, meant to be seen. Every subject from Pre-Algebra to Topology, drawn as a glowing 3D model.
 
 **Live site:** https://xuunh.github.io/OpenCurve/
 

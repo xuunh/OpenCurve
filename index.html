@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="A visual tour of math, from Pre-Algebra to Topology.">
+<meta name="description" content="Math, meant to be seen. Every subject from Pre-Algebra to Topology, drawn as a glowing 3D model.">
 <meta name="theme-color" content="#030306">
 <title>OpenCurve</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,7 +25,9 @@ html, body { background: var(--void); color: var(--ink); }
 html { scroll-snap-type: y mandatory; }
 body { font-family: var(--display); font-weight: 300; }
 a { color: inherit; text-decoration: none; }
-:focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
+:focus-visible { outline: none; } /* no focus boxes: keyboard focus shows as a color change instead */
+a:focus-visible, button:focus-visible { color: var(--accent); }
+.stepper button:focus-visible { border-color: var(--accent); }
 
 #scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
 .vignette { position: fixed; inset: 0; z-index: 1; pointer-events: none; background: radial-gradient(120% 90% at 55% 45%, transparent 50%, rgba(0,0,0,0.7) 100%); }
@@ -38,9 +40,6 @@ a { color: inherit; text-decoration: none; }
   padding-block: 24px;
   padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px));
 }
-.mark { font-family: var(--display); font-weight: 400; font-size: 15px; letter-spacing: -0.01em; color: var(--ink); justify-self: start; display: inline-flex; align-items: center; gap: 10px; }
-.mark { transition: opacity .5s, transform .5s; }
-html.on-cover .mark { opacity: 0; transform: translateY(-6px); pointer-events: none; } /* the cover already shows the big title */
 .picker { display: inline-flex; align-items: center; gap: 10px; font: inherit; letter-spacing: inherit; color: var(--ink); background: rgba(0,0,0,0.35); border: 1px solid var(--line); border-radius: 999px; padding: 11px 18px; min-height: 44px; cursor: pointer; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: border-color .3s; }
 .picker:hover { border-color: var(--accent); }
 .picker svg { transition: transform .3s; }
@@ -58,7 +57,7 @@ html.on-cover .mark { opacity: 0; transform: translateY(-6px); pointer-events: n
 .menu li { break-inside: avoid; }
 .menu li button { --c: var(--ink); width: 100%; display: grid; grid-template-columns: 28px 1fr auto; align-items: baseline; gap: 4px 12px; text-align: left; background: none; border: 0; padding: 12px 0; color: var(--ink); font-family: var(--display); font-weight: 200; font-size: clamp(24px, 2.6vw, 34px); line-height: 1.05; letter-spacing: -0.035em; cursor: pointer; transition: color .3s, transform .4s cubic-bezier(.6,0,.2,1); }
 .menu li button .n { font-family: var(--hud); font-size: 10px; letter-spacing: 0.06em; color: var(--mist); transition: color .3s; }
-.menu li button .tbd { font-family: var(--hud); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: rgba(144,151,168,0.6); }
+.menu li button .tbd { font-family: var(--hud); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--mist); }
 .menu li button .d { grid-column: 2 / -1; font-family: var(--display); font-weight: 300; font-size: 13px; letter-spacing: 0; color: var(--mist); max-height: 0; opacity: 0; overflow: hidden; transition: max-height .4s, opacity .4s; }
 .menu li button:hover, .menu li button:focus-visible { color: var(--c); transform: translateX(6px); }
 .menu li button:hover .n, .menu li button[aria-current="true"] .n { color: var(--c); }
@@ -75,8 +74,6 @@ html.on-cover .mark { opacity: 0; transform: translateY(-6px); pointer-events: n
 .menu-foot { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-family: var(--hud); font-size: 10px; letter-spacing: 0.08em; color: var(--mist); }
 @media (max-width: 900px) { .menu-body { grid-template-columns: 1fr; gap: 48px; } .menu aside { border-left: 0; border-top: 1px solid var(--line); padding: 32px 0 0; } }
 @media (prefers-reduced-motion: reduce) { .menu li button, .menu li button .d, .menu-close::after { transition: none; } }
-.hud-gh { justify-self: end; }
-.hud-gh:hover { color: var(--ink); }
 
 .hud-bottom {
   bottom: env(safe-area-inset-bottom, 0px); left: 0; right: 0;
@@ -99,8 +96,6 @@ main { position: relative; z-index: 2; }
   box-sizing: border-box;
 }
 .chapter-inner { max-width: 1280px; width: 100%; margin: 0 auto; display: grid; gap: 28px; }
-.kicker { font-family: var(--hud); font-size: 11px; letter-spacing: 0.06em; color: var(--mist); display: flex; align-items: center; gap: 10px; margin: 0; }
-.kicker i { width: 24px; height: 1px; background: var(--accent); transition: background .8s; }
 h1, h2 { margin: 0; font-weight: 200; letter-spacing: -0.055em; line-height: 0.86; text-wrap: balance; text-shadow: 0 0 40px rgba(0,0,0,0.6); }
 h1 { font-size: clamp(72px, 15vw, 232px); }
 h2 { font-size: clamp(52px, 9.5vw, 156px); }
@@ -123,17 +118,15 @@ h2 { font-size: clamp(52px, 9.5vw, 156px); }
 
 @media (max-width: 720px) {
   .hud-top { grid-template-columns: 1fr auto; }
-  .hud-gh { display: none; }
   .picker { justify-self: end; }
   .chapter { padding-block: 150px 120px; }
 }
-@media (prefers-reduced-motion: reduce) { .tabs button, .cta, .eq, .mark, .kicker i { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .cta, .eq { transition: none; } }
 
 /* Custom cursor: dashed axis lines across the screen through the pointer (x and y read off the edges),
-   plus a trailing ring with its polar reading (r, θ). Fixed neutral color. Mouse and trackpad only. */
+   plus a trailing polar reading (r, θ). Fixed neutral color. Mouse and trackpad only. */
 .cur-svg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 49; pointer-events: none; opacity: 0; transition: opacity .3s; overflow: visible; }
 .cur-svg .ax { stroke: #D6DAE3; stroke-width: 1; stroke-dasharray: 4 6; opacity: 0.38; }
-.cur-svg .ring { fill: none; stroke: #FFFFFF; stroke-width: 1.25; opacity: 0.85; transition: r .25s; }
 .cur-svg .pt { fill: #FFFFFF; }
 .cur-ax, .cur-ay, .cur-xy { position: fixed; z-index: 50; pointer-events: none; opacity: 0; transition: opacity .3s; font-family: var(--hud); font-size: 10px; letter-spacing: 0.04em; color: #D6DAE3; font-variant-numeric: tabular-nums; white-space: nowrap; padding: 3px 6px; border-radius: 4px; background: rgba(3,3,6,0.62); }
 .cur-ax { top: 78px; left: 0; transform: translateX(-50%); }
@@ -176,10 +169,11 @@ html.cur-off .cur-svg, html.cur-off .cur-ax, html.cur-off .cur-ay, html.cur-off 
 /* ---------- Type system pass: one set of sizes, tracking and rhythm for every piece of text ----------
    Mono labels (mixed case): 11px, 0.04em.  Mono caps labels: 10px, 0.18em (trailing space trimmed so they line up at edges).
    Display headings get a small negative indent so their thin first letter lines up with the text under it. */
-.hud, .kicker, .next, .loader-side, .loader-plot .fx, .count, .picker, .menu li button .n { font-size: 11px; letter-spacing: 0.04em; line-height: 1.4; }
+.hud, .next, .loader-side, .loader-plot .fx, .count, .picker, .menu li button .n { font-size: 11px; letter-spacing: 0.04em; line-height: 1.4; }
 .eq { font-size: 11px; letter-spacing: 0.04em; }
-.cta, .menu-head, .menu-close, .menu aside h3, .menu li button .tbd, .scroll-cue .lbl, .menu-foot { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; }
+.cta, .menu-head, .menu-close, .menu aside h3, .scroll-cue .lbl, .menu-foot { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; }
 .cta, .menu-close { margin-right: -0.18em; }
+.menu li button .tbd { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; }
 .scroll-cue .lbl { text-transform: lowercase; margin-right: -0.18em; }
 .menu-foot { letter-spacing: 0.04em; text-transform: none; font-size: 11px; }
 .cur-ax, .cur-ay, .cur-xy { font-size: 10px; letter-spacing: 0.04em; }
@@ -194,29 +188,15 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
 .menu aside h3 { margin-bottom: 12px; }
 .menu li button { padding-block: 12px; }
 
-/* Top-left slot: "Math You Can See" on the cover, the "OpenCurve" mark everywhere else */
-.mark, .tagline { grid-column: 1; grid-row: 1; justify-self: start; }
-.tagline { font-family: var(--hud); font-size: 11px; letter-spacing: 0.04em; color: var(--mist); opacity: 0; transform: translateY(-6px); transition: opacity .5s, transform .5s; pointer-events: none; }
-html.on-cover .tagline { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: reduce) { .tagline { transition: none; } }
-
-
 /* Top bar: a little more room above, and every item centered on one line */
 .hud-top { padding-block: 32px 24px; align-items: center; }
-.tagline, .mark, .hud-gh { line-height: 1; align-self: center; }
 
-/* Cover type: two-line title with the second line stepped in, then a short lead and a quiet mono meta line */
+/* Cover type: two-line title, "Open" thin over a bolder "Curve", flush left */
 #intro h1 { display: grid; line-height: 0.84; letter-spacing: -0.02em; } /* cover title: "Open" thin, "Curve" bolder, stacked flush left */
 #intro h1 .l1 { font-weight: 200; }
 #intro h1 .l2 { font-weight: 400; letter-spacing: -0.01em; }
-#intro h1 .l2 { padding-left: 0; }
 #intro .chapter-inner { gap: 36px; }
-#intro .intro-copy { display: grid; gap: 14px; }
-#intro .sub { font-size: clamp(17px, 1.5vw, 20px); line-height: 1.4; color: #D3D7E0; max-width: 40ch; letter-spacing: -0.01em; }
-#intro .meta { margin: 0; display: flex; flex-wrap: wrap; gap: 6px 0; font-family: var(--hud); font-size: 11px; letter-spacing: 0.04em; color: var(--mist); }
-#intro .meta span + span::before { content: '\00b7'; margin: 0 10px; opacity: 0.6; }
-@media (max-width: 720px) { #intro h1 .l2 { padding-left: 0; } #intro .scroll-cue { display: none; } }
-@media (hover: none) { #intro .meta .m-hover { display: none; } }
+@media (max-width: 720px) { #intro .scroll-cue { display: none; } }
 
 /* Top center: a minimal index bar — number, subject name, a two-line menu icon, and a hairline showing how far through the subjects you are */
 .picker { position: relative; gap: 14px; background: none; border: 0; border-radius: 0; padding: 12px 4px 14px; backdrop-filter: none; -webkit-backdrop-filter: none; font-family: var(--hud); font-size: 11px; letter-spacing: 0.04em; }
@@ -255,7 +235,7 @@ html.on-cover .tagline { opacity: 1; transform: none; }
         <div><h3>Open source</h3><p>Free to use. Found a mistake or want a topic? Open an issue on GitHub.</p></div>
       </aside>
     </div>
-    <div class="menu-foot"><span>OpenCurve</span><span>Math You Can See</span></div>
+    <div class="menu-foot"><span>OpenCurve</span><span>Math, meant to be seen</span></div>
   </div>
 </div>
 
@@ -271,7 +251,7 @@ html.on-cover .tagline { opacity: 1; transform: none; }
   </div>
   <div class="loader-foot">
     <div class="loader-num" id="ldNum">000</div>
-    <div class="loader-side"><b>OpenCurve</b>Building the space</div>
+    <div class="loader-side"><b>OpenCurve</b>Drawing the curve</div>
   </div>
 </div>
 <script>
@@ -319,7 +299,7 @@ html.on-cover .tagline { opacity: 1; transform: none; }
   <div class="eq" id="eq" aria-hidden="true">Torus knot (2, 3)</div>
   <div class="stepper">
     <button type="button" id="prev" aria-label="Previous subject">↑</button>
-    <span class="count" id="count" aria-hidden="true">01 / 20</span>
+    <span class="count" id="count" aria-hidden="true">00 / 19</span>
     <button type="button" id="next" aria-label="Next subject">↓</button>
   </div>
 </div>
@@ -351,7 +331,7 @@ html.on-cover .tagline { opacity: 1; transform: none; }
   var root = document.documentElement, $ = function (q) { return document.querySelector(q); };
   var ax = $('.cur-ax'), ay = $('.cur-ay'), xy = $('.cur-xy'), hl = $('.cur-svg .hl'), vl = $('.cur-svg .vl'), pt = $('.cur-svg .pt');
   var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var x = -100, y = -100, rx = -100, ry = -100, seen = false, hover = false, down = false, rr = 14;
+  var x = -100, y = -100, rx = -100, ry = -100, seen = false;
   function fmt(v) { var r = Math.round(v * 10) / 10; return (r < 0 ? '−' : '') + Math.abs(r).toFixed(1); }
   function at(el, a, b, c, d) { el.setAttribute('x1', a); el.setAttribute('y1', b); el.setAttribute('x2', c); el.setAttribute('y2', d); }
   function put(el, t) { if (el.textContent !== t) el.textContent = t; }
@@ -360,19 +340,15 @@ html.on-cover .tagline { opacity: 1; transform: none; }
     x = e.clientX; y = e.clientY;
     if (!seen) { seen = true; rx = x; ry = y; root.classList.add('has-cur'); }
     root.classList.remove('cur-off');
-    hover = !!(e.target && e.target.closest && e.target.closest('a, button'));
   }, { passive: true });
   document.addEventListener('pointerleave', function () { root.classList.add('cur-off'); });
   window.addEventListener('blur', function () { root.classList.add('cur-off'); });
-  window.addEventListener('pointerdown', function () { down = true; });
-  window.addEventListener('pointerup', function () { down = false; });
   var last = performance.now();
   (function loop(now) {
     now = now || performance.now();
     var k = still ? 1 : 1 - Math.pow(0.8, Math.min(6, (now - last) / 16.7)); /* same trailing speed at any frame rate */
     last = now;
     rx += (x - rx) * k; ry += (y - ry) * k;
-    var target = down ? 9 : hover ? 24 : 14; rr += (target - rr) * (still ? 1 : 0.25);
     var W = window.innerWidth, H = window.innerHeight, X = (x - W / 2) / 40, Y = (H / 2 - y) / 40;
     at(hl, 0, y, W, y); at(vl, x, 0, x, H);
     pt.setAttribute('cx', x); pt.setAttribute('cy', y);
@@ -439,8 +415,6 @@ html.on-cover .tagline { opacity: 1; transform: none; }
     var sec = document.createElement('section');
     sec.className = 'chapter'; sec.id = s.id;
     var inner = document.createElement('div'); inner.className = 'chapter-inner';
-    var k = document.createElement('p'); k.className = 'kicker';
-    k.hidden = true; /* no label above the subject name */
     var h = document.createElement('h2'); h.textContent = s.name;
     var row = document.createElement('div'); row.className = 'row';
     var p = document.createElement('p'); p.className = 'sub'; p.textContent = s.desc || '';
@@ -452,7 +426,7 @@ html.on-cover .tagline { opacity: 1; transform: none; }
       var sn = document.createElement('span'); sn.className = 'cta soon'; sn.textContent = 'Soon...';
       row.appendChild(sn);
     }
-    inner.appendChild(k); inner.appendChild(h); inner.appendChild(row);
+    inner.appendChild(h); inner.appendChild(row);
     var nx = SUBJECTS[i + 1] || SUBJECTS[1];
     if (nx) {
       var nu = document.createElement('a'); nu.className = 'next'; nu.href = '#' + (SUBJECTS[i + 1] ? nx.id : 'loop');
@@ -482,7 +456,15 @@ html.on-cover .tagline { opacity: 1; transform: none; }
   picker.addEventListener('click', function () { if (menu.hidden) openMenu(); else closeMenu(true); });
   document.getElementById('menuClose').addEventListener('click', function () { closeMenu(true); });
   menu.addEventListener('click', function (e) { if (e.target === menu) closeMenu(true); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !menu.hidden) closeMenu(true); });
+  document.addEventListener('keydown', function (e) {
+    if (menu.hidden) return;
+    if (e.key === 'Escape') { closeMenu(true); return; }
+    if (e.key === 'Tab') { /* keep focus inside the open menu */
+      var f = menu.querySelectorAll('button, a[href]'), first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
   tabs.forEach(function (b) {
     b.addEventListener('click', function () {
       closeMenu(false);
@@ -778,8 +760,7 @@ html.on-cover .tagline { opacity: 1; transform: none; }
     conformal: [12, 5, -8, 0.2, -0.4, 0], mobius: [9.5, 5.2, -5, 0.4, 0, 0.12]
   };
 
-  var LIFT = { lattice: 2.5 };
-  var HAND_SCALE = { ripple: 1.1, primes: 0.88 }; /* sizes you asked for: Pre-Calc +10%, Number Theory −12% */ /* per-model height nudge */
+  var LIFT = { lattice: 2.5 }; /* per-model height nudge */
   var TUNE = { primes: 0.838, saddle: 0.918, ripple: 1.14, stairs: 1.232, tangents: 0.902, walks: 1.505, conformal: 1.904, lattice: 1.03, dihedral: 0.896, hyperboloid: 0.952, helix: 1.008, revolve: 1.064, converge: 0.952, mobius: 0.8, lorenz: 1.254, solids: 1.12, bell: 1.12, graph: 0.95 };
   var ANCHOR = small ? V(6.5, 5.5, -4) : V(8.5, 4.2, -4), SIZE = small ? 20 : 25;
   function linesMesh(pts, s, opacity) {
@@ -882,7 +863,7 @@ html.on-cover .tagline { opacity: 1; transform: none; }
     if (ch !== shown) {
       shown = ch;
       eqEl.textContent = SUBJECTS[ch].label;
-      countEl.textContent = pad(ch + 1) + ' / ' + pad(LAST + 1);
+      countEl.textContent = pad(ch) + ' / ' + pad(LAST);
       document.documentElement.style.setProperty('--accent', SUBJECTS[ch].css);
       pickerLabel.textContent = ch === 0 ? 'Index' : SUBJECTS[ch].name;
       pickerNum.textContent = pad(ch);
