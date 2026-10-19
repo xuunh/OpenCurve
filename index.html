@@ -969,7 +969,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
      lines, so every change is a smooth morph, never a cut. That grid matches Pre-Algebra's model line for line, so the
      last step simply becomes it. */
   var PRE = forms[K + 1], PLS = PLACE[SUBJECTS[1].form], PLK = PLACE.knot;
-  var B_STAGES = 8, B_LOOK = 9;   /* which screens have the 19 dots, and the mouse tilt */
+  var B_STAGES = 8, B_LOOK = 9, B_WORDS = 10;   /* which screens have the 19 dots, and the mouse tilt */
   function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
   function easeIO(v) { return v < 0.5 ? 4 * v * v * v : 1 - Math.pow(-2 * v + 2, 3) / 2; }   /* slow start, slow finish */
   function lerp(a, b, w) { return a + (b - a) * w; }
@@ -1038,8 +1038,8 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
     { s: SHAPE.arc, pos: [18, 4.2, -10], rot: [0.2, -0.3, 0], col: W, alpha: 1 },
     /* 9 · a rolling wave (tilts with the mouse) */
     { s: SHAPE.wave, pos: RIGHT, rot: [0.35, -0.3, 0], col: W, alpha: 1 },
-    /* 10 · words only: the wave smooths into a flat strip and drifts, faint, back to the middle */
-    { s: SHAPE.strip, pos: [4, 3.6, -26], rot: [0.5, -0.1, 0], col: W, alpha: 0.3 },
+    /* 10 · words only: the wave smooths into a flat strip and drifts, faint and low, under the words (it dims further while they're up) */
+    { s: SHAPE.strip, pos: [4, -0.4, -24], rot: [0.3, -0.1, 0], col: W, alpha: 0.5 },
     /* 11 · model only: from the middle, the strip slowly starts to coil */
     { s: SHAPE.coil, pos: [5, 6.6, -12], rot: [lerp(0.5, PLS[3], 0.6), lerp(-0.1, PLS[4], 0.6), lerp(0, PLS[5], 0.6)], col: SUBJECTS[1].css, pre: true, alpha: 0.9 },
     /* 12 · and finishes as Pre-Algebra's spiral, in its own spot */
@@ -1187,7 +1187,8 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
     var sOp = 0.8 * clamp01((scrollF - 0.02) / 0.12);
     if (sOp > 0.002 && scrollF < HANDOFF) {
       var pp = scrollF > K ? Math.min(K, morphF) : Math.min(K + 1, morphF), al = drawSurface(pp, t, scrollF);
-      sMat.opacity = sOp * al; surf.visible = sMat.opacity > 0.002;
+      var quiet = Math.max(0, 1 - Math.abs(scrollF - B_WORDS) * 1.4);   /* the words-only screen: the model steps back so it never fights the text */
+      sMat.opacity = sOp * al * (1 - 0.8 * quiet); surf.visible = sMat.opacity > 0.002;
       if (surf.visible) drawDots(pp, t, al); else dots.visible = false;
     }
     stageRows.forEach(function (li) { li.classList.toggle('on', reveal * 4.2 - (+li.dataset.stage) > 0.3); });
