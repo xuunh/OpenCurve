@@ -1062,7 +1062,7 @@ a, img, svg { -webkit-user-drag: none; }
     shapeAt(mix.A, u, v, mix.t, bA); shapeAt(mix.B, u, v, mix.t, bB); return o.copy(bA).lerp(bB, w);
   }
   var gP = []; for (var gi = 0; gi < (SU + 1) * (NV + 1); gi++) gP.push(new THREE.Vector3());
-  var cP = new THREE.Vector3(), cQ = new THREE.Vector3(), deepC = new THREE.Color(), coreC = new THREE.Color(), tmpC = new THREE.Color();
+  var cP = new THREE.Vector3(), cQ = new THREE.Vector3(), deepC = new THREE.Color(), coreC = new THREE.Color(), tmpC = new THREE.Color(), redC = new THREE.Color();
   function drawSurface(p, t, cam) {
     var k0 = Math.min(KEYS.length - 2, Math.floor(p)), w = ease(Math.min(1, p - k0)), A = KEYS[k0], B = KEYS[k0 + 1];
     var alpha = lerp(A.alpha, B.alpha, w);
@@ -1071,7 +1071,12 @@ a, img, svg { -webkit-user-drag: none; }
     var i, j, k = 0, minY = Infinity, maxY = -Infinity;
     for (j = 0; j <= NV; j++) for (i = 0; i <= SU; i++) { var P = gP[j * (SU + 1) + i]; blendAt(i / SU, j / NV, P); if (P.y < minY) minY = P.y; if (P.y > maxY) maxY = P.y; }
     coreC.copy(A.c).lerp(B.c, w); deepC.copy(A.d).lerp(B.d, w);
-    function col(y) { tmpC.copy(deepC).lerp(coreC, 0.25 + 0.75 * (y - minY) / ((maxY - minY) || 1)); return tmpC; }   /* darker low down, brighter up top, like the subject models */
+    var redF = cam > K ? clamp01((cam - K - 0.12) / 0.84) : 0;   /* arriving at Pre-Algebra: its red rises up the spiral from the bottom, done before the hand-over */
+    function col(y) {   /* darker low down, brighter up top, like the subject models */
+      var h = (y - minY) / ((maxY - minY) || 1), c = 0.25 + 0.75 * h; tmpC.copy(deepC).lerp(coreC, c);
+      if (redF > 0) { var r = clamp01((redF * 1.3 - h) / 0.3); if (r > 0) tmpC.lerp(redC.copy(SUBJECTS[1].deep).lerp(SUBJECTS[1].core, c), r * r * (3 - 2 * r)); }   /* soft edge between white and red */
+      return tmpC;
+    }
     function seg(P, Q, u1, u2) { sArr[k] = P.x; sArr[k + 1] = P.y; sArr[k + 2] = P.z; sArr[k + 3] = Q.x; sArr[k + 4] = Q.y; sArr[k + 5] = Q.z; var c1 = col(P.y); sCol[k] = c1.r; sCol[k + 1] = c1.g; sCol[k + 2] = c1.b; var c2 = col(Q.y); sCol[k + 3] = c2.r; sCol[k + 4] = c2.g; sCol[k + 5] = c2.b; k += 6; }
     for (j = 0; j <= NV; j++) for (i = 0; i < SU; i++) seg(gP[j * (SU + 1) + i], gP[j * (SU + 1) + i + 1], i / SU, (i + 1) / SU);
     for (i = 0; i < NU; i++) { blendAt(i / NU, 0, cP); for (j = 1; j <= SV; j++) { blendAt(i / NU, j / SV, cQ); seg(cP, cQ, i / NU, i / NU); cP.copy(cQ); } }
@@ -1086,7 +1091,7 @@ a, img, svg { -webkit-user-drag: none; }
     return alpha;
   }
 
-  var lastMs = 0, morphF = 0, HANDOFF = K + 0.9;   /* the scroll point where the white intro spiral hands over to Pre-Algebra's red model (just before the camera finishes its glide, so the red shows up right away) */
+  var lastMs = 0, morphF = 0, HANDOFF = K + 0.995;   /* the scroll point where the intro spiral hands over to Pre-Algebra's model */
 
   var D = small ? 600 : 1400, dpos = new Float32Array(D * 3);
   for (var d = 0; d < D; d++) {
@@ -1144,23 +1149,15 @@ a, img, svg { -webkit-user-drag: none; }
     camera.position.set((small ? 4 : -2) + mx * 2.2 + sway, 2.6 - my * 1.2, zc + (small ? 38 : 22));
     camera.lookAt(small ? 6 : 3, 4.5, zc - 2);
 
-    if (bloom) bloom.strength = 1.05;   /* normal glow; the Pre-Algebra pop below can raise it for a moment */
     forms.forEach(function (m, i) {
       if (!m) return;
       var near = i === 0 ? scrollF * 4 :   /* the cover knot hands over to the intro surface (the same knot, same spot) as soon as you scroll */
         i === K + 1 && scrollF < HANDOFF ? 9 : Math.abs(u - STATIONS[i].t);   /* Pre-Algebra's model takes over only once the camera has arrived; until then the intro spiral (identical to it) is shown */
       m.visible = near < 0.8;
-      if (i === K + 1) { if (m.visible && !PRE.userData.on) PRE.userData.popAt = t; PRE.userData.on = m.visible; }   /* note when Pre-Algebra's red model takes over from the white intro spiral */
       if (!m.visible) return;
       m.rotation.y = m.userData.ry + (reduce ? 0 : Math.sin(t * 0.25) * 0.12); /* gentle sway, not a full spin, so each model keeps the angle it was framed at */
       var fade = Math.min(1, Math.max(0, (near - 0.3) / 0.5));
       m.material.opacity = 0.8 * (1 - fade * fade * (3 - 2 * fade));
-      if (i === K + 1) {   /* the pop: the spiral turns red with a bright flash, a softer second blink, then settles (about 1.2 s) */
-        var tau = reduce || PRE.userData.popAt === undefined ? 9 : (t - PRE.userData.popAt) / 1.2;
-        var e = tau > 1.2 ? 0 : Math.exp(-2.5 * tau) * (0.55 + 0.45 * Math.cos(4 * Math.PI * tau));
-        m.material.opacity = Math.min(1, m.material.opacity + 0.2 * e); m.material.color.setRGB(1 + 0.6 * e, 1 + 2.6 * e, 1 + 2.2 * e); m.scale.setScalar(1 + 0.05 * e);   /* the flash lifts the red toward a hot pink-white, then it cools back to red */
-        if (bloom) bloom.strength = 1.05 + 0.9 * e;
-      }
     });
 
     /* intro models: each draws itself in, moves while you're on its screen, and erases as you leave */
