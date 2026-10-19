@@ -1067,7 +1067,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
 
     forms.forEach(function (m, i) {
       if (!m) return;
-      var near = i === 0 ? scrollF * 1.6 : Math.abs(u - STATIONS[i].t);
+      var near = i === 0 ? scrollF * 1.6 : i === K + 1 && scrollF < K + 1 ? (K + 1 - scrollF) * 2.6 : Math.abs(u - STATIONS[i].t);   /* Pre-Algebra's model only fades in at the very end of the hand-off, once the intro spiral sits right on it */
       m.visible = near < 0.8;
       if (!m.visible) return;
       m.rotation.y = m.userData.ry + (reduce ? 0 : Math.sin(t * 0.25) * 0.12); /* gentle sway, not a full spin, so each model keeps the angle it was framed at */
@@ -1076,7 +1076,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
     });
 
     /* intro curve: fades in as you leave the cover, fades out as Pre-Algebra's own model takes over */
-    var cOp = 0.8 * Math.min(1, Math.max(0, (scrollF - 0.06) / 0.4)) * (1 - Math.min(1, Math.max(0, (scrollF - K - 0.35) / 0.5)));
+    var cOp = 0.8 * Math.min(1, Math.max(0, (scrollF - 0.06) / 0.4)) * (1 - Math.min(1, Math.max(0, (scrollF - K - 0.72) / 0.28)));
     curve.visible = cOp > 0.002 && scrollF < K + 1;
     if (curve.visible) {
       var w2n = Math.max(0, 1 - Math.abs(scrollF - 2) * 1.6);
