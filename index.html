@@ -1007,8 +1007,11 @@ a, img, svg { -webkit-user-drag: none; }
       var n = 6, w = 4.4, a = 0.1 + 0.55 * (0.5 - 0.5 * Math.cos(t * 0.45)), q = u * n, k = Math.min(n - 1, Math.floor(q)), f = q - k;
       return o.set((q - n / 2) * w * Math.cos(a), w * Math.sin(a) * (k % 2 ? 1 - f : f) - 1.4, -(v - 0.5) * 8);
     }),
-    band: Sh(function (p, u, v, t, o) {   /* a long, slow wave running the full width of the screen */
-      var x = (u - 0.5) * 56; return o.set(x, 0.75 * Math.sin(0.16 * x - 0.7 * t) + 0.3 * Math.sin(0.41 * x + 0.5 * t), -(v - 0.5) * 3.2 + 0.8 * Math.cos(0.12 * x + 0.4 * t));
+    band: Sh(function (p, u, v, t, o) {   /* a long, slow wave across the full width of the screen: a few gentle waves layered at different speeds, with a soft twist across its width, so it drifts like cloth instead of sliding */
+      var x = (u - 0.5) * 56, c = v - 0.5, wd = 3.4 * (1 + 0.2 * Math.sin(0.09 * x + 0.22 * t));
+      var y = 0.6 * Math.sin(0.14 * x - 0.42 * t) + 0.28 * Math.sin(0.31 * x + 0.27 * t + 1.3) + 0.12 * Math.sin(0.6 * x - 0.5 * t);
+      y += c * wd * 0.45 * Math.sin(0.11 * x - 0.3 * t + 0.8);   /* the band leans one way, then the other, along its length */
+      return o.set(x, y, -c * wd + 0.9 * Math.cos(0.1 * x + 0.24 * t) + 0.3 * Math.sin(0.27 * x - 0.33 * t));
     }),
     wave: Sh(function (p, u, v, t, o) { var x = (u - 0.5) * 28, z = -(v - 0.5) * 9; return o.set(x, 2.2 * Math.sin(0.45 * x - 1.2 * t) * (0.6 + 0.4 * Math.cos(0.5 * z + 0.5 * t)), z); }),
     coil: Sh(windAt, { s: 0.42 }),
