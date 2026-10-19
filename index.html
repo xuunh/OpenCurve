@@ -1000,7 +1000,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
     { s: SHAPE.spiral, pos: [7, PLS[1], PLS[2]], rot: [PLS[3], PLS[4], PLS[5]], col: SUBJECTS[1].css, alpha: 1 }
   ];
   KEYS.push(Object.assign({}, KEYS[K], { pos: [PLS[0], PLS[1], PLS[2] - GAP] }));   /* rides along as the camera travels to Pre-Algebra */
-  KEYS.forEach(function (k) { k.c = new THREE.Color(k.col); });
+  KEYS.forEach(function (k) { k.c = new THREE.Color(k.col); k.d = (k.s === SHAPE.spiral ? SUBJECTS[1].deep : SUBJECTS[0].deep).clone(); });
 
   var SU = 320, SV = 40, NU = 60, NV = 10;   /* the same grid as Pre-Algebra's model */
   var segs = (NV + 1) * SU + NU * SV, sArr = new Float32Array(segs * 6), sCol = new Float32Array(segs * 6), sGeo = new THREE.BufferGeometry();
@@ -1025,14 +1025,14 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
     mix.t = t; mix.A = A.s; mix.B = B.s; mix.stag = !!B.stagger; mix.w = B.stagger ? Math.min(1, p - k0) : w;
     var i, j, k = 0, minY = Infinity, maxY = -Infinity;
     for (j = 0; j <= NV; j++) for (i = 0; i <= SU; i++) { var P = gP[j * (SU + 1) + i]; blendAt(i / SU, j / NV, P); if (P.y < minY) minY = P.y; if (P.y > maxY) maxY = P.y; }
-    coreC.copy(A.c).lerp(B.c, w); deepC.copy(coreC).multiplyScalar(0.16);
+    coreC.copy(A.c).lerp(B.c, w); deepC.copy(A.d).lerp(B.d, w);
     function col(y) { tmpC.copy(deepC).lerp(coreC, 0.25 + 0.75 * (y - minY) / ((maxY - minY) || 1)); return tmpC; }   /* darker low down, brighter up top, like the subject models */
     function seg(P, Q) { sArr[k] = P.x; sArr[k + 1] = P.y; sArr[k + 2] = P.z; sArr[k + 3] = Q.x; sArr[k + 4] = Q.y; sArr[k + 5] = Q.z; var c1 = col(P.y); sCol[k] = c1.r; sCol[k + 1] = c1.g; sCol[k + 2] = c1.b; var c2 = col(Q.y); sCol[k + 3] = c2.r; sCol[k + 4] = c2.g; sCol[k + 5] = c2.b; k += 6; }
     for (j = 0; j <= NV; j++) for (i = 0; i < SU; i++) seg(gP[j * (SU + 1) + i], gP[j * (SU + 1) + i + 1]);
     for (i = 0; i < NU; i++) { blendAt(i / NU, 0, cP); for (j = 1; j <= SV; j++) { blendAt(i / NU, j / SV, cQ); seg(cP, cQ); cP.copy(cQ); } }
     sGeo.attributes.position.needsUpdate = sGeo.attributes.color.needsUpdate = true;
     var PA = A.pos, PB = B.pos, wp = w;
-    if (cam > K) { PA = KEYS[K].pos; PB = KEYS[K + 1].pos; wp = clamp01(cam - K); }   /* the hand-off rides with the camera (and drifts into Pre-Algebra's spot), at the camera's even pace */
+    if (cam > K) { PA = KEYS[K].pos; PB = KEYS[K + 1].pos; wp = clamp01((cam - K) / (HANDOFF - K)); }   /* lands exactly on Pre-Algebra's model at the hand-over point */   /* the hand-off rides with the camera (and drifts into Pre-Algebra's spot), at the camera's even pace */
     surf.position.set(lerp(PA[0], PB[0], wp), lerp(PA[1], PB[1], wp), lerp(PA[2], PB[2], wp));
     var tilt = Math.max(0, 1 - Math.abs(p - B_LOOK) * 1.5), mid = Math.max(0, 1 - Math.abs(p - 1) * 1.4);
     surf.rotation.set(lerp(A.rot[0], B.rot[0], w) + my * 0.3 * tilt,
@@ -1050,7 +1050,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
   dGeo2.setAttribute('position', new THREE.BufferAttribute(dP, 3)); dGeo2.setAttribute('color', new THREE.BufferAttribute(dC, 3));
   var dotMat = new THREE.PointsMaterial({ size: 1.8, map: dotTex, vertexColors: true, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
   var dots = new THREE.Points(dGeo2, dotMat); dots.frustumCulled = false; surf.add(dots);
-  var reveal = 0, lastMs = 0, morphF = 0;
+  var reveal = 0, lastMs = 0, morphF = 0, HANDOFF = K + 0.995;   /* the scroll point where the intro spiral hands over to Pre-Algebra's model */
   function drawDots(p, t, alpha) {
     var w2 = Math.max(0, 1 - Math.abs(p - B_STAGES) * 1.6) * alpha;
     dotMat.opacity = w2; dots.visible = w2 > 0.01;
@@ -1123,7 +1123,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
     forms.forEach(function (m, i) {
       if (!m) return;
       var near = i === 0 ? scrollF * 4 :   /* the cover knot hands over to the intro surface (the same knot, same spot) as soon as you scroll */
-        i === K + 1 && scrollF < K + 1 ? (K + 1 - scrollF) * 2.6 : Math.abs(u - STATIONS[i].t);   /* Pre-Algebra's model only fades in at the very end of the hand-off, once the intro spiral sits right on it */
+        i === K + 1 && scrollF < HANDOFF ? 9 : Math.abs(u - STATIONS[i].t);   /* Pre-Algebra's model takes over only once the camera has arrived; until then the intro spiral (identical to it) is shown */
       m.visible = near < 0.8;
       if (!m.visible) return;
       m.rotation.y = m.userData.ry + (reduce ? 0 : Math.sin(t * 0.25) * 0.12); /* gentle sway, not a full spin, so each model keeps the angle it was framed at */
@@ -1136,10 +1136,11 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
     var w2n = Math.max(0, 1 - Math.abs(scrollF - B_STAGES) * 1.6);
     if (reduce) reveal = 1; else if (w2n > 0.45) reveal = Math.min(1, reveal + dt / 1.8); else if (w2n < 0.15) reveal = 0;
     /* the intro surface follows the scroll more slowly than the camera, so its changes unfold gently */
-    morphF += (scrollF - morphF) * (reduce ? 1 : 1 - Math.exp(-dt * 1.4));
-    var sOp = 0.8 * clamp01((scrollF - 0.02) / 0.12) * (1 - clamp01((scrollF - K - 0.72) / 0.28));
-    if (sOp > 0.002 && scrollF < K + 1) {
-      var pp = Math.min(K + 1, morphF), al = drawSurface(pp, t, scrollF);
+    /* (once the camera starts traveling to Pre-Algebra it catches up, so the spiral is finished by the time we arrive) */
+    morphF += (scrollF - morphF) * (reduce ? 1 : 1 - Math.exp(-dt * (scrollF > K ? 5 : 1.4)));
+    var sOp = 0.8 * clamp01((scrollF - 0.02) / 0.12);
+    if (sOp > 0.002 && scrollF < HANDOFF) {
+      var pp = scrollF > K ? Math.min(K, morphF) : Math.min(K + 1, morphF), al = drawSurface(pp, t, scrollF);
       sMat.opacity = sOp * al; surf.visible = sMat.opacity > 0.002;
       if (surf.visible) drawDots(pp, t, al); else dots.visible = false;
     }
