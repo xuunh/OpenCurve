@@ -238,10 +238,6 @@ a, img, svg { -webkit-user-drag: none; }
 .beat-list li::after { content: ''; order: 1; flex: 1; border-bottom: 1px dotted rgba(220,225,240,0.18); transform: translateY(-3px); }
 .beat-list .k { color: var(--ink); min-width: 12ch; }
 .beat-list .v { order: 2; }
-/* live equation under the sign-flip heading: the sign (in blue) and the shape's name change with the model */
-.beat .beat-eq { margin: 30px 0 0; display: flex; align-items: baseline; gap: 12px; font-family: var(--hud); font-size: 15px; letter-spacing: 0.02em; color: var(--ink); }
-.beat-eq b { font-weight: 400; color: var(--blue); min-width: 1ch; text-align: center; text-shadow: 0 0 10px rgba(76,130,255,0.7); }
-.beat-eq i { font-style: normal; font-size: 11px; letter-spacing: 0.04em; color: var(--mist); margin-left: 10px; }
 .beat .meta-line { font-family: var(--hud); font-size: 11px; letter-spacing: 0.04em; color: var(--mist); }
 .beat .meta-line span + span::before { content: '\00b7'; margin: 0 10px; opacity: 0.6; }
 .beat .chapter-inner > * { opacity: 0; transform: translateY(26px); filter: blur(8px); transition: opacity .55s ease, transform .7s cubic-bezier(.3,0,.2,1), filter .55s ease; }
@@ -402,12 +398,11 @@ a, img, svg { -webkit-user-drag: none; }
       <a class="next skip" href="#pre-algebra"><span class="next-k">Skip intro</span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2v11M3 8.5 8 13.5 13 8.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     </div>
   </section>
-  <section class="chapter beat" id="flip">
+  <section class="chapter beat" id="open">
     <div class="chapter-inner">
-      <p class="beat-k"><b>02</b><span>Small changes</span></p>
-      <h2>Flip one sign. The whole surface <span class="ser">turns.</span></h2>
-      <p class="beat-eq" aria-live="off"><span>z = x²</span><b id="flipSign">+</b><span>y²</span><i id="flipName">a bowl</i></p>
-      <p class="sub">One character apart, two completely different shapes. Seeing it makes the difference stick.</p>
+      <p class="beat-k"><b>02</b><span>How it works</span></p>
+      <h2>Open a topic. Watch the idea <span class="ser">unfold.</span></h2>
+      <p class="sub">Every subject opens into topics, and each one is something you can watch move, not a page to read.</p>
       <a class="next skip" href="#pre-algebra"><span class="next-k">Skip intro</span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2v11M3 8.5 8 13.5 13 8.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     </div>
   </section>
@@ -580,7 +575,7 @@ a, img, svg { -webkit-user-drag: none; }
     { id: 'unroll', label: 'The ring, unrolling' },
     { id: 'sheet', label: 'One open sheet' },
     { id: 'idea', label: 'The sheet, twisted' },
-    { id: 'flip', label: 'z = x² ± y²  (bowl ⇄ saddle)' },
+    { id: 'open', label: 'A folded sheet, opening' },
     { id: 'look', label: 'A rolling wave  z = sin(x − t)' },
     { id: 'project', label: 'A long wave  y = sin(x − t)' },
     { id: 'coil', label: 'The sheet, starting to coil' },
@@ -1000,8 +995,6 @@ a, img, svg { -webkit-user-drag: none; }
     return PRE ? o.sub(PRE.userData.c).multiplyScalar(PRE.userData.k) : o;
   }
   function Sh(f, p) { return { f: f, p: p || {} }; }
-  function flipS(t) { return Math.tanh(3 * Math.sin(t * 0.5)) / Math.tanh(3); }   /* +1 bowl, −1 saddle: rests on each, then turns over */
-  var flipSign = document.getElementById('flipSign'), flipName = document.getElementById('flipName');
   var SHAPE = {
     knot: Sh(knotAt, { a: 1, m: 2 }),
     loose: Sh(knotAt, { a: 0.42, m: 2 }),
@@ -1010,8 +1003,9 @@ a, img, svg { -webkit-user-drag: none; }
     half: Sh(rollAt, { phi: Math.PI * 0.9 }),
     sheet: Sh(rollAt, { phi: 0 }),
     twist: Sh(function (p, u, v, t, o) { var th = (u - 0.5) * Math.PI * 1.4 + Math.sin(t * 0.35) * 0.6, w = -(v - 0.5) * 7; return o.set((u - 0.5) * 26, w * Math.sin(th), w * Math.cos(th)); }),
-    flip: Sh(function (p, u, v, t, o) {   /* z = x² ± y²: a bowl that slowly flips into a saddle and back */
-      var x = (u - 0.5) * 17, z = -(v - 0.5) * 16; return o.set(x, 0.035 * x * x + flipS(t) * 0.055 * z * z - 1.4, z);
+    fold: Sh(function (p, u, v, t, o) {   /* the sheet folded like an accordion (six panels), slowly opening flat and folding back */
+      var n = 6, w = 4.4, a = 0.1 + 0.55 * (0.5 - 0.5 * Math.cos(t * 0.45)), q = u * n, k = Math.min(n - 1, Math.floor(q)), f = q - k;
+      return o.set((q - n / 2) * w * Math.cos(a), w * Math.sin(a) * (k % 2 ? 1 - f : f) - 1.4, -(v - 0.5) * 8);
     }),
     band: Sh(function (p, u, v, t, o) {   /* a long, slow wave running the full width of the screen */
       var x = (u - 0.5) * 56; return o.set(x, 0.75 * Math.sin(0.16 * x - 0.7 * t) + 0.3 * Math.sin(0.41 * x + 0.5 * t), -(v - 0.5) * 3.2 + 0.8 * Math.cos(0.12 * x + 0.4 * t));
@@ -1036,8 +1030,8 @@ a, img, svg { -webkit-user-drag: none; }
     { s: SHAPE.sheet, pos: [3, 4.4, -10], rot: [0.95, -0.14, 0.05], col: W, alpha: 1 },
     /* 7 · the sheet slides to the usual right-hand spot and twists */
     { s: SHAPE.twist, pos: RIGHT, rot: [0.25, -0.35, 0.08], col: W, alpha: 1 },
-    /* 8 · a bowl that flips into a saddle when one sign changes (z = x² ± y²) */
-    { s: SHAPE.flip, pos: [15, 5.6, -10], rot: [0.45, -0.62, 0], col: W, alpha: 1 },
+    /* 8 · the sheet folds up like an accordion and slowly opens out again, like a topic being opened */
+    { s: SHAPE.fold, pos: [15, 5, -9], rot: [0.32, -0.45, 0], col: W, alpha: 1 },
     /* 9 · a rolling wave (tilts with the mouse) */
     { s: SHAPE.wave, pos: RIGHT, rot: [0.35, -0.3, 0], col: W, alpha: 1 },
     /* 10 · words centered: the wave stretches into a long band that flows across the whole screen beneath them */
@@ -1168,8 +1162,6 @@ a, img, svg { -webkit-user-drag: none; }
       var pp = scrollF > K ? Math.min(K, morphF) : Math.min(K + 1, morphF), al = drawSurface(pp, t, scrollF);
       sMat.opacity = sOp * al; surf.visible = sMat.opacity > 0.002;
     }
-    var fs = flipS(t) >= 0;   /* keep the live equation in step with the bowl/saddle */
-    if (fs !== frame.fs) { frame.fs = fs; flipSign.textContent = fs ? '+' : '−'; flipName.textContent = fs ? 'a bowl' : 'a saddle'; }
 
     pickerBar.style.transform = 'scaleX(' + Math.min(1, Math.max(0, (scrollF > SL - 1 ? 1 : scrollF - K) / LAST)).toFixed(4) + ')';
     var cc = Math.round(scrollF), cur = info(cc), key = cur.beat ? 'b' + cur.beat.beat : cur.n;
