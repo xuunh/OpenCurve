@@ -8,7 +8,7 @@
 <title>OpenCurve</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@200;300;400&family=Geist+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@200;300;400;600&family=Geist+Mono:wght@400&family=Instrument+Serif:ital@0;1&display=swap">
 <style>
 /* Layout: a fixed full-screen glowing realm; each subject is a station with one monumental light-drawn form, ordered from first steps to advanced. Minimal HUD on top. Single dark look by design. */
 :root {
@@ -204,6 +204,18 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
 .beat .chapter-inner { gap: 22px; }
 .beat .beat-k { margin: 0; font-family: var(--hud); font-size: 11px; letter-spacing: 0.04em; color: var(--mist); }
 .beat h2 { font-size: clamp(44px, 5.4vw, 100px); line-height: 0.95; letter-spacing: -0.045em; max-width: 13ch; }
+/* accent words: a few words in a heading switch type, never the whole line */
+.ser { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-weight: 400; letter-spacing: -0.02em; }
+.bold { font-weight: 600; letter-spacing: -0.05em; }
+.monoword { font-family: var(--hud); font-weight: 400; font-size: 0.78em; letter-spacing: -0.04em; text-transform: uppercase; }
+/* one word, a different typeface for every letter */
+.mix { white-space: nowrap; }
+.mix span { display: inline-block; }
+.mix .a { font-family: "Instrument Serif", Georgia, serif; font-style: italic; font-weight: 400; }
+.mix .b { font-family: var(--hud); font-size: 0.8em; text-transform: uppercase; }
+.mix .c { font-weight: 600; }
+.mix .d { font-family: "Instrument Serif", Georgia, serif; font-weight: 400; }
+.mix .e { font-weight: 200; -webkit-text-stroke: 1px currentColor; color: transparent; }
 .beat .sub { max-width: 46ch; }
 @media (min-width: 721px) { .chapter.beat .sub { white-space: normal; max-width: 46ch; } }
 /* words only: bigger, set in the middle of the screen's height */
@@ -359,7 +371,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
   <section class="chapter beat words" id="idea">
     <div class="chapter-inner">
       <p class="beat-k">The idea</p>
-      <h2>Every formula is a shape first.</h2>
+      <h2 aria-label="Every formula is a shape first.">Every formula is a <span class="mix" aria-hidden="true"><span class="a">s</span><span class="b">h</span><span class="c">a</span><span class="d">p</span><span class="e">e</span></span> first.</h2>
       <p class="sub">OpenCurve draws the shape, so you can see what the math is doing.</p>
       <a class="next skip" href="#pre-algebra"><span class="next-k">Skip intro</span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2v11M3 8.5 8 13.5 13 8.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     </div>
@@ -367,7 +379,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
   <section class="chapter beat" id="stages">
     <div class="chapter-inner">
       <p class="beat-k">The scope</p>
-      <h2>Nineteen subjects. One curve.</h2>
+      <h2><span class="bold">Nineteen</span> subjects. One <span class="ser">curve.</span></h2>
       <ul class="beat-list stages">
         <li data-stage="0"><i></i><span class="k">Foundations</span><span class="v">01</span></li>
         <li data-stage="1"><i></i><span class="k">High School</span><span class="v">06</span></li>
@@ -381,7 +393,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
   <section class="chapter beat right" id="look">
     <div class="chapter-inner">
       <p class="beat-k">How to look</p>
-      <h2>Look around.</h2>
+      <h2>Look <span class="ser">around.</span></h2>
       <ul class="beat-list">
         <li><span class="k">Scroll</span><span class="v">travel to the next subject</span></li>
         <li><span class="k">Move</span><span class="v">tilt the view</span></li>
@@ -397,7 +409,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
   <section class="chapter beat words mid" id="project">
     <div class="chapter-inner">
       <p class="beat-k">Who it's for</p>
-      <h2>Made for anyone who struggles to picture math.</h2>
+      <h2>Made for <span class="ser">anyone</span> who struggles to <span class="bold">picture</span> math.</h2>
       <p class="sub">Not a textbook. A place to see the ideas first, then study them anywhere.</p>
       <p class="meta-line"><span>Open source</span><span>Free to use</span><span>Made by Junayed Haider</span></p>
       <a class="next skip" href="#pre-algebra"><span class="next-k">Skip intro</span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2v11M3 8.5 8 13.5 13 8.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
@@ -406,7 +418,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
   <section class="chapter beat" id="begin">
     <div class="chapter-inner">
       <p class="beat-k">First stop</p>
-      <h2>Start at the beginning.</h2>
+      <h2>Start at the <span class="ser">beginning.</span></h2>
       <p class="sub">The number line, wound into a spiral.</p>
       <a class="next" href="#pre-algebra" aria-label="Next up: Pre-Algebra"><span class="next-k">Next up</span><span class="next-n">Pre-Algebra</span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2v11M3 8.5 8 13.5 13 8.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     </div>
@@ -540,13 +552,13 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
   /* Intro beats sit between the cover and Pre-Algebra. They are chapters you scroll through, but the camera
      doesn't travel during them: the cover knot opens up and changes shape in place instead. */
   var BEATS = [
-    { id: 'unwind', label: 'Lissajous curve  x = sin 3t, y = sin 2t, z = sin 5t' },
+    { id: 'unwind', label: 'Lissajous figure  x = sin 3t, y = sin 2t, z = sin 5t' },
     { id: 'idea', label: 'OpenCurve' },
-    { id: 'stages', label: '19 points on one curve' },
-    { id: 'look', label: 'y = sin x, bent into space' },
-    { id: 'name', label: 'An open curve: one gap, no end' },
+    { id: 'stages', label: '19 subjects, one constellation' },
+    { id: 'look', label: 'A rolling wave  y = sin(x − t)' },
+    { id: 'name', label: 'Six open curves, each with a gap' },
     { id: 'project', label: 'OpenCurve' },
-    { id: 'begin', label: 'A spiral, about to become the number line' }
+    { id: 'begin', label: 'The number line, wound into a spiral' }
   ];
   BEATS.forEach(function (b, i) { b.beat = i + 1; });
   var K = BEATS.length;
@@ -942,85 +954,120 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
   })();
   var UP = new THREE.Vector3(0, 1, 0), XA = new THREE.Vector3(1, 0, 0), T = new THREE.Vector3();
 
-  function makeTube(o) {
-    var CN = o.samples || 300, CM = 8, CR = o.rings || 80;
-    var pts = [], nrm = [], bin = []; for (var i = 0; i < CN; i++) { pts.push(new THREE.Vector3()); nrm.push(new THREE.Vector3()); bin.push(new THREE.Vector3()); }
-    var arr = new Float32Array(((CN - 1) * CM + CR * CM) * 6), geo = new THREE.BufferGeometry();
+  /* An intro drawing: thin glowing lines (no tubes). draw(s0, s1, t, push) adds line segments for the part of the
+     drawing between s0 and s1 (0 = start, 1 = end), so every drawing can draw itself in and erase itself the same way. */
+  function makeLines(o) {
+    var arr = new Float32Array((o.max || 6000) * 6), geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(arr, 3));
     var col = new THREE.Color(o.col), mat = new THREE.LineBasicMaterial({ color: col, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
     var grp = new THREE.Group(), mesh = new THREE.LineSegments(geo, mat); mesh.frustumCulled = false; grp.add(mesh); grp.visible = false; scene.add(grp);
     var hGeo = new THREE.BufferGeometry(), hPos = new Float32Array(3); hGeo.setAttribute('position', new THREE.BufferAttribute(hPos, 3));
-    var hMat = new THREE.PointsMaterial({ color: col.clone().lerp(new THREE.Color('#ffffff'), 0.6), size: o.tip || 2.2, map: dotTex, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
+    var hMat = new THREE.PointsMaterial({ color: col.clone().lerp(new THREE.Color('#ffffff'), 0.6), size: o.tipSize || 2.2, map: dotTex, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
     var head = new THREE.Points(hGeo, hMat); head.frustumCulled = false; grp.add(head);
-    var tube = { o: o, grp: grp, pts: pts, CN: CN, s0: 0, s1: 0 };
-    function build(s0, s1, t) {
-      var n = CN, i, j, k = 0, ring = [], prev = [];
-      for (i = 0; i < n; i++) o.shape(s0 + (s1 - s0) * i / (n - 1), t, pts[i]);
-      for (i = 0; i < n; i++) {   /* a sideways direction carried smoothly along the line, so the tube never pinches or flips */
-        T.copy(pts[Math.min(n - 1, i + 1)]).sub(pts[Math.max(0, i - 1)]).normalize();
-        if (i === 0) nrm[0].crossVectors(Math.abs(T.y) > 0.9 ? XA : UP, T).normalize();
-        else nrm[i].copy(nrm[i - 1]).addScaledVector(T, -nrm[i - 1].dot(T)).normalize();
-        bin[i].crossVectors(T, nrm[i]);
-      }
-      var every = Math.max(1, Math.round(n / CR));
-      for (i = 0; i < n; i++) {
-        var f = i / (n - 1), whole = o.closed && s1 - s0 > 0.999, rr = o.r * (whole ? 1 : Math.min(1, f / 0.06, (1 - f) / 0.06)) * (o.thick ? o.thick(s0 + (s1 - s0) * f, t) : 1), P = pts[i], N = nrm[i], B = bin[i];
-        for (j = 0; j < CM; j++) {
-          var a = j / CM * Math.PI * 2, ca = Math.cos(a) * rr, sa = Math.sin(a) * rr;
-          ring[j] = [P.x + ca * N.x + sa * B.x, P.y + ca * N.y + sa * B.y, P.z + ca * N.z + sa * B.z];
-          if (i > 0) { var q = prev[j]; arr[k++] = q[0]; arr[k++] = q[1]; arr[k++] = q[2]; arr[k++] = ring[j][0]; arr[k++] = ring[j][1]; arr[k++] = ring[j][2]; }
-        }
-        if (i % every === 0 && k + CM * 6 <= arr.length) for (j = 0; j < CM; j++) { var u1 = ring[j], u2 = ring[(j + 1) % CM]; arr[k++] = u1[0]; arr[k++] = u1[1]; arr[k++] = u1[2]; arr[k++] = u2[0]; arr[k++] = u2[1]; arr[k++] = u2[2]; }
-        prev = ring.slice();
-      }
-      while (k < arr.length) arr[k++] = 0;
-      geo.attributes.position.needsUpdate = true;
-    }
-    tube.update = function (p, t, mxs, mys) {
+    var k = 0;
+    function push(ax, ay, az, bx, by, bz) { if (k + 6 > arr.length) return; arr[k++] = ax; arr[k++] = ay; arr[k++] = az; arr[k++] = bx; arr[k++] = by; arr[k++] = bz; }
+    var item = { o: o, grp: grp, s0: 0, s1: 0 };
+    item.update = function (p, t, mxs, mys) {
       var b = o.beat;
       var enter = easeIO(clamp01((p - (b - 0.92)) / 0.8));                 /* draws itself in as its screen arrives */
-      var leave = o.ride ? 0 : easeIO(clamp01((p - (b + 0.1)) / 0.75));     /* erased from the tail as you move on */
+      var leave = o.ride ? 0 : easeIO(clamp01((p - (b + 0.1)) / 0.75));     /* erased as you move on */
       var s0 = leave, s1 = enter;
       if (s1 - s0 < 0.004) { grp.visible = false; return; }
-      grp.visible = true; tube.s0 = s0; tube.s1 = s1;
-      build(s0, s1, t);
+      grp.visible = true; item.s0 = s0; item.s1 = s1;
+      k = 0; o.draw(s0, s1, t, push); geo.setDrawRange(0, k / 3); geo.attributes.position.needsUpdate = true;
       var ein = 1 - enter, eout = leave, ride = o.ride ? clamp01(p - K) : 0;
       grp.position.set(o.pos[0] + o.from[0] * ein + o.to[0] * eout, o.pos[1] + o.from[1] * ein + o.to[1] * eout, o.pos[2] + o.from[2] * ein + o.to[2] * eout - ride * GAP);
       var spin = o.spin ? o.spin(t) : 0, tilt = o.tilt ? Math.max(0, 1 - Math.abs(p - b) * 1.5) : 0;
-      grp.rotation.set(o.rot[0] + my * 0.12 + mys * 0.3 * tilt, o.rot[1] + spin + 0.5 * ein - 0.4 * eout + mxs * (0.12 + 0.5 * tilt), o.rot[2]);
+      grp.rotation.set(o.rot[0] + (o.ride ? 0 : my * 0.12) + mys * 0.3 * tilt, o.rot[1] + spin + (o.ride ? 0 : 0.5 * ein - 0.4 * eout + mxs * (0.12 + 0.5 * tilt)), o.rot[2]);
       var fadeOut = o.ride ? 1 - clamp01((p - K - 0.72) / 0.28) : 1;
-      mat.opacity = 0.82 * Math.min(1, (s1 - s0) * 5) * fadeOut;
-      /* the pen tip: leads the line while drawing, then (on some shapes) keeps gliding along it */
-      var hs = s1 < 0.999 ? s1 : o.glide ? s0 + (s1 - s0) * ((t * o.glide) % 1) : -1;
-      if (hs >= 0 && !reduce) { o.shape(hs, t, T); hPos[0] = T.x; hPos[1] = T.y; hPos[2] = T.z; hGeo.attributes.position.needsUpdate = true; hMat.opacity = 0.95 * fadeOut * Math.min(1, (s1 - s0) * 5); head.visible = true; }
+      mat.opacity = (o.alpha || 0.8) * Math.min(1, (s1 - s0) * 5) * fadeOut;
+      var hs = !o.tip ? -1 : s1 < 0.999 ? s1 : o.glide ? s0 + (s1 - s0) * ((t * o.glide) % 1) : -1;   /* the bright pen tip */
+      if (hs >= 0 && !reduce) { o.tip(hs, t, T); hPos[0] = T.x; hPos[1] = T.y; hPos[2] = T.z; hGeo.attributes.position.needsUpdate = true; hMat.opacity = 0.95 * fadeOut * Math.min(1, (s1 - s0) * 5); head.visible = true; }
       else head.visible = false;
-      if (o.after) o.after(tube, t);
+      if (o.after) o.after(item, t);
     };
-    return tube;
+    return item;
   }
+  var V3 = new THREE.Vector3(), V4 = new THREE.Vector3();
 
-  /* 1 · model only: a Lissajous curve. One line, drawn by three sine waves at once (x = sin 3t, y = sin 2t, z = sin 5t). A light keeps tracing it. */
-  var LIS = makeTube({ beat: 1, closed: true, col: '#E4E8F0', r: 0.2, tip: 2.4, samples: 520, rings: 150, glide: 0.07,
-    shape: function (s, t, o) { var u = s * Math.PI * 2; return o.set(9.5 * Math.sin(3 * u + 0.6), 6.2 * Math.sin(2 * u), 7 * Math.sin(5 * u)); },
-    spin: function (t) { return t * 0.12; },
+  /* 1 · model only: a Lissajous figure (x = sin 3t, y = sin 2t, z = sin 5t) drawn as a fan of nine fine threads,
+     each a tiny step out of phase, like string art. A light keeps tracing it. */
+  function lisAt(u, d, o) { return o.set(9.5 * Math.sin(3 * u + 0.6 + d), 6.2 * Math.sin(2 * u + d * 0.7), 7 * Math.sin(5 * u - d * 0.5)); }
+  var LIS = makeLines({ beat: 1, col: '#E4E8F0', alpha: 0.55, max: 4200, tipSize: 2.4, glide: 0.06,
+    draw: function (s0, s1, t, push) {
+      var N = 440;
+      for (var q = 0; q < 9; q++) {
+        var d = (q - 4) * 0.055 * (1 + 0.25 * Math.sin(t * 0.6));   /* the fan slowly opens and closes */
+        for (var i = 0; i < N; i++) {
+          var u0 = Math.PI * 2 * (s0 + (s1 - s0) * i / N), u1 = Math.PI * 2 * (s0 + (s1 - s0) * (i + 1) / N);
+          lisAt(u0, d, V3); lisAt(u1, d, V4); push(V3.x, V3.y, V3.z, V4.x, V4.y, V4.z);
+        }
+      }
+    },
+    tip: function (s, t, o) { return lisAt(s * Math.PI * 2, 0, o); },
+    spin: function (t) { return t * 0.1; },
     pos: [8, 5.6, -6], rot: [0.25, 0, 0.08], from: [6, -2, -18], to: [-4, 3, -26] });
-  /* 3 · model right, words left: a long path; each subject's dot lights up as the pen passes it */
-  var PATH = makeTube({ beat: B_STAGES, col: '#E4E8F0', r: 0.34, tip: 2.6, samples: 300, rings: 90, glide: 0.09,
-    shape: function (s, t, o) { return o.set(s * 38, 9 * s + 2.2 * Math.sin(s * Math.PI * 2.2), -s * 30 + 5 * Math.sin(s * Math.PI * 1.6)); },
+
+  /* 3 · model right, words left: a constellation. The 19 subjects are stars joined by straight lines, each with a
+     thin drop line to the floor, like a chart. Each star lights up as the line reaches it. */
+  function pathAt(s, t, o) { return o.set(s * 38, 9 * s + 2.2 * Math.sin(s * Math.PI * 2.2), -s * 30 + 5 * Math.sin(s * Math.PI * 1.6)); }
+  function starS(j) { return 0.04 + 0.92 * j / (LAST - 1); }
+  var PATH = makeLines({ beat: B_STAGES, col: '#C9D0DE', alpha: 0.7, max: 400, tipSize: 2.4, glide: 0.08,
+    shape: pathAt,
+    draw: function (s0, s1, t, push) {
+      for (var j = 0; j < LAST; j++) {
+        var sj = starS(j); if (sj < s0 || sj > s1) continue;
+        pathAt(sj, t, V3);
+        for (var g = 0; g < 6; g++) { var y0 = V3.y - (V3.y + 3.5) * g / 6, y1 = V3.y - (V3.y + 3.5) * (g + 0.55) / 6; push(V3.x, y0, V3.z, V3.x, y1, V3.z); }   /* dashed drop line */
+        if (j < LAST - 1) {   /* line to the next star, drawn up to wherever the pen is */
+          var sn = starS(j + 1), f = clamp01((s1 - sj) / (sn - sj));
+          pathAt(sn, t, V4); V4.lerp(V3, 1 - f); push(V3.x, V3.y, V3.z, V4.x, V4.y, V4.z);
+        }
+      }
+    },
+    tip: function (s, t, o) {
+      for (var j = 0; j < LAST - 1; j++) { var a = starS(j), b = starS(j + 1); if (s <= b) { pathAt(a, t, o); pathAt(b, t, V4); return o.lerp(V4, clamp01((s - a) / (b - a))); } }
+      return pathAt(starS(LAST - 1), t, o);
+    },
     spin: function (t) { return Math.sin(t * 0.2) * 0.06; },
     pos: [4, 0.5, -2], rot: [0, 0, 0], from: [3, -2, -10], to: [8, 2, -24] });
-  /* 4 · model left, words right: a sine wave that keeps rolling, and tilts with the mouse */
-  var WAVE = makeTube({ beat: B_LOOK, col: '#E4E8F0', r: 0.5, tip: 2.2, samples: 260, rings: 90, tilt: true,
-    shape: function (s, t, o) { var a = s * Math.PI * 4; return o.set((s - 0.5) * 18, 3 * Math.sin(a - t * 1.1), -3 * Math.cos(a * 0.5)); },
-    pos: [-10, 5, -6], rot: [0.12, 0.35, 0], from: [-6, -1, -14], to: [-4, 2, -24] });
-  /* 5 · model only: the open circle, the shape in the name. It breathes and slowly turns */
-  var NAMEC = makeTube({ beat: 5, col: '#E4E8F0', r: 0.82, tip: 3, samples: 300, rings: 110,
-    shape: function (s, t, o) { var a = 0.37 * Math.PI + s * Math.PI * 2 * 0.88, rr = 8.6 + 0.3 * Math.sin(4 * a + t * 1.4); return o.set(rr * Math.cos(a), rr * Math.sin(a), 0.7 * Math.sin(3 * a + t * 0.9)); },
-    spin: function (t) { return Math.sin(t * 0.18) * 0.25; },
-    pos: [9, 5.6, -8], rot: [0.06, -0.25, 0], from: [5, 0, -16], to: [-6, 2, -26] });
-  /* 7 · model right, words left: the same spiral as Pre-Algebra's number line; it rides along and becomes that model */
-  var SPIR = makeTube({ beat: K, col: SUBJECTS[1].css, r: 0.55, tip: 2.4, samples: 300, rings: 100, ride: true,
-    shape: function (s, t, o) { var th = (s - 0.5) * Math.PI * 2 * 2.5, r = 5.2; o.set(r * Math.cos(th), th * 1.15, r * Math.sin(th)); return PRE ? o.sub(PRE.userData.c).multiplyScalar(PRE.userData.k) : o; },
+
+  /* 4 · model left, words right: a rolling wave surface, a sheet of grid lines; it tilts with the mouse */
+  function waveY(x, z, t) { return 2.4 * Math.sin(0.62 * x - 1.2 * t) * (0.55 + 0.45 * Math.cos(0.32 * z + 0.4 * t)); }
+  var WAVE = makeLines({ beat: B_LOOK, col: '#E4E8F0', alpha: 0.6, max: 2600, tilt: true,
+    draw: function (s0, s1, t, push) {
+      var xa = -9 + 18 * s0, xb = -9 + 18 * s1, R = 13, C = 28, i, j;
+      for (j = 0; j <= R; j++) { var z = -6 + 12 * j / R; for (i = 0; i < 60; i++) { var x0 = xa + (xb - xa) * i / 60, x1 = xa + (xb - xa) * (i + 1) / 60; push(x0, waveY(x0, z, t), z, x1, waveY(x1, z, t), z); } }
+      for (i = 0; i <= C; i++) { var x = -9 + 18 * i / C; if (x < xa || x > xb) continue; for (j = 0; j < 14; j++) { var z0 = -6 + 12 * j / 14, z1 = -6 + 12 * (j + 1) / 14; push(x, waveY(x, z0, t), z0, x, waveY(x, z1, t), z1); } }
+    },
+    pos: [-10, 4.6, -6], rot: [0.28, 0.4, 0], from: [-6, -1, -14], to: [-4, 2, -24] });
+
+  /* 5 · model only: six open rings nested inside each other, each with its own gap, turning at its own speed.
+     The shape in the name: curves left open. */
+  var NAMEC = makeLines({ beat: 5, col: '#E4E8F0', alpha: 0.75, max: 1200, tipSize: 2.6,
+    draw: function (s0, s1, t, push) {
+      for (var q = 0; q < 6; q++) {
+        var R = 4.4 + q * 0.95, a0 = 0.37 * Math.PI + t * 0.06 * (q % 2 ? -1 : 1) * (1 + q * 0.35) + q * 0.5, span = Math.PI * 2 * (0.62 + 0.05 * q), z = (q - 2.5) * 0.35;
+        for (var i = 0; i < 120; i++) {
+          var f0 = s0 + (s1 - s0) * i / 120, f1 = s0 + (s1 - s0) * (i + 1) / 120, a = a0 + span * f0, b = a0 + span * f1;
+          push(R * Math.cos(a), R * Math.sin(a), z, R * Math.cos(b), R * Math.sin(b), z);
+        }
+      }
+    },
+    tip: function (s, t, o) { var R = 4.4 + 5 * 0.95, a = 0.37 * Math.PI + t * 0.06 * -1 * (1 + 5 * 0.35) + 2.5 + Math.PI * 2 * 0.87 * s; return o.set(R * Math.cos(a), R * Math.sin(a), (5 - 2.5) * 0.35); },
+    spin: function (t) { return Math.sin(t * 0.18) * 0.3; },
+    pos: [9, 5.6, -8], rot: [0.1, -0.25, 0], from: [5, 0, -16], to: [-6, 2, -26] });
+
+  /* 7 · model right, words left: Pre-Algebra's own number-line spiral, drawn in line by line. It is the exact same
+     drawing as that model, so when the camera reaches Pre-Algebra the two simply become one. */
+  function stairAt(u, v, o) { var th = (u - 0.5) * Math.PI * 2 * 2.5, r = 2.2 + v * 6; o.set(r * Math.cos(th), th * 1.15, r * Math.sin(th)); return PRE ? o.sub(PRE.userData.c).multiplyScalar(PRE.userData.k) : o; }
+  var SPIR = makeLines({ beat: K, col: SUBJECTS[1].css, alpha: 0.8, max: 4200, tipSize: 2.2, ride: true,
+    draw: function (s0, s1, t, push) {
+      var i, j, NV = Math.round(10 * q), NU = Math.round(60 * q);
+      for (j = 0; j <= NV; j++) { var v = j / NV; for (i = 0; i < 200; i++) { stairAt(s0 + (s1 - s0) * i / 200, v, V3); stairAt(s0 + (s1 - s0) * (i + 1) / 200, v, V4); push(V3.x, V3.y, V3.z, V4.x, V4.y, V4.z); } }
+      for (i = 0; i <= NU; i++) { var u = i / NU; if (u < s0 || u > s1) continue; for (j = 0; j < 20; j++) { stairAt(u, j / 20, V3); stairAt(u, (j + 1) / 20, V4); push(V3.x, V3.y, V3.z, V4.x, V4.y, V4.z); } }
+    },
+    tip: function (s, t, o) { return stairAt(s, 0.5, o); },
     spin: function (t) { return Math.sin(t * 0.25) * 0.12; },   /* same sway as the real model, so they line up */
     pos: [PLS[0], PLS[1], PLS[2]], rot: [PLS[3], PLS[4], PLS[5]], from: [4, -2, -14], to: [0, 0, 0] });
   var introTubes = [LIS, PATH, WAVE, NAMEC, SPIR];
@@ -1039,16 +1086,16 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
   var rings = new THREE.LineSegments(rGeo, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.85, depthWrite: false, blending: THREE.AdditiveBlending }));
   rings.frustumCulled = false; PATH.grp.add(rings);
   var stageLit = 0, tmpC = new THREE.Color(), dA = new THREE.Vector3(), dB = new THREE.Vector3(), dN = new THREE.Vector3(), dBn = new THREE.Vector3();
-  PATH.o.after = function (tube, t) {
+  PATH.o.after = function (tube, t) {   /* stars light up as the line reaches them */
     var lit = 0, ro = 0, shown = 0;
     for (var j = 0; j < LAST; j++) {
       var sj = 0.04 + 0.92 * j / (LAST - 1), on = clamp01((tube.s1 - sj) * 14) * (sj >= tube.s0 ? 1 : 0);
-      PATH.o.shape(sj, t, dA); dP[j * 3] = dA.x; dP[j * 3 + 1] = dA.y; dP[j * 3 + 2] = dA.z;
+      pathAt(sj, t, dA); dP[j * 3] = dA.x; dP[j * 3 + 1] = dA.y; dP[j * 3 + 2] = dA.z;
       var pulse = 1 + 0.25 * Math.sin(t * 2.2 - j * 0.6);   /* the dots breathe, one after another */
       tmpC.copy(SUBJECTS[j + 1].core).multiplyScalar(on * pulse); dC[j * 3] = tmpC.r; dC[j * 3 + 1] = tmpC.g; dC[j * 3 + 2] = tmpC.b;
       if (on > 0.5) lit = Math.max(lit, dotStage[j] + 1);
       if (stageStart[dotStage[j]] === j) {   /* a ring around the first subject of each stage */
-        PATH.o.shape(Math.min(1, sj + 0.01), t, dB); T.copy(dB).sub(dA).normalize();
+        pathAt(Math.min(1, sj + 0.01), t, dB); T.copy(dB).sub(dA).normalize();
         dN.crossVectors(Math.abs(T.y) > 0.9 ? XA : UP, T).normalize(); dBn.crossVectors(T, dN);
         var rad = 1.5 * on;
         for (var e = 0; e < RS; e++) for (var h = 0; h < 2; h++) {
