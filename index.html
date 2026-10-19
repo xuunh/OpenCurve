@@ -904,8 +904,8 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
       at: function (s, o) { return o.set(s * 38, 9 * s + 2.2 * Math.sin(s * Math.PI * 2.2), -s * 30 + 5 * Math.sin(s * Math.PI * 1.6)); }, r: 0.34, open: 1,
       pos: [4, 0.5, -2], rot: [0, 0, 0], col: '#E4E8F0' },
     { /* 3 · look around: the loading screen's sine wave, now in 3D; it tilts with the mouse */
-      at: function (s, o) { var a = s * Math.PI * 4; return o.set((s - 0.5) * 28, 3 * Math.sin(a), -3.5 * Math.cos(a * 0.5)); }, r: 0.5, open: 1,
-      pos: [9.5, 5.2, -4], rot: [0.12, -0.25, 0], col: '#E4E8F0' },
+      at: function (s, o) { var a = s * Math.PI * 4; return o.set((s - 0.5) * 22, 3 * Math.sin(a), -3.5 * Math.cos(a * 0.5)); }, r: 0.5, open: 1,
+      pos: [15, 5.2, -6], rot: [0.12, -0.25, 0], col: '#E4E8F0' },
     { /* 4 · the project: an open circle, the shape in the name */
       at: function (s, o) { var a = Math.PI * 0.42 + s * Math.PI * 2 * 0.88; return o.set(8.2 * Math.cos(a), 8.2 * Math.sin(a), 0.8 * Math.sin(3 * a)); }, r: 0.62, open: 1,
       pos: [13.5, 5.4, -6], rot: [0.08, -0.4, 0], col: '#E4E8F0' },
@@ -975,7 +975,8 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
     }
     while (o < cArr.length) cArr[o++] = 0;
     cGeo.attributes.position.needsUpdate = true;
-    curve.position.set(A.pos[0] + (B.pos[0] - A.pos[0]) * w, A.pos[1] + (B.pos[1] - A.pos[1]) * w, A.pos[2] + (B.pos[2] - A.pos[2]) * w);
+    var wp = k0 === KEYS.length - 2 ? Math.min(1, p - k0) : w;   /* the hand-off rides with the camera, which moves at an even pace */
+    curve.position.set(A.pos[0] + (B.pos[0] - A.pos[0]) * wp, A.pos[1] + (B.pos[1] - A.pos[1]) * wp, A.pos[2] + (B.pos[2] - A.pos[2]) * wp);
     var w3 = Math.max(0, 1 - Math.abs(p - 3) * 1.5);   /* beat 3: the wave tilts with the mouse */
     curve.rotation.set(A.rot[0] + (B.rot[0] - A.rot[0]) * w + mys * 0.3 * w3, A.rot[1] + (B.rot[1] - A.rot[1]) * w + mxs * 0.6 * w3 + sway, A.rot[2] + (B.rot[2] - A.rot[2]) * w);
     cMat.color.copy(A.c).lerp(B.c, w);
@@ -1079,7 +1080,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
     curve.visible = cOp > 0.002 && scrollF < K + 1;
     if (curve.visible) {
       var w2n = Math.max(0, 1 - Math.abs(scrollF - 2) * 1.6);
-      if (reduce) reveal = 1; else if (w2n > 0.7) reveal = Math.min(1, reveal + dt / 2.6); else if (w2n < 0.15) reveal = 0;
+      if (reduce) reveal = 1; else if (w2n > 0.45) reveal = Math.min(1, reveal + dt / 1.8); else if (w2n < 0.15) reveal = 0;
       cMat.opacity = cOp;
       drawCurve(Math.min(K + 1, scrollF), mx, my, reduce ? 0 : Math.sin(t * 0.25) * 0.12);
     } else if (scrollF > 3) reveal = 0;
