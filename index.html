@@ -229,7 +229,7 @@ a, img, svg { -webkit-user-drag: none; }
 .beat.words { justify-content: center; }
 .beat.words h2 { font-size: clamp(52px, 6vw, 112px); max-width: 15ch; }
 .beat.words.mid .chapter-inner { justify-items: center; text-align: center; }
-#project .chapter-inner { margin-top: -12vh; }   /* sits a little high, leaving the bottom of the screen to the long wave */
+#project .chapter-inner { margin-top: -15vh; }   /* sits a little high, leaving the bottom of the screen to the long wave */
 /* model only: nothing to read, just the quiet scroll cue from the cover */
 .beat.model .scroll-cue { position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -1018,7 +1018,7 @@ a, img, svg { -webkit-user-drag: none; }
     spiral: Sh(windAt, { s: 1 })
   };
   function shapeAt(S, u, v, t, o) { return S.f(S.p, u, v, t, o); }
-  var W = '#E4E8F0', RIGHT = [14, 4.8, -8], MID = [3, 6.2, -8], BAND = [1, -1.1, 4.5];
+  var W = '#E4E8F0', RIGHT = [14, 4.8, -8], MID = [3, 6.2, -8], BAND = [1, -0.35, 1];
   var KEYS = [
     /* 0 · cover: exactly the cover knot */
     { s: SHAPE.knot, pos: [PLK[0], PLK[1], PLK[2]], rot: [PLK[3], PLK[4], PLK[5]], col: W, alpha: 1 },
