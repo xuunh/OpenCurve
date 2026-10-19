@@ -53,15 +53,15 @@ a:focus-visible, button:focus-visible { color: var(--accent); }
 .menu-close::after { content: '\00d7'; font-size: 18px; letter-spacing: 0; line-height: 1; transition: transform .4s; }
 .menu-close:hover::after { transform: rotate(90deg); }
 .menu-body { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 72px; flex: 1; }
-.menu ol { list-style: none; margin: 0; padding: 0; columns: 2 300px; column-gap: 48px; }
-.menu li { break-inside: avoid; }
+/* two fixed columns (1-10, 11-19): a subject never jumps to the other column */
+.menu ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(10, auto); grid-auto-flow: column; column-gap: 48px; align-content: start; }
+@media (max-width: 900px) { .menu ol { grid-template-columns: 1fr; grid-template-rows: none; grid-auto-flow: row; } }
 .menu li button { --c: var(--ink); width: 100%; display: grid; grid-template-columns: 28px 1fr auto; align-items: baseline; gap: 4px 12px; text-align: left; background: none; border: 0; padding: 12px 0; color: var(--ink); font-family: var(--display); font-weight: 200; font-size: clamp(24px, 2.6vw, 34px); line-height: 1.05; letter-spacing: -0.035em; cursor: pointer; transition: color .3s, transform .4s cubic-bezier(.6,0,.2,1); }
 .menu li button .n { font-family: var(--hud); font-size: 10px; letter-spacing: 0.06em; color: var(--mist); transition: color .3s; }
 .menu li button .tbd { font-family: var(--hud); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--mist); }
-.menu li button .d { grid-column: 2 / -1; font-family: var(--display); font-weight: 300; font-size: 13px; letter-spacing: 0; color: var(--mist); max-height: 0; opacity: 0; overflow: hidden; transition: max-height .4s, opacity .4s; }
+.menu li button .d { display: none; }   /* the hovered subject's description shows in the footer instead, so nothing in the list moves */
 .menu li button:hover, .menu li button:focus-visible { color: var(--c); transform: translateX(6px); }
 .menu li button:hover .n, .menu li button[aria-current="true"] .n { color: var(--c); }
-.menu li button:hover .d, .menu li button:focus-visible .d { max-height: 40px; opacity: 1; }
 .menu li button[aria-current="true"] { color: var(--c); }
 .menu aside { border-left: 1px solid var(--line); padding-left: 32px; display: flex; flex-direction: column; gap: 36px; font-size: 14px; line-height: 1.6; color: var(--mist); }
 .menu aside h3 { margin: 0 0 10px; font-family: var(--hud); font-weight: 400; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--mist); }
@@ -272,7 +272,7 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
         <div><h3>Open source</h3><p>Free to use. Found a mistake or want a topic? Open an issue on GitHub.</p></div>
       </aside>
     </div>
-    <div class="menu-foot"><span>OpenCurve</span><span>Math, meant to be seen</span></div>
+    <div class="menu-foot"><span id="menuDesc">OpenCurve</span><span>Math, meant to be seen</span></div>
   </div>
 </div>
 
@@ -583,7 +583,11 @@ body { margin: 0; } /* the browser's default 8px margin was pushing all page tex
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     }
   });
+  var menuDesc = document.getElementById('menuDesc');
   tabs.forEach(function (b) {
+    var show = function () { menuDesc.textContent = SUBJECTS[+b.dataset.go].desc || 'OpenCurve'; }, hide = function () { menuDesc.textContent = 'OpenCurve'; };
+    b.addEventListener('mouseenter', show); b.addEventListener('focus', show);
+    b.addEventListener('mouseleave', hide); b.addEventListener('blur', hide);
     b.addEventListener('click', function () {
       closeMenu(false);
       document.getElementById(SUBJECTS[+b.dataset.go].id).scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
