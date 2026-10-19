@@ -207,15 +207,17 @@ a, img, svg { -webkit-user-drag: none; }
 /* Top bar: a little more room above, and every item centered on one line */
 .hud-top { padding-block: 32px 24px; align-items: center; }
 
-/* Pre-cover: two text-only screens before the cover.
-   1. "Open Curve" on one line, in the middle of a black screen.
-   2. The title shrinks to the top and the quote appears.
-   3. Scrolling on, the quote leaves and the two words glide into the stacked cover title, while the 3D scene and
-      the top and bottom bars fade in. The words are the cover title itself, moved by script. */
+/* Pre-cover: two text-only screens before the cover, played slowly by scrolling.
+   1. "Some math only clicks once you see it." fades in.
+   2. Scroll: it fades out, and "Introducing" with "Open Curve" (side by side) fades in.
+   3. Scroll: "Open" and "Curve" glide into the stacked cover title while the 3D scene and the bars fade in.
+   The words are the cover title itself, moved by script; the two empty sections are just scroll stops. */
 .pre-veil { position: fixed; inset: 0; z-index: 1; background: var(--void); pointer-events: none; }   /* covers the 3D scene on the pre-cover; fades away on the way to the cover */
-.prelude { position: relative; z-index: 2; min-height: 100svh; display: grid; place-items: center; box-sizing: border-box; padding: 120px 24px; scroll-snap-align: start; scroll-snap-stop: always; }
-.prelude .pre-quote { margin: 0; max-width: 14ch; text-align: center; text-wrap: balance; font-size: clamp(52px, 6vw, 112px); font-weight: 200; line-height: 1; letter-spacing: -0.045em; color: var(--ink); opacity: 0; }
+.prelude { position: relative; z-index: 2; min-height: 100svh; box-sizing: border-box; scroll-snap-align: start; scroll-snap-stop: always; }
 .prelude .scroll-cue { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); }
+.pre-fx { position: fixed; z-index: 3; left: 50%; top: 50%; margin: 0; text-align: center; pointer-events: none; opacity: 0; transform: translate(-50%, -50%); }
+.pre-quote { width: min(14ch, 92vw); text-wrap: balance; font-size: clamp(52px, 6vw, 112px); font-weight: 200; line-height: 1; letter-spacing: -0.045em; color: var(--ink); }
+.pre-intro { font-size: clamp(20px, 1.6vw, 28px); font-weight: 300; letter-spacing: -0.01em; color: var(--mist); white-space: nowrap; }
 #intro h1 > span { justify-self: start; transform-origin: 0 0; }   /* each word measures to its own width, so it can travel on its own */
 
 /* Cover type: two-line title, "Open" thin over a bolder "Curve", flush left */
@@ -376,11 +378,12 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
 
 <svg class="cur-svg" aria-hidden="true"><line class="ax hl"/><line class="ax vl"/><circle class="pt" r="2"/></svg>
 <div class="cur-ax" aria-hidden="true"></div><div class="cur-ay" aria-hidden="true"></div><div class="cur-xy" aria-hidden="true"></div>
-<section class="prelude" id="prelude" aria-label="OpenCurve">
+<p class="pre-fx pre-quote">Some math only clicks once you <span class="ser">see</span> it.</p>
+<p class="pre-fx pre-intro" aria-hidden="true">Introducing</p>
+<section class="prelude" id="prelude" aria-label="Some math only clicks once you see it.">
   <a class="scroll-cue" href="#prelude2" aria-label="Scroll down"><span class="lbl">scroll</span><span class="hair" aria-hidden="true"></span></a>
 </section>
-<section class="prelude" id="prelude2">
-  <p class="pre-quote">Some Math Only Clicks Once You <span class="ser">See</span> It</p>
+<section class="prelude" id="prelude2" aria-label="Introducing OpenCurve">
   <a class="scroll-cue" href="#intro" aria-label="Scroll down"><span class="lbl">scroll</span><span class="hair" aria-hidden="true"></span></a>
 </section>
 <main id="chapters">
@@ -1116,7 +1119,7 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
     return alpha;
   }
 
-  var prelude = document.getElementById('prelude'), preQuote = document.querySelector('.pre-quote'), preVeil = document.getElementById('preVeil'), huds = Array.prototype.slice.call(document.querySelectorAll('.hud'));
+  var prelude = document.getElementById('prelude'), preQuote = document.querySelector('.pre-quote'), preIntro = document.querySelector('.pre-intro'), preP = 0, preReady = 0, preVeil = document.getElementById('preVeil'), huds = Array.prototype.slice.call(document.querySelectorAll('.hud'));
   var words = null, wordEls = [], titleTravel = false, q2Top = 1, titleFs = 1;   /* where each title word rests on the cover (page coordinates, no transform) */
   function measureTitle() {
     wordEls = Array.prototype.slice.call(coverIn.children); titleFs = parseFloat(getComputedStyle(coverIn).fontSize) || 1;
@@ -1193,28 +1196,43 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
        middle they move together and slowly blend from one to the other, so the hand-over can't be seen */
     var cx = reduce ? (scrollF > 0.05 ? 1 : 0) : ease(clamp01((morphF - 0.02) / 0.5));
     /* pre-cover: until you scroll down from it, only its words show; the scene and bars fade in on the way to the cover */
-    var preT = clamp01(window.scrollY / (main.offsetTop || 1)), sh = ease(clamp01((preT - 0.6) / 0.38));   /* the scene stays hidden through both pre-cover screens */
+    /* pre-cover progress, in screens (0 = quote, 1 = "Introducing", 2 = cover). It trails the scroll on purpose, so every step plays out slowly */
+    var q2 = q2Top || 1, moT = main.offsetTop || 1, sy = window.scrollY, preTarget = sy <= q2 ? sy / q2 : 1 + clamp01((sy - q2) / ((moT - q2) || 1));
+    if (!frame.preInit) { frame.preInit = true; preP = preTarget; }   /* opening the page partway down (a link to a subject) starts there, without replaying the intro */
+    preP += (preTarget - preP) * (reduce ? 1 : 1 - Math.exp(-dt * 1.5));
+    if (Math.abs(preTarget - preP) < 0.0005) preP = preTarget;
+    if (document.documentElement.classList.contains('pre-ready')) preReady = reduce ? 1 : Math.min(1, preReady + dt / 1.6);
+    var sh = ease(clamp01((preP - 1.35) / 0.6));   /* the scene and bars stay hidden until the words start settling into the cover */
     if (sh !== frame.sh) {
       frame.sh = sh; preVeil.style.opacity = String(Math.min(0.995, 1 - sh));   /* never fully opaque: a completely hidden canvas can stop being drawn in some browsers */ preVeil.style.display = sh >= 1 ? 'none' : '';
       huds.forEach(function (h) { h.style.opacity = sh < 1 ? sh.toFixed(3) : ''; h.style.visibility = sh < 0.02 ? 'hidden' : ''; });
     }
-    /* the pre-cover trip. u: first screen -> second (0..1), v: second screen -> cover (0..1) */
-    var mo = main.offsetTop || 1, sy = window.scrollY, pu = clamp01(sy / q2Top), pv = clamp01((sy - q2Top) / ((mo - q2Top) || 1));
-    var qin = ease(clamp01((pu - 0.45) / 0.5)), qout = ease(clamp01(pv / 0.55)), qo = qin * (1 - qout);   /* the quote: in on the second screen, out on the way to the cover */
-    if (qo !== frame.qo) { frame.qo = qo; preQuote.style.opacity = qo.toFixed(3); preQuote.style.transform = 'translateY(' + ((1 - qin) * 30 - qout * 56).toFixed(1) + 'px)'; preQuote.style.filter = qo < 0.99 ? 'blur(' + ((1 - qin) * 8 + qout * 8).toFixed(2) + 'px)' : ''; }
-    if (words && sy < mo - 0.5) {   /* the title words: side by side in the middle, then small at the top, then into the stacked cover title */
+    /* the words on the pre-cover screens */
+    var qo = ease(preReady) * (1 - ease(clamp01(preP / 0.45)));   /* the quote: fades in on load, out as you scroll */
+    var wi = ease(clamp01((preP - 0.55) / 0.45)), io = wi * (1 - ease(clamp01((preP - 1.05) / 0.4)));   /* "Introducing" and the title come in together; "Introducing" leaves first */
+    var fxKey = qo.toFixed(3) + io.toFixed(3);
+    if (fxKey !== frame.fx) {
+      frame.fx = fxKey;
+      preQuote.style.opacity = qo.toFixed(3); preQuote.style.filter = qo < 0.99 ? 'blur(' + ((1 - qo) * 8).toFixed(2) + 'px)' : ''; preQuote.style.transform = 'translate(-50%, calc(-50% + ' + ((1 - qo) * (preP > 0.01 ? -40 : 24)).toFixed(1) + 'px))';
+      preIntro.style.opacity = io.toFixed(3); preIntro.style.filter = io < 0.99 ? 'blur(' + ((1 - io) * 6).toFixed(2) + 'px)' : '';
+      preQuote.style.visibility = qo < 0.002 ? 'hidden' : ''; preIntro.style.visibility = io < 0.002 ? 'hidden' : '';
+    }
+    if (words && (sy < moT - 0.5 || preP < 1.999)) {   /* "Open" and "Curve": side by side under "Introducing", then into the stacked cover title */
       var vw = window.innerWidth, vh = window.innerHeight, gap = titleFs * 0.24, w0 = words[0], w1 = words[1], tot = w0.w + gap + w1.w;
-      var sA = Math.min(0.5, vw * 0.78 / tot), sB = Math.min(0.12, vw * 0.3 / tot), fl = reduce ? 0 : 1 - pu;
-      var side = function (sc, top, fx) { var x = (vw - tot * sc) / 2 + fx; return [{ x: x, y: top, s: sc }, { x: x + (w0.w + gap) * sc, y: top, s: sc }]; };
-      var A = side(sA, vh * 0.5 - w0.h * sA / 2 + Math.sin(t * 0.6 + 1) * 7 * fl, Math.sin(t * 0.37) * 10 * fl), B = side(sB, 58, 0);
-      var C = words.map(function (w) { return { x: w.left, y: w.top - mo, s: 1 }; });
-      var from = sy <= q2Top ? A : B, to = sy <= q2Top ? B : C, kk = easeIO(sy <= q2Top ? pu : pv);
+      var sA = Math.min(0.42, vw * 0.7 / tot), fl = reduce ? 0 : 1 - clamp01(preP - 1);
+      var ax = (vw - tot * sA) / 2 + Math.sin(t * 0.37) * 6 * fl, ay = vh * 0.5 - w0.h * sA * 0.3 + Math.sin(t * 0.6 + 1) * 5 * fl;
+      preIntro.style.top = (ay - 34) + 'px';   /* "Introducing" sits just above the words */
+      var A = [{ x: ax, y: ay, s: sA }, { x: ax + (w0.w + gap) * sA, y: ay, s: sA }];
+      var kr = clamp01(preP - 1), kk = easeIO(kr), rest = Math.max(moT, sy);
       wordEls.forEach(function (el, i) {
-        var x = lerp(from[i].x, to[i].x, kk), y = lerp(from[i].y, to[i].y, kk), sc = lerp(from[i].s, to[i].s, kk);
+        /* "Curve" drops to its line a little before it slides left, so the two words never run into each other */
+        var kx = i ? easeIO(clamp01((kr - 0.25) / 0.75)) : kk, ky = i ? easeIO(clamp01(kr / 0.75)) : kk;
+        var x = lerp(A[i].x, words[i].left, kx), y = lerp(A[i].y, words[i].top - rest, ky), sc = lerp(A[i].s, 1, kk);
         el.style.transform = 'translate(' + (x - words[i].left).toFixed(2) + 'px,' + (y - (words[i].top - sy)).toFixed(2) + 'px) scale(' + sc.toFixed(4) + ')';
+        el.style.opacity = preP < 1 ? wi.toFixed(3) : ''; el.style.filter = preP < 1 && wi < 0.99 ? 'blur(' + ((1 - wi) * 8).toFixed(2) + 'px)' : '';
       });
       titleTravel = true;
-    } else if (titleTravel) { wordEls.forEach(function (el) { el.style.transform = ''; }); titleTravel = false; frame.ce = -1; }
+    } else if (titleTravel) { wordEls.forEach(function (el) { el.style.transform = ''; el.style.opacity = ''; el.style.filter = ''; }); titleTravel = false; frame.ce = -1; }
     var ce = ease(clamp01(scrollF / 0.55));   /* the cover title drifts up, fades and softens as you scroll away */
     if (ce !== frame.ce) {
       frame.ce = ce;
