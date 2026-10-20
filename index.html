@@ -211,9 +211,9 @@ a, img, svg { -webkit-user-drag: none; }
    1. "Some math only clicks once you see it." fades in.
    2. Scroll: it fades out, and "Introducing" with "Open Curve" (side by side) fades in.
    3. Scroll: "Open" and "Curve" glide into the stacked cover title while the 3D scene and the bars fade in.
-   The words are the cover title itself, moved by script; the long empty section is just room to scroll. */
+   One scroll per step: the two empty sections are snap stops, and each step plays out smoothly on its own. */
 .pre-veil { position: fixed; inset: 0; z-index: 1; background: var(--void); pointer-events: none; }   /* covers the 3D scene on the pre-cover; fades away on the way to the cover */
-.prelude { position: relative; z-index: 2; height: 400svh; box-sizing: border-box; scroll-snap-align: start; }   /* one long stretch, about four screens of scrolling, with no snap stops inside it */
+.prelude { position: relative; z-index: 2; height: 100svh; box-sizing: border-box; scroll-snap-align: start; scroll-snap-stop: always; }   /* one scroll = one step: each screen is a snap stop */
 .prelude .scroll-cue { position: fixed; z-index: 3; left: 50%; bottom: 14px; transform: translateX(-50%); }
 .pre-fx { position: fixed; z-index: 3; left: 50%; top: 50%; margin: 0; text-align: center; pointer-events: none; opacity: 0; transform: translate(-50%, -50%); }
 .pre-quote { width: min(14ch, 92vw); text-wrap: balance; font-size: clamp(52px, 6vw, 112px); font-weight: 200; line-height: 1; letter-spacing: -0.045em; color: var(--ink); }
@@ -388,9 +388,10 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
 <p class="pre-fx pre-quote">Some math only clicks once you <span class="ser">see</span> it.</p>
 <p class="pre-fx pre-intro" aria-hidden="true">Introducing</p>
 <div class="pre-title" aria-hidden="true"><span class="l1">Open</span><span class="l2">Cu<span class="kr">r</span>ve</span></div>
-<section class="prelude" id="prelude" aria-label="Some math only clicks once you see it. Introducing OpenCurve.">
+<section class="prelude" id="prelude" aria-label="Some math only clicks once you see it.">
   <a class="scroll-cue" href="#intro" aria-label="Scroll down"><span class="lbl">scroll</span><span class="hair" aria-hidden="true"></span></a>
 </section>
+<section class="prelude" id="prelude2" aria-label="Introducing OpenCurve"></section>
 <main id="chapters">
   <section class="chapter" id="intro">
     <div class="chapter-inner">
@@ -1131,6 +1132,20 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
     words = wordEls.map(function (w) { var tr = w.style.transform; w.style.transform = ''; var r = w.getBoundingClientRect(); w.style.transform = tr; return { left: r.left, top: r.top + window.scrollY, w: r.width, h: r.height }; });
   }
   var coverIn = document.querySelector('#intro h1')   /* only the title moves, so the scroll hint below keeps its place on the bottom line */, coverCue = document.querySelector('#intro .scroll-cue');
+  /* the pre-cover moves one step per scroll gesture: a wheel flick or a trackpad swipe goes exactly one screen
+     (the long tail of a trackpad swipe doesn't count as a second scroll) */
+  var lastWheelT = 0, stepLock = 0;
+  window.addEventListener('wheel', function (e) {
+    var mo = main.offsetTop, y = window.scrollY, now = performance.now();
+    if (y > mo + 2 || (y >= mo - 2 && e.deltaY > 0) || Math.abs(e.deltaY) < 1) return;   /* past the pre-cover: scrolling works as usual */
+    e.preventDefault();
+    var fresh = now - lastWheelT > 220; lastWheelT = now;
+    if (!fresh || now < stepLock) return;
+    var h = mo / 2, idx = Math.round(y / h), next = Math.max(0, Math.min(2, idx + (e.deltaY > 0 ? 1 : -1)));
+    if (next === idx) return;
+    stepLock = now + 1200;   /* the step finishes before another can start */
+    window.scrollTo({ top: next * h, behavior: reduce ? 'auto' : 'smooth' });
+  }, { passive: false });
   measureTitle(); window.addEventListener('resize', measureTitle); if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureTitle);
   var redF = 0;   /* how red the spiral is: rises from the bottom on screen 05 (about 2.5 s), drains back from the top if you scroll back */
   var lastMs = 0, morphF = 0, HANDOFF = K + 0.995;   /* the scroll point where the intro spiral hands over to Pre-Algebra's model */
@@ -1203,7 +1218,7 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
     /* pre-cover progress, in screens (0 = quote, 1 = "Introducing", 2 = cover). It trails the scroll on purpose, so every step plays out slowly */
     var moT = main.offsetTop || 1, sy = window.scrollY, preTarget = 2 * clamp01(sy / moT), preCue = prelude.querySelector('.scroll-cue');
     if (!frame.preInit) { frame.preInit = true; preP = preTarget; }   /* opening the page partway down (a link to a subject) starts there, without replaying the intro */
-    preP += (preTarget - preP) * (reduce ? 1 : 1 - Math.exp(-dt * 2.4));
+    preP += (preTarget - preP) * (reduce ? 1 : 1 - Math.exp(-dt * 2));
     if (Math.abs(preTarget - preP) < 0.0005 || (preTarget === 2 && preP > 1.95)) preP = preTarget;   /* the last sliver of the glide is under a pixel, so finish it */
     if (document.documentElement.classList.contains('pre-ready')) preReady = reduce ? 1 : Math.min(1, preReady + dt / 1.6);
     var sh = ease(clamp01((preP - 1.35) / 0.6));   /* the scene and bars stay hidden until the words start settling into the cover */
