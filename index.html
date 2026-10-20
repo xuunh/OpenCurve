@@ -217,6 +217,12 @@ a, img, svg { -webkit-user-drag: none; }
 .prelude .scroll-cue { position: fixed; z-index: 3; left: 50%; bottom: 14px; transform: translateX(-50%); }
 .pre-fx { position: fixed; z-index: 3; left: 50%; top: 50%; margin: 0; text-align: center; pointer-events: none; opacity: 0; transform: translate(-50%, -50%); }
 .pre-quote { width: min(14ch, 92vw); text-wrap: balance; font-size: clamp(52px, 6vw, 112px); font-weight: 200; line-height: 1; letter-spacing: -0.045em; color: var(--ink); }
+/* the traveling title: a copy pinned to the screen, set exactly like the cover title. Being pinned, the page's own
+   scrolling never moves it, so it glides without the one-frame wobble a scrolling element gets; on arrival it hands
+   over to the real cover title in the same spot */
+.pre-title { position: fixed; z-index: 3; left: 0; top: 0; pointer-events: none; font-size: clamp(72px, 15vw, 232px); font-weight: 200; letter-spacing: -0.02em; line-height: 0.84; color: var(--ink); text-shadow: 0 0 40px rgba(0,0,0,0.6); }
+.pre-title span { position: absolute; left: 0; top: 0; display: block; white-space: nowrap; transform-origin: 0 0; visibility: hidden; will-change: transform; }
+.pre-title .l2 { font-weight: 400; letter-spacing: -0.01em; }
 .pre-intro { font-size: clamp(20px, 1.6vw, 28px); font-weight: 300; letter-spacing: -0.01em; color: var(--mist); white-space: nowrap; }
 #intro h1 > span { justify-self: start; transform-origin: 0 0; }   /* each word measures to its own width, so it can travel on its own */
 
@@ -380,6 +386,7 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
 <div class="cur-ax" aria-hidden="true"></div><div class="cur-ay" aria-hidden="true"></div><div class="cur-xy" aria-hidden="true"></div>
 <p class="pre-fx pre-quote">Some math only clicks once you <span class="ser">see</span> it.</p>
 <p class="pre-fx pre-intro" aria-hidden="true">Introducing</p>
+<div class="pre-title" aria-hidden="true"><span class="l1">Open</span><span class="l2">Curve</span></div>
 <section class="prelude" id="prelude" aria-label="Some math only clicks once you see it. Introducing OpenCurve.">
   <a class="scroll-cue" href="#intro" aria-label="Scroll down"><span class="lbl">scroll</span><span class="hair" aria-hidden="true"></span></a>
 </section>
@@ -1117,7 +1124,7 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
   }
 
   var prelude = document.getElementById('prelude'), preQuote = document.querySelector('.pre-quote'), preIntro = document.querySelector('.pre-intro'), preP = 0, preReady = 0, preVeil = document.getElementById('preVeil'), huds = Array.prototype.slice.call(document.querySelectorAll('.hud'));
-  var words = null, wordEls = [], titleTravel = false, titleFs = 1;   /* where each title word rests on the cover (page coordinates, no transform) */
+  var words = null, wordEls = [], titleTravel = false, titleFs = 1, cloneEls = Array.prototype.slice.call(document.querySelectorAll('.pre-title span'));   /* where each title word rests on the cover (page coordinates, no transform) */
   function measureTitle() {
     wordEls = Array.prototype.slice.call(coverIn.children); titleFs = parseFloat(getComputedStyle(coverIn).fontSize) || 1;
     words = wordEls.map(function (w) { var tr = w.style.transform; w.style.transform = ''; var r = w.getBoundingClientRect(); w.style.transform = tr; return { left: r.left, top: r.top + window.scrollY, w: r.width, h: r.height }; });
@@ -1196,7 +1203,7 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
     var moT = main.offsetTop || 1, sy = window.scrollY, preTarget = 2 * clamp01(sy / moT), preCue = prelude.querySelector('.scroll-cue');
     if (!frame.preInit) { frame.preInit = true; preP = preTarget; }   /* opening the page partway down (a link to a subject) starts there, without replaying the intro */
     preP += (preTarget - preP) * (reduce ? 1 : 1 - Math.exp(-dt * 0.9));
-    if (Math.abs(preTarget - preP) < 0.0005) preP = preTarget;
+    if (Math.abs(preTarget - preP) < 0.0005 || (preTarget === 2 && preP > 1.95)) preP = preTarget;   /* the last sliver of the glide is under a pixel, so finish it */
     if (document.documentElement.classList.contains('pre-ready')) preReady = reduce ? 1 : Math.min(1, preReady + dt / 1.6);
     var sh = ease(clamp01((preP - 1.35) / 0.6));   /* the scene and bars stay hidden until the words start settling into the cover */
     if (sh !== frame.sh) {
@@ -1222,15 +1229,16 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
       preIntro.style.top = (ay - 34) + 'px';   /* "Introducing" sits just above the words */
       var A = [{ x: ax, y: ay, s: sA }, { x: ax + (w0.w + gap) * sA, y: ay, s: sA }];
       var kr = clamp01(preP - 1), kk = easeIO(kr), rest = Math.max(moT, sy);
-      wordEls.forEach(function (el, i) {
+      cloneEls.forEach(function (el, i) {
         /* "Curve" drops to its line a little before it slides left, so the two words never run into each other */
         var kx = i ? easeIO(clamp01((kr - 0.25) / 0.75)) : kk, ky = i ? easeIO(clamp01(kr / 0.75)) : kk;
         var x = lerp(A[i].x, words[i].left, kx), y = lerp(A[i].y, words[i].top - rest, ky), sc = lerp(A[i].s, 1, kk);
-        el.style.transform = 'translate(' + (x - words[i].left).toFixed(2) + 'px,' + (y - (words[i].top - sy)).toFixed(2) + 'px) scale(' + sc.toFixed(4) + ')';
-        el.style.opacity = preP < 1 ? wi.toFixed(3) : ''; el.style.filter = preP < 1 && wi < 0.99 ? 'blur(' + ((1 - wi) * 8).toFixed(2) + 'px)' : '';
+        el.style.transform = 'translate3d(' + x.toFixed(2) + 'px,' + y.toFixed(2) + 'px,0) scale(' + sc.toFixed(4) + ')';
+        el.style.opacity = preP < 1 ? wi.toFixed(3) : String(1 - ease(clamp01(scrollF / 0.55))); el.style.filter = preP < 1 && wi < 0.99 ? 'blur(' + ((1 - wi) * 8).toFixed(2) + 'px)' : '';
+        el.style.visibility = 'visible';
       });
-      titleTravel = true;
-    } else if (titleTravel) { wordEls.forEach(function (el) { el.style.transform = ''; el.style.opacity = ''; el.style.filter = ''; }); titleTravel = false; frame.ce = -1; }
+      if (!titleTravel) { wordEls.forEach(function (el) { el.style.visibility = 'hidden'; }); titleTravel = true; }   /* the real title waits on the cover, hidden, until the copy lands on it */
+    } else if (titleTravel) { cloneEls.forEach(function (el) { el.style.visibility = ''; }); wordEls.forEach(function (el) { el.style.visibility = ''; }); titleTravel = false; frame.ce = -1; }
     var ce = ease(clamp01(scrollF / 0.55));   /* the cover title drifts up, fades and softens as you scroll away */
     if (ce !== frame.ce) {
       frame.ce = ce;
