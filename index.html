@@ -78,7 +78,7 @@ a:focus-visible, button:focus-visible { color: var(--accent); }
 
 .hud-bottom {
   bottom: env(safe-area-inset-bottom, 0px); left: 0; right: 0;
-  display: flex; justify-content: space-between; align-items: flex-end; gap: 16px;
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;   /* the label sits on the same centre line as the counter */
   padding-block: 24px;
   padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px));
 }
@@ -144,7 +144,7 @@ html.cur-off .cur-svg, html.cur-off .cur-ax, html.cur-off .cur-ay, html.cur-off 
 .scroll-cue:hover { opacity: 0.9; }
 @keyframes breathe { 0%, 100% { transform: scaleY(0.35); opacity: 0.4; } 50% { transform: scaleY(1); opacity: 1; } }
 #intro { position: relative; }
-#intro .scroll-cue { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); }   /* the word sits on the same line as the bottom labels; its breathing line points down at it */
+#intro .scroll-cue { position: absolute; left: 50%; bottom: calc(24px + 20px - 10px - 6.5px); transform: translateX(-50%); }   /* the word sits on the same centre line as the bottom label and counter; its breathing line points down at it */
 @media (max-width: 720px) { #intro .scroll-cue { bottom: 84px; } }
 @media (prefers-reduced-motion: reduce) { .scroll-cue .hair { animation: none; } }
 
@@ -184,7 +184,7 @@ html.cur-off .cur-svg, html.cur-off .cur-ax, html.cur-off .cur-ay, html.cur-off 
 .next-n { letter-spacing: 0.02em; }
 .beat .beat-k, .beat-list, .beat .meta-line, .menu-foot, .menu-head { line-height: 1.4; }   /* every one-line mono label shares one line height */
 .beat.words.mid h2 { margin-left: 0; }
-.scroll-cue .lbl { text-transform: lowercase; margin-right: -0.18em; }
+.scroll-cue .lbl { text-transform: lowercase; margin-right: -0.18em; line-height: 13px; }
 .menu-foot { letter-spacing: 0.04em; text-transform: none; font-size: 11px; }
 .cur-ax, .cur-ay, .cur-xy { font-size: 10px; letter-spacing: 0.04em; }
 h1, h2, .loader-num { margin-left: -0.045em; }
@@ -214,7 +214,7 @@ a, img, svg { -webkit-user-drag: none; }
    One scroll per step: the two empty sections are snap stops, and each step plays out smoothly on its own. */
 .pre-veil { position: fixed; inset: 0; z-index: 1; background: var(--void); pointer-events: none; }   /* covers the 3D scene on the pre-cover; fades away on the way to the cover */
 .prelude { position: relative; z-index: 2; height: 100svh; box-sizing: border-box; scroll-snap-align: start; scroll-snap-stop: always; }   /* one scroll = one step: each screen is a snap stop */
-.prelude .scroll-cue { position: fixed; z-index: 3; left: 50%; bottom: 14px; transform: translateX(-50%); }
+.prelude .scroll-cue { position: fixed; z-index: 3; left: 50%; bottom: calc(24px + 20px - 10px - 6.5px); transform: translateX(-50%); }
 .pre-fx { position: fixed; z-index: 3; left: 50%; top: 50%; margin: 0; text-align: center; pointer-events: none; opacity: 0; transform: translate(-50%, -50%); }
 .pre-quote { width: min(14ch, 92vw); text-wrap: balance; font-size: clamp(52px, 6vw, 112px); font-weight: 200; line-height: 1; letter-spacing: -0.045em; color: var(--ink); }
 /* the traveling title: a copy pinned to the screen, set exactly like the cover title. Being pinned, the page's own
@@ -230,7 +230,7 @@ a, img, svg { -webkit-user-drag: none; }
 #intro h1 { display: grid; width: max-content; line-height: 0.84; letter-spacing: -0.02em; transform-origin: 0 0; transition: opacity 1.4s cubic-bezier(.2,.7,.2,1) .1s; }
 html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the loader lifts */ /* cover title: "Open" thin, "Curve" bolder, stacked flush left */
 #intro h1 .l1 { font-weight: 200; }
-#intro h1 .l2 { font-weight: 400; letter-spacing: -0.01em; margin-left: 0.5em; }   /* "Curve" steps out to the right under "Open", so the two words aren't stacked flush */
+#intro h1 .l2 { font-weight: 400; letter-spacing: -0.01em; margin-left: 1.25em; }   /* "Curve" starts under the "e" of "Open": a clean diagonal step, clear of the tail of the "p" */
 .kr { margin: 0 -0.012em 0 -0.042em; }   /* the "r" in Curve: Geist leaves too much air after the u and too little before the v at this size */
 #intro .chapter-inner { gap: 36px; }
 @media (max-width: 720px) { #intro .scroll-cue { display: none; } }
@@ -257,7 +257,7 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
 .beat.words.mid .chapter-inner { justify-items: center; text-align: center; }
 #project .chapter-inner { margin-top: -15vh; }   /* sits a little high, leaving the bottom of the screen to the long wave */
 /* model only: nothing to read, just the quiet scroll cue from the cover */
-.beat.model .scroll-cue { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); }
+.beat.model .scroll-cue { position: absolute; left: 50%; bottom: calc(24px + 20px - 10px - 6.5px); transform: translateX(-50%); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .beat-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; width: min(400px, 100%); font-family: var(--hud); font-size: 11px; letter-spacing: 0.04em; color: var(--mist); text-align: left; }
 .beat-list li { display: flex; align-items: baseline; gap: 12px; }
@@ -1314,10 +1314,10 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
       shown = key;
       var ch = cur.n;
       eqEl.textContent = cur.beat ? cur.beat.label : SUBJECTS[ch].label;
-      countEl.textContent = pad(ch) + ' / ' + pad(LAST);
+      countEl.textContent = (ch ? pad(ch) : '—') + ' / ' + pad(LAST);   /* the cover and intro aren't subjects, so no "00" */
       document.documentElement.style.setProperty('--accent', SUBJECTS[ch].css);
       pickerLabel.textContent = cur.beat ? 'Intro' : ch === 0 ? 'Index' : SUBJECTS[ch].name;
-      pickerNum.textContent = pad(ch);
+      pickerNum.textContent = ch ? pad(ch) : ''; pickerNum.style.display = ch ? '' : 'none';
       tabs.forEach(function (b) { b.setAttribute('aria-current', String(ch > 0 && +b.dataset.go === ch)); });
     }
 
