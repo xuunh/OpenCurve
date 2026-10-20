@@ -54,10 +54,10 @@ a:focus-visible, button:focus-visible { color: var(--accent); }
 .menu-close::after { content: '\00d7'; font-size: 18px; letter-spacing: 0; line-height: 1; transition: transform .4s; }
 .menu-close:hover::after { transform: rotate(90deg); }
 /* Index: a course map. One open curve runs through every subject in order, across four stages; hovering a subject
-   lights the curve up to it and shows its 3D model turning on the right. The about details sit in a quiet row below. */
+   lights the curve up to it. The about details sit in a quiet row below. */
 .menu-head { margin-bottom: 40px; }
-.ix { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) clamp(280px, 22vw, 340px); gap: clamp(40px, 4vw, 72px); align-items: start; }
-.ix-map { position: relative; display: grid; grid-template-columns: repeat(4, max-content); justify-content: space-between; column-gap: 28px; padding-bottom: 48px; }
+.ix { flex: 1; display: block; }
+.ix-map { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 32px; padding-bottom: 48px; }   /* the same four-column grid as the about row below, so the stages line up with it */
 .ix-curve { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
 .ix-curve path { fill: none; stroke: rgba(220,225,240,0.16); stroke-width: 1; transition: stroke .35s, stroke-width .35s; }
 .ix-curve path.on { stroke: rgba(240,243,250,0.7); }
@@ -73,15 +73,6 @@ a:focus-visible, button:focus-visible { color: var(--accent); }
 .ix-col button.pass .dot { border-color: rgba(240,243,250,0.75); background: rgba(240,243,250,0.75); }
 .ix-col button:hover .dot, .ix-col button:focus-visible .dot, .ix-col button.lit .dot { border-color: var(--c); background: var(--c); box-shadow: 0 0 12px var(--c); }
 .ix-col button[aria-current="true"] .nm { color: var(--c); }
-.ix-pre { position: sticky; top: 0; display: grid; gap: 0; }
-.ix-stage { position: relative; aspect-ratio: 1 / 0.86; border: 1px solid var(--line); border-radius: 2px; background: radial-gradient(120% 90% at 50% 60%, #0c0d12, var(--void) 70%); overflow: hidden; }   /* solid, so nothing from the scene behind shows through */
-.ix-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.ix-k { margin: 22px 0 10px; display: flex; align-items: center; gap: 14px; font-family: var(--hud); font-size: 11px; line-height: 1.4; letter-spacing: 0.04em; color: var(--mist); }
-.ix-k b { font-weight: 400; color: var(--c, var(--ink)); font-variant-numeric: tabular-nums; }
-.ix-k b::after { content: ''; display: inline-block; width: 28px; height: 1px; margin-left: 14px; vertical-align: middle; background: var(--mist); opacity: 0.5; }
-.ix-name { margin: 0; font-family: var(--display); font-weight: 200; font-size: clamp(34px, 2.8vw, 48px); line-height: 1; letter-spacing: -0.045em; color: var(--ink); }
-.ix-desc { margin: 14px 0 0; font-size: 15px; line-height: 1.5; color: var(--mist); max-width: 34ch; }
-.ix-eq { margin: 18px 0 0; font-family: var(--hud); font-size: 11px; line-height: 1.4; letter-spacing: 0.04em; color: var(--c, var(--mist)); }
 .ix-about { margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px; font-size: 13px; line-height: 1.55; color: var(--mist); }
 .ix-about h4 { margin: 0 0 10px; font-family: var(--hud); font-weight: 400; font-size: 10px; line-height: 1.4; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mist); }
 .ix-about p { margin: 0; }
@@ -90,7 +81,7 @@ a:focus-visible, button:focus-visible { color: var(--accent); }
 .ix-about a { color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
 .ix-about a::after { content: '\2197'; font-size: 11px; color: var(--mist); transition: transform .3s; }
 .ix-about a:hover::after { transform: translate(2px, -2px); color: var(--ink); }
-@media (max-width: 1000px) { .ix { grid-template-columns: 1fr; } .ix-pre { display: none; } .ix-map { grid-template-columns: 1fr 1fr; row-gap: 28px; } .ix-about { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 1000px) { .ix-map { grid-template-columns: 1fr 1fr; row-gap: 28px; } .ix-about { grid-template-columns: 1fr 1fr; } }
 @media (prefers-reduced-motion: reduce) { .ix-col button, .ix-col button .dot, .ix-curve path, .menu-close::after { transition: none; } }
 
 .hud-bottom {
@@ -325,13 +316,6 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
     <div class="menu-head"><span>Index</span><button type="button" class="menu-close" id="menuClose">Close</button></div>
     <div class="ix">
       <nav class="ix-map" id="ixMap" aria-label="Subjects"><svg class="ix-curve" id="ixCurve" aria-hidden="true"></svg></nav>
-      <div class="ix-pre" aria-live="polite">
-        <div class="ix-stage"><canvas id="ixCanvas" aria-hidden="true"></canvas></div>
-        <p class="ix-k"><b id="ixN">01</b><span id="ixGroup">Foundations</span></p>
-        <h3 class="ix-name" id="ixName">Pre-Algebra</h3>
-        <p class="ix-desc" id="ixDesc"></p>
-        <p class="ix-eq" id="ixEq"></p>
-      </div>
     </div>
     <footer class="ix-about" aria-label="About">
       <div><h4>Made by</h4><p><span class="who">Junayed Haider</span> <span class="handle">@xuunh</span></p><p>Biomedical Engineering, The City College of New&nbsp;York</p></div>
@@ -712,13 +696,7 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
     ixSegs.forEach(function (p, j) { p.classList.toggle('on', j + 1 < i); });
     tabs.forEach(function (b) { var g = +b.dataset.go; b.classList.toggle('pass', g < i); b.classList.toggle('lit', g === i); });
   }
-  var ixN = document.getElementById('ixN'), ixGroup = document.getElementById('ixGroup'), ixName = document.getElementById('ixName'), ixDesc = document.getElementById('ixDesc'), ixEq = document.getElementById('ixEq'), ixPre = document.querySelector('.ix-pre');
-  function ixShow(i) {
-    var s = SUBJECTS[i];
-    ixPre.style.setProperty('--c', s.css); ixN.textContent = pad(i); ixGroup.textContent = s.group === 'High school' ? 'High School' : s.group;
-    ixName.textContent = s.name; ixDesc.textContent = s.desc || ''; ixEq.textContent = s.label || '';
-    ixLight(i); if (window.ixModel) ixModel(i);
-  }
+  function ixShow(i) { ixLight(i); }
   window.addEventListener('resize', function () { if (!menu.hidden) drawCurve(); });
   tabs.forEach(function (b) {
     var show = function () { ixShow(+b.dataset.go); };
@@ -1062,29 +1040,6 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
     return m;
   });
 
-  /* ---------- Index preview: the hovered subject's own model, turning slowly in a small window of its own ---------- */
-  var ixCanvas = document.getElementById('ixCanvas'), ixR = null, ixScene = new THREE.Scene(), ixCam = new THREE.PerspectiveCamera(32, 1, 0.1, 500), ixMesh = null, ixFade = 0, ixTilt = 0;
-  try { ixR = new THREE.WebGLRenderer({ canvas: ixCanvas, antialias: true, alpha: true }); ixR.setClearColor(0x000000, 0); } catch (e) { ixR = null; }
-  window.ixModel = function (i) {
-    if (!ixR) return;
-    var src = forms[K + i]; if (!src) return;
-    if (!ixMesh) { ixMesh = new THREE.LineSegments(src.geometry, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending })); ixScene.add(ixMesh); }
-    if (ixMesh.geometry !== src.geometry) { ixMesh.geometry = src.geometry; ixFade = 0; }
-    var g = src.geometry; if (!g.boundingSphere) g.computeBoundingSphere();
-    var r = g.boundingSphere.radius, d = r / Math.sin(ixCam.fov * Math.PI / 360) * 1.02;
-    ixCam.position.set(0, r * 0.12, d); ixCam.lookAt(0, 0, 0); ixMesh.position.copy(g.boundingSphere.center).multiplyScalar(-1);
-    ixTilt = src.rotation.x; ixMesh.rotation.z = src.rotation.z;
-  };
-  function ixRender(t, dt) {
-    if (!ixR || !ixMesh) return;
-    var w = ixCanvas.clientWidth, h = ixCanvas.clientHeight; if (!w || !h) return;
-    if (ixCanvas.width !== Math.round(w * Math.min(2, window.devicePixelRatio || 1))) { ixR.setPixelRatio(Math.min(2, window.devicePixelRatio || 1)); ixR.setSize(w, h, false); ixCam.aspect = w / h; ixCam.updateProjectionMatrix(); }
-    ixFade = Math.min(1, ixFade + dt / 0.45);
-    ixMesh.material.opacity = 0.9 * ixFade * ixFade * (3 - 2 * ixFade);
-    ixMesh.rotation.x = ixTilt; ixMesh.rotation.y = reduce ? 0.4 : t * 0.35;
-    ixR.render(ixScene, ixCam);
-  }
-
   /* ---------- Intro surface ----------
      After the cover, the cover's own knot carries the intro. It glides to the middle of the screen, relaxes into a
      ring and flattens into a flat grid, then keeps reshaping in the usual right-hand spot (a twist, a curved sheet with
@@ -1418,7 +1373,6 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
     }
 
     if (composer) composer.render(); else renderer.render(scene, camera);
-    if (!menu.hidden) ixRender(t, dt);   /* the index's turning preview */
     if (!frame.drawn) { frame.drawn = true; if (window.ssReady) ssReady(); }
     if (!reduce) requestAnimationFrame(frame);
   }
