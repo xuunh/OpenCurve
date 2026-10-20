@@ -1152,19 +1152,30 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
     words = wordEls.map(function (w) { var tr = w.style.transform; w.style.transform = ''; var r = w.getBoundingClientRect(); w.style.transform = tr; return { left: r.left, top: r.top + window.scrollY, w: r.width, h: r.height }; });
   }
   var coverIn = document.querySelector('#intro h1')   /* only the title moves, so the scroll hint below keeps its place on the bottom line */, coverCue = document.querySelector('#intro .scroll-cue');
-  /* the pre-cover moves one step per scroll gesture: a wheel flick or a trackpad swipe goes exactly one screen
-     (the long tail of a trackpad swipe doesn't count as a second scroll) */
-  var lastWheelT = 0, stepLock = 0;
+  /* One screen per scroll, everywhere: a wheel flick or a trackpad swipe moves exactly one screen, and the next one
+     only goes once the model has caught up (camera arrived, shape finished changing). Scrolling fast can't leave the
+     model behind; it just plays each step in turn. The long tail of a trackpad swipe doesn't count as a new scroll. */
+  var lastWheelT = 0, stepLock = 0, stepGoal = -1;
+  function stops() { return Array.prototype.slice.call(document.querySelectorAll('.prelude')).concat(Array.prototype.slice.call(main.children)); }
+  function modelSettled(now) {
+    if (stepGoal >= 0 && Math.abs(window.scrollY - stepGoal) > 2 && now < stepLock + 2500) return false;   /* the page is still gliding to the last step */
+    var camOk = Math.abs(scrollTarget - scrollF) < 0.12;
+    var shapeOk = scrollF > K + 0.5 || Math.abs(scrollF - morphF) < 0.2;
+    var preOk = window.scrollY >= docTop(main) - 2 || Math.abs(2 * clamp01(window.scrollY / (docTop(main) || 1)) - preP) < 0.08;
+    return camOk && shapeOk && preOk;
+  }
   window.addEventListener('wheel', function (e) {
-    var mo = docTop(main), y = window.scrollY, now = performance.now();
-    if (y > mo + 2 || (y >= mo - 2 && e.deltaY > 0) || Math.abs(e.deltaY) < 1) return;   /* past the pre-cover: scrolling works as usual */
+    if (e.ctrlKey || !menu.hidden || Math.abs(e.deltaY) < 1 || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;   /* zooming, the open index, sideways swipes: leave alone */
     e.preventDefault();
-    var fresh = now - lastWheelT > 220; lastWheelT = now;
-    if (!fresh || now < stepLock) return;
-    var h = mo / 2, idx = Math.round(y / h), next = Math.max(0, Math.min(2, idx + (e.deltaY > 0 ? 1 : -1)));
+    var now = performance.now(), fresh = now - lastWheelT > 220; lastWheelT = now;
+    if (!fresh || now < stepLock || !modelSettled(now)) return;
+    var list = stops(), y = window.scrollY, idx = 0, best = Infinity;
+    list.forEach(function (el, i) { var d = Math.abs(docTop(el) - y); if (d < best) { best = d; idx = i; } });
+    var next = Math.max(0, Math.min(list.length - 1, idx + (e.deltaY > 0 ? 1 : -1)));
     if (next === idx) return;
-    stepLock = now + 1200;   /* the step finishes before another can start */
-    window.scrollTo({ top: next * h, behavior: reduce ? 'auto' : 'smooth' });
+    stepLock = now + 700;   /* at least this long between steps, even when the model is quick */
+    stepGoal = Math.round(docTop(list[next]));
+    window.scrollTo({ top: docTop(list[next]), behavior: reduce ? 'auto' : 'smooth' });
   }, { passive: false });
   measureTitle(); window.addEventListener('resize', measureTitle); if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureTitle);
   var looped = false;   /* true while the camera finishes gliding in after the Topology -> Pre-Algebra jump */
