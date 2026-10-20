@@ -53,41 +53,39 @@ a:focus-visible, button:focus-visible { color: var(--accent); }
 .menu-close { font: inherit; letter-spacing: inherit; text-transform: inherit; color: var(--ink); background: none; border: 0; padding: 12px 0; min-height: 44px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; }
 .menu-close::after { content: '\00d7'; font-size: 18px; letter-spacing: 0; line-height: 1; transition: transform .4s; }
 .menu-close:hover::after { transform: rotate(90deg); }
-/* Index: two columns of subjects (1-10, 11-19) as ruled rows, the about details beside them, and a footer that
-   reads out the hovered subject's stage and one-line description. Hovering a row draws its rule across in the
-   subject's colour. Rows rise in, one after another, when the index opens. */
-.ix { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: clamp(48px, 5vw, 96px); align-items: start; }
-.ix-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(10, auto); grid-auto-flow: column; column-gap: clamp(32px, 4vw, 64px); }
+/* Index: one editorial list, a full-width row per subject. Each row: number, the name set large, and its one-line description in its own column, which only lights up
+   on hover so nothing shifts. Hovering washes the row in the subject's colour from the left. About sits at the end. */
+.menu-head { margin-bottom: 28px; }
+.ix-list { list-style: none; margin: 0; padding: 0; }
 .ix-list li { position: relative; border-top: 1px solid var(--line); }
-.ix-list li:nth-child(10), .ix-list li:last-child { border-bottom: 1px solid var(--line); }
-.ix-list li::before { content: ''; position: absolute; left: 0; right: 0; top: -1px; height: 1px; background: var(--c, var(--ink)); transform: scaleX(0); transform-origin: left; transition: transform .55s cubic-bezier(.6,0,.2,1); }
-.ix-list li:hover::before, .ix-list li:focus-within::before { transform: scaleX(1); }
-.ix-list button { --c: var(--ink); width: 100%; display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; align-items: baseline; column-gap: 10px; padding: 13px 0 12px; background: none; border: 0; text-align: left; cursor: pointer;
-  color: rgba(240,243,250,0.86); font-family: var(--display); font-weight: 200; font-size: clamp(22px, 1.9vw, 32px); line-height: 1.08; letter-spacing: -0.035em; white-space: nowrap; }
-.ix-list .n { font-family: var(--hud); font-weight: 400; font-size: 11px; letter-spacing: 0.04em; color: var(--mist); font-variant-numeric: tabular-nums; transition: color .3s; }
-.ix-list .nm { display: inline-block; overflow: hidden; text-overflow: ellipsis; transition: transform .45s cubic-bezier(.6,0,.2,1), color .3s; }
-.ix-list .tbd { font-family: var(--hud); font-weight: 400; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mist); opacity: 0.75; }
-.ix-list .here { justify-self: end; font-family: var(--hud); font-weight: 400; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--c); }
-.ix-list button:hover .nm, .ix-list button:focus-visible .nm { transform: translateX(8px); color: var(--c); }
+.ix-list li:last-child { border-bottom: 1px solid var(--line); }
+.ix-list button { --c: var(--ink); position: relative; width: 100%; display: grid; grid-template-columns: 44px minmax(0, 1.1fr) minmax(0, 1fr) 110px; align-items: center; column-gap: 16px;
+  padding: 12px 0; background: none; border: 0; text-align: left; cursor: pointer; color: rgba(240,243,250,0.84); overflow: hidden; }
+.ix-list button::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--c) 16%, transparent), transparent 70%); opacity: 0; transform: scaleX(0.6); transform-origin: left; transition: opacity .45s, transform .6s cubic-bezier(.16,1,.3,1); pointer-events: none; }
+.ix-list button:hover::before, .ix-list button:focus-visible::before { opacity: 1; transform: none; }
+.ix-list .n { font-family: var(--hud); font-weight: 400; font-size: 11px; line-height: 1.4; letter-spacing: 0.04em; color: var(--mist); font-variant-numeric: tabular-nums; transition: color .3s; }
+.ix-list .nm { font-family: var(--display); font-weight: 200; font-size: clamp(28px, 2.7vw, 46px); line-height: 1.05; letter-spacing: -0.04em; white-space: nowrap; transition: color .3s, transform .5s cubic-bezier(.16,1,.3,1); }
+.ix-list .ds { font-size: 14px; line-height: 1.45; color: var(--mist); opacity: 0; transform: translateX(-8px); transition: opacity .35s, transform .5s cubic-bezier(.16,1,.3,1); }
+.ix-list .tg { justify-self: end; white-space: nowrap; font-family: var(--hud); font-weight: 400; font-size: 9px; line-height: 1.4; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mist); }
+.ix-list button:hover .nm, .ix-list button:focus-visible .nm { color: var(--c); transform: translateX(10px); }
+.ix-list button:hover .ds, .ix-list button:focus-visible .ds { opacity: 1; transform: none; color: rgba(240,243,250,0.78); }
 .ix-list button:hover .n, .ix-list button:focus-visible .n, .ix-list button[aria-current="true"] .n { color: var(--c); }
 .ix-list button[aria-current="true"] .nm { color: var(--c); }
-.ix-about { border-left: 1px solid var(--line); padding-left: 32px; display: grid; gap: 34px; font-size: 14px; line-height: 1.6; color: var(--mist); }
-.ix-about h4 { margin: 0 0 12px; font-family: var(--hud); font-weight: 400; font-size: 10px; line-height: 1.4; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mist); }
+.ix-list button[aria-current="true"] .tg::before { content: 'You are here'; color: var(--c); }
+.ix-about { margin-top: 72px; display: grid; grid-template-columns: 44px minmax(0, 1.1fr) minmax(0, 1fr); column-gap: 16px; font-size: 13px; line-height: 1.55; color: var(--mist); }
+.ix-lede { grid-column: 2 / 3; margin: 0; max-width: 22ch; font-family: var(--display); font-weight: 200; font-size: clamp(26px, 2.2vw, 38px); line-height: 1.15; letter-spacing: -0.035em; color: var(--ink); text-wrap: balance; }
+.ix-cols { grid-column: 3 / 4; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-self: start; }
+.ix-about h4 { margin: 0 0 10px; font-family: var(--hud); font-weight: 400; font-size: 10px; line-height: 1.4; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mist); }
 .ix-about p { margin: 0; }
-.ix-about .who { font-family: var(--display); font-weight: 300; font-size: 24px; line-height: 1.15; letter-spacing: -0.025em; color: var(--ink); }
-.ix-about .handle { margin: 4px 0 12px; font-family: var(--hud); font-size: 11px; letter-spacing: 0.04em; }
-.ix-about a { color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; min-height: 30px; }
-.ix-about a::after { content: '\2197'; font-size: 12px; color: var(--mist); transition: transform .3s; }
+.ix-about .who { color: var(--ink); font-size: 15px; margin-bottom: 2px; }
+.ix-about .handle { font-family: var(--hud); font-size: 11px; letter-spacing: 0.04em; color: var(--mist); }
+.ix-about a { color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; min-height: 26px; }
+.ix-about a::after { content: '\2197'; font-size: 11px; color: var(--mist); transition: transform .3s; }
 .ix-about a:hover::after { transform: translate(2px, -2px); color: var(--ink); }
-.ix-foot { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: baseline; gap: 24px; font-family: var(--hud); font-size: 11px; line-height: 1.4; letter-spacing: 0.04em; color: var(--mist); }
-.ix-info { margin: 0; display: flex; gap: 14px; align-items: baseline; min-height: 1.4em; }
-.ix-info .ix-k { color: var(--c, var(--ink)); }
-.ix-info #ixD { font-family: var(--display); font-size: 14px; letter-spacing: 0; color: rgba(240,243,250,0.75); }
-/* rows rise in when the index opens */
-.menu:not([hidden]) .ix-list li, .menu:not([hidden]) .ix-about > div { animation: ixIn .7s cubic-bezier(.16,1,.3,1) both; animation-delay: calc(var(--i, 0) * 28ms + 60ms); }
+.menu:not([hidden]) .ix-list li, .menu:not([hidden]) .ix-about { animation: ixIn .7s cubic-bezier(.16,1,.3,1) both; animation-delay: calc(var(--i, 0) * 26ms + 60ms); }
 @keyframes ixIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
-@media (max-width: 1000px) { .ix { grid-template-columns: 1fr; } .ix-list { grid-template-columns: 1fr; grid-template-rows: none; grid-auto-flow: row; } .ix-list li:nth-child(10) { border-bottom: 0; } .ix-about { border-left: 0; border-top: 1px solid var(--line); padding: 32px 0 0; } }
-@media (prefers-reduced-motion: reduce) { .ix-list li::before, .ix-list .nm, .menu-close::after { transition: none; } .menu:not([hidden]) .ix-list li, .menu:not([hidden]) .ix-about > div { animation: none; } }
+@media (max-width: 1000px) { .ix-list button { grid-template-columns: 36px minmax(0, 1fr) auto; } .ix-list .ds { display: none; } .ix-about { grid-template-columns: 1fr; row-gap: 32px; } .ix-lede, .ix-cols { grid-column: auto; } }
+@media (prefers-reduced-motion: reduce) { .ix-list button::before, .ix-list .nm, .ix-list .ds, .menu-close::after { transition: none; } .menu:not([hidden]) .ix-list li, .menu:not([hidden]) .ix-about { animation: none; } }
 
 .hud-bottom {
   bottom: env(safe-area-inset-bottom, 0px); left: 0; right: 0;
@@ -319,16 +317,16 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
 <div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Index" hidden>
   <div class="menu-inner">
     <div class="menu-head"><span>Index</span><button type="button" class="menu-close" id="menuClose">Close</button></div>
-    <div class="ix">
-      <nav class="ix-nav" aria-label="Subjects"><ol class="ix-list" id="ixList"></ol></nav>
-      <aside class="ix-about" aria-label="About">
-        <div><h4>Made by</h4><p class="who">Junayed Haider</p><p class="handle">@xuunh</p><p>Biomedical Engineering, The City College of New&nbsp;York</p></div>
-        <div><h4>Links</h4><p><a href="https://github.com/xuunh/OpenCurve" target="_blank" rel="noopener">GitHub repository</a></p><p><a href="https://github.com/xuunh" target="_blank" rel="noopener">@xuunh on GitHub</a></p></div>
-        <div><h4>Open source</h4><p>Free to use. Found a mistake or want a topic? Open an issue on GitHub.</p></div>
-        <div><h4>Credits</h4><p>3D rendering by Three.js. Type set in Geist, Geist Mono and Instrument Serif.</p></div>
-      </aside>
-    </div>
-    <div class="ix-foot"><p class="ix-info" id="ixInfo"><span class="ix-k" id="ixK"></span><span id="ixD"></span></p><span class="ix-tag">Math, meant to be seen</span></div>
+    <nav class="ix" aria-label="Subjects"><ol class="ix-list" id="ixList"></ol></nav>
+    <section class="ix-about" aria-label="About">
+      <p class="ix-lede">OpenCurve is a free, open-source atlas of math you can <span class="ser">see.</span> Every subject from Pre-Algebra to Topology gets a 3D model you can look around, so the idea makes sense before the formulas do.</p>
+      <div class="ix-cols">
+        <div><h4>Made by</h4><p class="who">Junayed Haider</p><p>Biomedical Engineering student at The City College of New&nbsp;York.</p></div>
+        <div><h4>Links</h4><p><a href="https://github.com/xuunh/OpenCurve" target="_blank" rel="noopener">GitHub repository</a></p><p><a href="https://github.com/xuunh/OpenCurve/issues" target="_blank" rel="noopener">Report a mistake or suggest a topic</a></p><p><a href="https://github.com/xuunh" target="_blank" rel="noopener">@xuunh on GitHub</a></p></div>
+        <div><h4>Open source</h4><p>MIT licensed. Free to use, share and build on, as long as the credit stays.</p></div>
+        <div><h4>Built with</h4><p>Three.js for the 3D. Type set in Geist, Geist Mono and Instrument Serif.</p></div>
+      </div>
+    </section>
   </div>
 </div>
 
@@ -584,10 +582,10 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
     b.type = 'button'; b.dataset.go = i;
     var n = document.createElement('span'); n.className = 'n'; n.textContent = pad(i);
     var nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = s.name;
-    b.appendChild(n); b.appendChild(nm);
+    var ds = document.createElement('span'); ds.className = 'ds'; ds.textContent = s.desc || '';
+    b.appendChild(n); b.appendChild(nm); b.appendChild(ds);
     var later = i > CALC1;
-    if (later) { var tb = document.createElement('span'); tb.className = 'tbd'; tb.textContent = 'Soon'; b.appendChild(tb); }   /* everything after Calculus 1 is still coming */
-    if (!later) b.appendChild(document.createElement('span'));
+    var tg = document.createElement('span'); tg.className = 'tg'; if (later) tg.textContent = 'Soon'; b.appendChild(tg);   /* everything after Calculus 1 is still coming */
     li.style.setProperty('--i', i); li.appendChild(b); ixList.appendChild(li);
 
     var sec = document.createElement('section');
@@ -672,11 +670,7 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     }
   });
-  var ixInfo = document.getElementById('ixInfo'), ixK = document.getElementById('ixK'), ixD = document.getElementById('ixD');
-  function ixShow(i) {   /* the footer reads out the subject under the pointer */
-    var s = SUBJECTS[i]; ixInfo.style.setProperty('--c', s.css);
-    ixK.textContent = pad(i) + ' · ' + (s.group === 'High school' ? 'High School' : s.group); ixD.textContent = s.desc || '';
-  }
+  function ixShow(i) {}
   tabs.forEach(function (b) {
     var show = function () { ixShow(+b.dataset.go); };
     b.addEventListener('mouseenter', show); b.addEventListener('focus', show);
