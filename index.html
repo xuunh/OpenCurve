@@ -211,10 +211,10 @@ a, img, svg { -webkit-user-drag: none; }
    1. "Some math only clicks once you see it." fades in.
    2. Scroll: it fades out, and "Introducing" with "Open Curve" (side by side) fades in.
    3. Scroll: "Open" and "Curve" glide into the stacked cover title while the 3D scene and the bars fade in.
-   The words are the cover title itself, moved by script; the two empty sections are just scroll stops. */
+   The words are the cover title itself, moved by script; the long empty section is just room to scroll. */
 .pre-veil { position: fixed; inset: 0; z-index: 1; background: var(--void); pointer-events: none; }   /* covers the 3D scene on the pre-cover; fades away on the way to the cover */
-.prelude { position: relative; z-index: 2; min-height: 100svh; box-sizing: border-box; scroll-snap-align: start; scroll-snap-stop: always; }
-.prelude .scroll-cue { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); }
+.prelude { position: relative; z-index: 2; height: 400svh; box-sizing: border-box; scroll-snap-align: start; }   /* one long stretch, about four screens of scrolling, with no snap stops inside it */
+.prelude .scroll-cue { position: fixed; z-index: 3; left: 50%; bottom: 14px; transform: translateX(-50%); }
 .pre-fx { position: fixed; z-index: 3; left: 50%; top: 50%; margin: 0; text-align: center; pointer-events: none; opacity: 0; transform: translate(-50%, -50%); }
 .pre-quote { width: min(14ch, 92vw); text-wrap: balance; font-size: clamp(52px, 6vw, 112px); font-weight: 200; line-height: 1; letter-spacing: -0.045em; color: var(--ink); }
 .pre-intro { font-size: clamp(20px, 1.6vw, 28px); font-weight: 300; letter-spacing: -0.01em; color: var(--mist); white-space: nowrap; }
@@ -380,10 +380,7 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
 <div class="cur-ax" aria-hidden="true"></div><div class="cur-ay" aria-hidden="true"></div><div class="cur-xy" aria-hidden="true"></div>
 <p class="pre-fx pre-quote">Some math only clicks once you <span class="ser">see</span> it.</p>
 <p class="pre-fx pre-intro" aria-hidden="true">Introducing</p>
-<section class="prelude" id="prelude" aria-label="Some math only clicks once you see it.">
-  <a class="scroll-cue" href="#prelude2" aria-label="Scroll down"><span class="lbl">scroll</span><span class="hair" aria-hidden="true"></span></a>
-</section>
-<section class="prelude" id="prelude2" aria-label="Introducing OpenCurve">
+<section class="prelude" id="prelude" aria-label="Some math only clicks once you see it. Introducing OpenCurve.">
   <a class="scroll-cue" href="#intro" aria-label="Scroll down"><span class="lbl">scroll</span><span class="hair" aria-hidden="true"></span></a>
 </section>
 <main id="chapters">
@@ -1120,11 +1117,10 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
   }
 
   var prelude = document.getElementById('prelude'), preQuote = document.querySelector('.pre-quote'), preIntro = document.querySelector('.pre-intro'), preP = 0, preReady = 0, preVeil = document.getElementById('preVeil'), huds = Array.prototype.slice.call(document.querySelectorAll('.hud'));
-  var words = null, wordEls = [], titleTravel = false, q2Top = 1, titleFs = 1;   /* where each title word rests on the cover (page coordinates, no transform) */
+  var words = null, wordEls = [], titleTravel = false, titleFs = 1;   /* where each title word rests on the cover (page coordinates, no transform) */
   function measureTitle() {
     wordEls = Array.prototype.slice.call(coverIn.children); titleFs = parseFloat(getComputedStyle(coverIn).fontSize) || 1;
     words = wordEls.map(function (w) { var tr = w.style.transform; w.style.transform = ''; var r = w.getBoundingClientRect(); w.style.transform = tr; return { left: r.left, top: r.top + window.scrollY, w: r.width, h: r.height }; });
-    q2Top = document.getElementById('prelude2').getBoundingClientRect().top + window.scrollY || 1;
   }
   var coverIn = document.querySelector('#intro h1')   /* only the title moves, so the scroll hint below keeps its place on the bottom line */, coverCue = document.querySelector('#intro .scroll-cue');
   measureTitle(); window.addEventListener('resize', measureTitle); if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureTitle);
@@ -1197,9 +1193,9 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
     var cx = reduce ? (scrollF > 0.05 ? 1 : 0) : ease(clamp01((morphF - 0.02) / 0.5));
     /* pre-cover: until you scroll down from it, only its words show; the scene and bars fade in on the way to the cover */
     /* pre-cover progress, in screens (0 = quote, 1 = "Introducing", 2 = cover). It trails the scroll on purpose, so every step plays out slowly */
-    var q2 = q2Top || 1, moT = main.offsetTop || 1, sy = window.scrollY, preTarget = sy <= q2 ? sy / q2 : 1 + clamp01((sy - q2) / ((moT - q2) || 1));
+    var moT = main.offsetTop || 1, sy = window.scrollY, preTarget = 2 * clamp01(sy / moT), preCue = prelude.querySelector('.scroll-cue');
     if (!frame.preInit) { frame.preInit = true; preP = preTarget; }   /* opening the page partway down (a link to a subject) starts there, without replaying the intro */
-    preP += (preTarget - preP) * (reduce ? 1 : 1 - Math.exp(-dt * 1.5));
+    preP += (preTarget - preP) * (reduce ? 1 : 1 - Math.exp(-dt * 0.9));
     if (Math.abs(preTarget - preP) < 0.0005) preP = preTarget;
     if (document.documentElement.classList.contains('pre-ready')) preReady = reduce ? 1 : Math.min(1, preReady + dt / 1.6);
     var sh = ease(clamp01((preP - 1.35) / 0.6));   /* the scene and bars stay hidden until the words start settling into the cover */
@@ -1217,8 +1213,10 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
       preIntro.style.opacity = io.toFixed(3); preIntro.style.filter = io < 0.99 ? 'blur(' + ((1 - io) * 6).toFixed(2) + 'px)' : '';
       preQuote.style.visibility = qo < 0.002 ? 'hidden' : ''; preIntro.style.visibility = io < 0.002 ? 'hidden' : '';
     }
+    var co = 1 - clamp01((preP - 1.5) / 0.3);   /* the pre-cover scroll hint stays on the bottom line until the cover's own takes over */
+    if (co !== frame.co) { frame.co = co; preCue.style.opacity = co < 1 ? String(0.45 * co) : ''; preCue.style.visibility = co < 0.01 ? 'hidden' : ''; }
     if (words && (sy < moT - 0.5 || preP < 1.999)) {   /* "Open" and "Curve": side by side under "Introducing", then into the stacked cover title */
-      var vw = window.innerWidth, vh = window.innerHeight, gap = titleFs * 0.24, w0 = words[0], w1 = words[1], tot = w0.w + gap + w1.w;
+      var vw = window.innerWidth, vh = window.innerHeight, gap = titleFs * 0.01, w0 = words[0], w1 = words[1], tot = w0.w + gap + w1.w;
       var sA = Math.min(0.42, vw * 0.7 / tot), fl = reduce ? 0 : 1 - clamp01(preP - 1);
       var ax = (vw - tot * sA) / 2 + Math.sin(t * 0.37) * 6 * fl, ay = vh * 0.5 - w0.h * sA * 0.3 + Math.sin(t * 0.6 + 1) * 5 * fl;
       preIntro.style.top = (ay - 34) + 'px';   /* "Introducing" sits just above the words */
