@@ -1240,8 +1240,8 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
     if (co !== frame.co) { frame.co = co; preCue.style.opacity = co < 1 ? String(0.45 * co) : ''; preCue.style.visibility = co < 0.01 ? 'hidden' : ''; }
     if (words && (sy < moT - 0.5 || preP < 1.999)) {   /* "Open" and "Curve": side by side under "Introducing", then into the stacked cover title */
       var vw = window.innerWidth, vh = window.innerHeight, gap = titleFs * 0.01, w0 = words[0], w1 = words[1], tot = w0.w + gap + w1.w;
-      var sA = Math.min(0.42, vw * 0.7 / tot), fl = reduce ? 0 : 1 - clamp01(preP - 1);
-      var ax = (vw - tot * sA) / 2 + Math.sin(t * 0.37) * 6 * fl, ay = vh * 0.5 - w0.h * sA * 0.3 + Math.sin(t * 0.6 + 1) * 5 * fl;
+      var sA = Math.min(0.42, vw * 0.7 / tot);
+      var ax = Math.round((vw - tot * sA) / 2), ay = Math.round(vh * 0.5 - w0.h * sA * 0.3);   /* held perfectly still, on whole pixels */
       preIntro.style.top = (ay - 34) + 'px';   /* "Introducing" sits just above the words */
       var A = [{ x: ax, y: ay, s: sA }, { x: ax + (w0.w + gap) * sA, y: ay, s: sA }];
       var kr = clamp01(preP - 1), kk = easeIO(kr), rest = Math.max(moT, sy);
