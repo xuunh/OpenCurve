@@ -48,33 +48,50 @@ a:focus-visible, button:focus-visible { color: var(--accent); }
 .menu { position: fixed; inset: 0; z-index: 20; background: rgba(3,3,6,0.9); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); overflow-y: auto; box-sizing: border-box;
   padding-block: calc(env(safe-area-inset-top, 0px) + 28px) 64px;
   padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
-.menu-inner { max-width: 1240px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; }
+.menu-inner { max-width: 1420px; margin: 0 auto; min-height: 100%; display: flex; flex-direction: column; }
 .menu-head { display: flex; justify-content: space-between; align-items: center; gap: 16px; font-family: var(--hud); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--mist); margin-bottom: 56px; }
 .menu-close { font: inherit; letter-spacing: inherit; text-transform: inherit; color: var(--ink); background: none; border: 0; padding: 12px 0; min-height: 44px; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; }
 .menu-close::after { content: '\00d7'; font-size: 18px; letter-spacing: 0; line-height: 1; transition: transform .4s; }
 .menu-close:hover::after { transform: rotate(90deg); }
-.menu-body { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 72px; flex: 1; }
-/* two fixed columns (1-10, 11-19): a subject never jumps to the other column */
-.menu ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(10, auto); grid-auto-flow: column; column-gap: 48px; align-content: start; }
-@media (max-width: 900px) { .menu ol { grid-template-columns: 1fr; grid-template-rows: none; grid-auto-flow: row; } }
-.menu li button { --c: var(--ink); width: 100%; display: grid; grid-template-columns: 28px 1fr auto; align-items: baseline; gap: 4px 12px; text-align: left; background: none; border: 0; padding: 12px 0; color: var(--ink); font-family: var(--display); font-weight: 200; font-size: clamp(24px, 2.6vw, 34px); line-height: 1.05; letter-spacing: -0.035em; cursor: pointer; transition: color .3s, transform .4s cubic-bezier(.6,0,.2,1); }
-.menu li button .n { font-family: var(--hud); font-size: 10px; letter-spacing: 0.06em; color: var(--mist); font-variant-numeric: tabular-nums; transition: color .3s; }
-.menu li button .tbd { font-family: var(--hud); font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--mist); }
-.menu li button .d { display: none; }   /* the hovered subject's description shows in the footer instead, so nothing in the list moves */
-.menu li button:hover, .menu li button:focus-visible { color: var(--c); transform: translateX(6px); }
-.menu li button:hover .n, .menu li button[aria-current="true"] .n { color: var(--c); }
-.menu li button[aria-current="true"] { color: var(--c); }
-.menu aside { border-left: 1px solid var(--line); padding-left: 32px; display: flex; flex-direction: column; gap: 36px; font-size: 14px; line-height: 1.6; color: var(--mist); }
-.menu aside h3 { margin: 0 0 10px; font-family: var(--hud); font-weight: 400; font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--mist); }
-.menu aside p { margin: 0; }
-.menu aside .who { font-family: var(--display); font-weight: 300; font-size: 22px; letter-spacing: -0.02em; color: var(--ink); }
-.menu aside ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
-.menu aside a { color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; min-height: 32px; }
-.menu aside a::after { content: '\2197'; font-size: 12px; color: var(--mist); transition: transform .3s; }
-.menu aside a:hover::after { transform: translate(2px, -2px); color: var(--ink); }
-.menu-foot { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-family: var(--hud); font-size: 10px; letter-spacing: 0.08em; color: var(--mist); }
-@media (max-width: 900px) { .menu-body { grid-template-columns: 1fr; gap: 48px; } .menu aside { border-left: 0; border-top: 1px solid var(--line); padding: 32px 0 0; } }
-@media (prefers-reduced-motion: reduce) { .menu li button, .menu li button .d, .menu-close::after { transition: none; } }
+/* Index: a course map. One open curve runs through every subject in order, across four stages; hovering a subject
+   lights the curve up to it and shows its 3D model turning on the right. The about details sit in a quiet row below. */
+.menu-head { margin-bottom: 40px; }
+.ix { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) clamp(280px, 22vw, 340px); gap: clamp(40px, 4vw, 72px); align-items: start; }
+.ix-map { position: relative; display: grid; grid-template-columns: repeat(4, max-content); justify-content: space-between; column-gap: 28px; padding-bottom: 48px; }
+.ix-curve { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.ix-curve path { fill: none; stroke: rgba(220,225,240,0.16); stroke-width: 1; transition: stroke .35s, stroke-width .35s; }
+.ix-curve path.on { stroke: rgba(240,243,250,0.7); }
+.ix-col { position: relative; min-width: 0; }
+.ix-g { margin: 0 0 18px; padding-left: 22px; font-family: var(--hud); font-weight: 400; font-size: 10px; line-height: 1.4; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mist); }
+.ix-col ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.ix-col button { --c: var(--ink); position: relative; width: 100%; white-space: nowrap; display: flex; align-items: center; gap: 12px; padding: 9px 0; background: none; border: 0; text-align: left; cursor: pointer;
+  color: rgba(240,243,250,0.82); font-family: var(--display); font-weight: 200; font-size: clamp(18px, 1.45vw, 26px); line-height: 1.1; letter-spacing: -0.03em; transition: color .3s; }
+.ix-col button .dot { flex: none; width: 9px; height: 9px; border-radius: 50%; box-sizing: border-box; border: 1px solid rgba(220,225,240,0.4); background: var(--void); transition: background .3s, border-color .3s, box-shadow .3s; }
+.ix-col button .nm { min-width: 0; }
+.ix-col button .tbd { margin-left: 2px; transform: translateY(1px); font-family: var(--hud); font-weight: 400; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mist); opacity: 0.7; }
+.ix-col button:hover, .ix-col button:focus-visible, .ix-col button.lit { color: var(--ink); }
+.ix-col button.pass .dot { border-color: rgba(240,243,250,0.75); background: rgba(240,243,250,0.75); }
+.ix-col button:hover .dot, .ix-col button:focus-visible .dot, .ix-col button.lit .dot { border-color: var(--c); background: var(--c); box-shadow: 0 0 12px var(--c); }
+.ix-col button[aria-current="true"] .nm { color: var(--c); }
+.ix-pre { position: sticky; top: 0; display: grid; gap: 0; }
+.ix-stage { position: relative; aspect-ratio: 1 / 0.86; border: 1px solid var(--line); border-radius: 2px; background: radial-gradient(120% 90% at 50% 60%, #0c0d12, var(--void) 70%); overflow: hidden; }   /* solid, so nothing from the scene behind shows through */
+.ix-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.ix-k { margin: 22px 0 10px; display: flex; align-items: center; gap: 14px; font-family: var(--hud); font-size: 11px; line-height: 1.4; letter-spacing: 0.04em; color: var(--mist); }
+.ix-k b { font-weight: 400; color: var(--c, var(--ink)); font-variant-numeric: tabular-nums; }
+.ix-k b::after { content: ''; display: inline-block; width: 28px; height: 1px; margin-left: 14px; vertical-align: middle; background: var(--mist); opacity: 0.5; }
+.ix-name { margin: 0; font-family: var(--display); font-weight: 200; font-size: clamp(34px, 2.8vw, 48px); line-height: 1; letter-spacing: -0.045em; color: var(--ink); }
+.ix-desc { margin: 14px 0 0; font-size: 15px; line-height: 1.5; color: var(--mist); max-width: 34ch; }
+.ix-eq { margin: 18px 0 0; font-family: var(--hud); font-size: 11px; line-height: 1.4; letter-spacing: 0.04em; color: var(--c, var(--mist)); }
+.ix-about { margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px; font-size: 13px; line-height: 1.55; color: var(--mist); }
+.ix-about h4 { margin: 0 0 10px; font-family: var(--hud); font-weight: 400; font-size: 10px; line-height: 1.4; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mist); }
+.ix-about p { margin: 0; }
+.ix-about .who { color: var(--ink); }
+.ix-about .handle { font-family: var(--hud); font-size: 11px; letter-spacing: 0.04em; }
+.ix-about a { color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.ix-about a::after { content: '\2197'; font-size: 11px; color: var(--mist); transition: transform .3s; }
+.ix-about a:hover::after { transform: translate(2px, -2px); color: var(--ink); }
+@media (max-width: 1000px) { .ix { grid-template-columns: 1fr; } .ix-pre { display: none; } .ix-map { grid-template-columns: 1fr 1fr; row-gap: 28px; } .ix-about { grid-template-columns: 1fr 1fr; } }
+@media (prefers-reduced-motion: reduce) { .ix-col button, .ix-col button .dot, .ix-curve path, .menu-close::after { transition: none; } }
 
 .hud-bottom {
   bottom: env(safe-area-inset-bottom, 0px); left: 0; right: 0;
@@ -303,22 +320,25 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
 <div class="pre-veil" id="preVeil" aria-hidden="true"></div>
 <div class="vignette" aria-hidden="true"></div>
 
-<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="All subjects" hidden>
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Index" hidden>
   <div class="menu-inner">
     <div class="menu-head"><span>Index</span><button type="button" class="menu-close" id="menuClose">Close</button></div>
-    <div class="menu-body">
-      <nav aria-label="Subjects"><ol id="menuList"></ol></nav>
-      <aside aria-label="Credits">
-        <div><h3>Made by</h3><p class="who">Junayed Haider</p><p class="handle">@xuunh</p><p>Bachelor of Engineering in Biomedical Engineering, The City College of New&nbsp;York</p></div>
-        <div><h3>Links</h3><ul>
-          <li><a href="https://github.com/xuunh/OpenCurve" target="_blank" rel="noopener">GitHub repository</a></li>
-          <li><a href="https://github.com/xuunh" target="_blank" rel="noopener">@xuunh on GitHub</a></li>
-        </ul></div>
-        <div><h3>Credits</h3><p>3D rendering by Three.js. Type set in Geist and Geist Mono by Vercel, with Instrument Serif by Instrument.</p></div>
-        <div><h3>Open source</h3><p>Free to use. Found a mistake or want a topic? Open an issue on GitHub.</p></div>
-      </aside>
+    <div class="ix">
+      <nav class="ix-map" id="ixMap" aria-label="Subjects"><svg class="ix-curve" id="ixCurve" aria-hidden="true"></svg></nav>
+      <div class="ix-pre" aria-live="polite">
+        <div class="ix-stage"><canvas id="ixCanvas" aria-hidden="true"></canvas></div>
+        <p class="ix-k"><b id="ixN">01</b><span id="ixGroup">Foundations</span></p>
+        <h3 class="ix-name" id="ixName">Pre-Algebra</h3>
+        <p class="ix-desc" id="ixDesc"></p>
+        <p class="ix-eq" id="ixEq"></p>
+      </div>
     </div>
-    <div class="menu-foot"><span id="menuDesc">OpenCurve</span><span>Math, meant to be seen</span></div>
+    <footer class="ix-about" aria-label="About">
+      <div><h4>Made by</h4><p><span class="who">Junayed Haider</span> <span class="handle">@xuunh</span></p><p>Biomedical Engineering, The City College of New&nbsp;York</p></div>
+      <div><h4>Links</h4><p><a href="https://github.com/xuunh/OpenCurve" target="_blank" rel="noopener">GitHub repository</a></p><p><a href="https://github.com/xuunh" target="_blank" rel="noopener">@xuunh on GitHub</a></p></div>
+      <div><h4>Open source</h4><p>Free to use. Found a mistake or want a topic? Open an issue on GitHub.</p></div>
+      <div><h4>Credits</h4><p>3D by Three.js. Type: Geist, Geist Mono, Instrument Serif.</p></div>
+    </footer>
   </div>
 </div>
 
@@ -566,20 +586,25 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
   function pad(n) { return (n < 10 ? '0' : '') + n; }
 
   /* Build tabs and chapters from the list */
-  var menuList = document.getElementById('menuList'), main = document.getElementById('chapters');
+  var ixMap = document.getElementById('ixMap'), main = document.getElementById('chapters'), groupCols = {};
+  function groupList(g) {   /* one column per stage, in the order they first appear */
+    if (groupCols[g]) return groupCols[g];
+    var col = document.createElement('div'); col.className = 'ix-col';
+    var h = document.createElement('p'); h.className = 'ix-g'; h.textContent = g === 'High school' ? 'High School' : g;
+    var ol = document.createElement('ol'); col.appendChild(h); col.appendChild(ol); ixMap.appendChild(col);
+    return (groupCols[g] = ol);
+  }
   var CALC1 = SUBJECTS.map(function (x) { return x.id; }).indexOf('calculus-1');
   SUBJECTS.forEach(function (s, i) {
     if (i === 0) return;
     var li = document.createElement('li'), b = document.createElement('button');
     b.type = 'button'; b.dataset.go = i;
-    var n = document.createElement('span'); n.className = 'n'; n.textContent = pad(i);
-    var nm = document.createElement('span'); nm.textContent = s.name;
-    b.appendChild(n); b.appendChild(nm);
-    var later = i > CALC1; /* everything after Calculus 1 is still coming */
-    if (later) { var tb = document.createElement('span'); tb.className = 'tbd'; tb.textContent = 'Soon'; b.appendChild(tb); }
-    if (!later) { var sp = document.createElement('span'); b.appendChild(sp); }
-    var dd = document.createElement('span'); dd.className = 'd'; dd.textContent = s.desc || ''; b.appendChild(dd);
-    li.appendChild(b); menuList.appendChild(li);
+    var dot = document.createElement('i'); dot.className = 'dot'; dot.setAttribute('aria-hidden', 'true');
+    var nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = s.name;
+    b.appendChild(dot); b.appendChild(nm);
+    var later = i > CALC1;
+    if (later) { var tb = document.createElement('span'); tb.className = 'tbd'; tb.textContent = 'Soon'; b.appendChild(tb); }   /* everything after Calculus 1 is still coming */
+    li.appendChild(b); groupList(s.group).appendChild(li);
 
     var sec = document.createElement('section');
     sec.className = 'chapter'; sec.id = s.id;
@@ -639,11 +664,13 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
     if (c <= K) return { n: 0, beat: BEATS[c - 1] };
     return { n: c - K };
   }
-  var tabs = Array.prototype.slice.call(menuList.querySelectorAll('button'));
+  var tabs = Array.prototype.slice.call(ixMap.querySelectorAll('button'));
   var picker = document.getElementById('picker'), menu = document.getElementById('menu'), pickerLabel = document.getElementById('pickerLabel'), pickerNum = document.getElementById('pickerNum'), pickerBar = document.getElementById('pickerBar');
   function openMenu() {
     menu.hidden = false; picker.setAttribute('aria-expanded', 'true');
-    (menuList.querySelector('[aria-current="true"]') || menuList.querySelector('button')).focus();
+    var cur = ixMap.querySelector('[aria-current="true"]') || tabs[0];
+    tabs.forEach(function (b) { b.style.setProperty('--c', SUBJECTS[+b.dataset.go].css); });
+    drawCurve(); ixShow(+cur.dataset.go); cur.focus({ preventScroll: true });
   }
   function closeMenu(returnFocus) {
     menu.hidden = true; picker.setAttribute('aria-expanded', 'false');
@@ -661,11 +688,41 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
       else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     }
   });
-  var menuDesc = document.getElementById('menuDesc');
+  /* the map's curve: one smooth line through every subject's dot, in order */
+  var ixCurve = document.getElementById('ixCurve'), ixSegs = [], ixActive = 1;
+  function drawCurve() {
+    var box = ixMap.getBoundingClientRect(), pts = tabs.map(function (b) { var r = b.querySelector('.dot').getBoundingClientRect(); return [r.left + r.width / 2 - box.left, r.top + r.height / 2 - box.top]; });
+    ixCurve.setAttribute('viewBox', '0 0 ' + box.width + ' ' + box.height); ixCurve.innerHTML = ''; ixSegs = [];
+    var cols = tabs.map(function (b) { return b.closest('.ix-col'); }), r = 10;
+    for (var j = 0; j + 1 < pts.length; j++) {
+      var A = pts[j], B = pts[j + 1], d;
+      if (cols[j] === cols[j + 1]) d = 'M' + A[0] + ' ' + A[1] + 'L' + B[0] + ' ' + B[1];   /* within a stage: straight down */
+      else {   /* to the next stage: down just under its last subject, across, then up beside the next stage to its first subject */
+        var yb = A[1] + 30, gx = B[0] - 16;   /* a short hook just under the stage's last subject */
+        d = 'M' + A[0] + ' ' + A[1] + 'L' + A[0] + ' ' + (yb - r) + 'Q' + A[0] + ' ' + yb + ' ' + (A[0] + r) + ' ' + yb + 'L' + (gx - r) + ' ' + yb + 'Q' + gx + ' ' + yb + ' ' + gx + ' ' + (yb - r) +
+            'L' + gx + ' ' + (B[1] + r) + 'Q' + gx + ' ' + B[1] + ' ' + (gx + r) + ' ' + B[1] + 'L' + B[0] + ' ' + B[1];
+      }
+      var path = document.createElementNS('http://www.w3.org/2000/svg', 'path'); path.setAttribute('d', d);
+      ixCurve.appendChild(path); ixSegs.push(path);
+    }
+    ixLight(ixActive);
+  }
+  function ixLight(i) {   /* the curve lights up from the start to subject i */
+    ixActive = i;
+    ixSegs.forEach(function (p, j) { p.classList.toggle('on', j + 1 < i); });
+    tabs.forEach(function (b) { var g = +b.dataset.go; b.classList.toggle('pass', g < i); b.classList.toggle('lit', g === i); });
+  }
+  var ixN = document.getElementById('ixN'), ixGroup = document.getElementById('ixGroup'), ixName = document.getElementById('ixName'), ixDesc = document.getElementById('ixDesc'), ixEq = document.getElementById('ixEq'), ixPre = document.querySelector('.ix-pre');
+  function ixShow(i) {
+    var s = SUBJECTS[i];
+    ixPre.style.setProperty('--c', s.css); ixN.textContent = pad(i); ixGroup.textContent = s.group === 'High school' ? 'High School' : s.group;
+    ixName.textContent = s.name; ixDesc.textContent = s.desc || ''; ixEq.textContent = s.label || '';
+    ixLight(i); if (window.ixModel) ixModel(i);
+  }
+  window.addEventListener('resize', function () { if (!menu.hidden) drawCurve(); });
   tabs.forEach(function (b) {
-    var show = function () { menuDesc.textContent = SUBJECTS[+b.dataset.go].desc || 'OpenCurve'; }, hide = function () { menuDesc.textContent = 'OpenCurve'; };
+    var show = function () { ixShow(+b.dataset.go); };
     b.addEventListener('mouseenter', show); b.addEventListener('focus', show);
-    b.addEventListener('mouseleave', hide); b.addEventListener('blur', hide);
     b.addEventListener('click', function () {
       closeMenu(false);
       document.getElementById(SUBJECTS[+b.dataset.go].id).scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
@@ -1005,6 +1062,29 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
     return m;
   });
 
+  /* ---------- Index preview: the hovered subject's own model, turning slowly in a small window of its own ---------- */
+  var ixCanvas = document.getElementById('ixCanvas'), ixR = null, ixScene = new THREE.Scene(), ixCam = new THREE.PerspectiveCamera(32, 1, 0.1, 500), ixMesh = null, ixFade = 0, ixTilt = 0;
+  try { ixR = new THREE.WebGLRenderer({ canvas: ixCanvas, antialias: true, alpha: true }); ixR.setClearColor(0x000000, 0); } catch (e) { ixR = null; }
+  window.ixModel = function (i) {
+    if (!ixR) return;
+    var src = forms[K + i]; if (!src) return;
+    if (!ixMesh) { ixMesh = new THREE.LineSegments(src.geometry, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending })); ixScene.add(ixMesh); }
+    if (ixMesh.geometry !== src.geometry) { ixMesh.geometry = src.geometry; ixFade = 0; }
+    var g = src.geometry; if (!g.boundingSphere) g.computeBoundingSphere();
+    var r = g.boundingSphere.radius, d = r / Math.sin(ixCam.fov * Math.PI / 360) * 1.02;
+    ixCam.position.set(0, r * 0.12, d); ixCam.lookAt(0, 0, 0); ixMesh.position.copy(g.boundingSphere.center).multiplyScalar(-1);
+    ixTilt = src.rotation.x; ixMesh.rotation.z = src.rotation.z;
+  };
+  function ixRender(t, dt) {
+    if (!ixR || !ixMesh) return;
+    var w = ixCanvas.clientWidth, h = ixCanvas.clientHeight; if (!w || !h) return;
+    if (ixCanvas.width !== Math.round(w * Math.min(2, window.devicePixelRatio || 1))) { ixR.setPixelRatio(Math.min(2, window.devicePixelRatio || 1)); ixR.setSize(w, h, false); ixCam.aspect = w / h; ixCam.updateProjectionMatrix(); }
+    ixFade = Math.min(1, ixFade + dt / 0.45);
+    ixMesh.material.opacity = 0.9 * ixFade * ixFade * (3 - 2 * ixFade);
+    ixMesh.rotation.x = ixTilt; ixMesh.rotation.y = reduce ? 0.4 : t * 0.35;
+    ixR.render(ixScene, ixCam);
+  }
+
   /* ---------- Intro surface ----------
      After the cover, the cover's own knot carries the intro. It glides to the middle of the screen, relaxes into a
      ring and flattens into a flat grid, then keeps reshaping in the usual right-hand spot (a twist, a curved sheet with
@@ -1338,6 +1418,7 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
     }
 
     if (composer) composer.render(); else renderer.render(scene, camera);
+    if (!menu.hidden) ixRender(t, dt);   /* the index's turning preview */
     if (!frame.drawn) { frame.drawn = true; if (window.ssReady) ssReady(); }
     if (!reduce) requestAnimationFrame(frame);
   }
