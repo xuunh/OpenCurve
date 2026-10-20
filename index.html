@@ -1024,11 +1024,25 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
     return o.set(r * Math.cos(th) - Rc * sc * Math.cos(th0), y, r * Math.sin(th) - Rc * sc * Math.sin(th0));   /* kept centered while it unrolls */
   }
   var WIND = 5 * Math.PI;   /* Pre-Algebra's spiral: two and a half turns */
-  function windAt(S, u, v, t, o) {   /* a strip that coils up into Pre-Algebra's spiral. s: how wound (0 = flat strip, 1 = exactly Pre-Algebra's model) */
-    var s = Math.max(1e-4, S.s), span = WIND * s, Rc = lerp(30, 5.2 * WIND, s) / span, th0 = -0.5 * Math.PI * (1 - s), th = th0 + (u - 0.5) * span;
-    var r = Rc + 6 * (v - 0.5);
+  /* the long wave under 04 (a few slow waves layered at different speeds, with a soft lean across its width) */
+  function bandWave(p, u, v, t, o) {   /* a long, slow wave across the full width of the screen: a few gentle waves layered at different speeds, with a soft twist across its width, so it drifts like cloth instead of sliding */
+      var x = (u - 0.5) * 56, c = v - 0.5, wd = 3.4 * (1 + 0.2 * Math.sin(0.09 * x + 0.22 * t));
+      var y = 0.6 * Math.sin(0.14 * x - 0.42 * t) + 0.28 * Math.sin(0.31 * x + 0.27 * t + 1.3) + 0.12 * Math.sin(0.6 * x - 0.5 * t);
+      y += c * wd * 0.45 * Math.sin(0.11 * x - 0.3 * t + 0.8);   /* the band leans one way, then the other, along its length */
+      return o.set(x, y, -c * wd + 0.9 * Math.cos(0.1 * x + 0.24 * t) + 0.3 * Math.sin(0.27 * x - 0.33 * t));
+    }
+  var PK = PRE ? PRE.userData.k : 1, bandP = new THREE.Vector3();
+  /* one strip, three looks: long and rippling (04), starting to coil, then exactly Pre-Algebra's spiral (05).
+     s: how wound (0 flat, 1 the spiral). L, w: its length and width while flat. wv: how much it ripples like the 04 wave.
+     Because every step uses this one recipe, going from 04 to 05 eases these numbers: the ripples settle, the strip
+     pulls in, and its ends curl round into the spiral, instead of points sliding across to a different shape */
+  function windAt(S, u, v, t, o) {
+    var s = Math.max(1e-4, S.s), span = WIND * s, Rc = lerp(S.L, 5.2 * WIND, s) / span, th0 = -0.5 * Math.PI * (1 - s), th = th0 + (u - 0.5) * span;
+    var r = Rc + S.w * (v - 0.5);
     o.set(r * Math.cos(th) - (Rc - 5.2) * Math.cos(th0), 1.15 * (u - 0.5) * span, r * Math.sin(th) - (Rc - 5.2) * Math.sin(th0));
-    return PRE ? o.sub(PRE.userData.c).multiplyScalar(PRE.userData.k) : o;
+    if (PRE) o.sub(PRE.userData.c).multiplyScalar(PRE.userData.k);
+    if (S.wv > 1e-4) { bandWave(null, u, v, t, bandP); o.lerp(bandP, S.wv); }
+    return o;
   }
   function Sh(f, p) { return { f: f, p: p || {} }; }
   var SHAPE = {
@@ -1043,15 +1057,10 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
       var n = 6, w = 6, a = 0.1 + 0.55 * (0.5 - 0.5 * Math.cos(t * 0.45)), q = u * n, k = Math.min(n - 1, Math.floor(q)), f = q - k;
       return o.set((q - n / 2) * w * Math.cos(a), w * Math.sin(a) * (k % 2 ? 1 - f : f) - 2, -(v - 0.5) * 11);
     }),
-    band: Sh(function (p, u, v, t, o) {   /* a long, slow wave across the full width of the screen: a few gentle waves layered at different speeds, with a soft twist across its width, so it drifts like cloth instead of sliding */
-      var x = (u - 0.5) * 56, c = v - 0.5, wd = 3.4 * (1 + 0.2 * Math.sin(0.09 * x + 0.22 * t));
-      var y = 0.6 * Math.sin(0.14 * x - 0.42 * t) + 0.28 * Math.sin(0.31 * x + 0.27 * t + 1.3) + 0.12 * Math.sin(0.6 * x - 0.5 * t);
-      y += c * wd * 0.45 * Math.sin(0.11 * x - 0.3 * t + 0.8);   /* the band leans one way, then the other, along its length */
-      return o.set(x, y, -c * wd + 0.9 * Math.cos(0.1 * x + 0.24 * t) + 0.3 * Math.sin(0.27 * x - 0.33 * t));
-    }),
+    band: Sh(windAt, { s: 0, L: 56 / PK, w: 3.4 / PK, wv: 1 }),   /* the long wave under 04: the same strip that coils into the spiral, laid out long and rippling */
     wave: Sh(function (p, u, v, t, o) { var x = (u - 0.5) * 28, z = -(v - 0.5) * 9; return o.set(x, 2.2 * Math.sin(0.45 * x - 1.2 * t) * (0.6 + 0.4 * Math.cos(0.5 * z + 0.5 * t)), z); }),
-    coil: Sh(windAt, { s: 0.42 }),
-    spiral: Sh(windAt, { s: 1 })
+    coil: Sh(windAt, { s: 0.42, L: 30, w: 6, wv: 0 }),
+    spiral: Sh(windAt, { s: 1, L: 30, w: 6, wv: 0 })
   };
   function shapeAt(S, u, v, t, o) { return S.f(S.p, u, v, t, o); }
   var W = '#E4E8F0', RIGHT = [12.5, 4.6, -6], MID = [3, 6.2, -8], BAND = [1, -0.35, 1];
@@ -1076,7 +1085,7 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
     /* 10 · words centered: the wave stretches into a long band that flows across the whole screen beneath them */
     { s: SHAPE.band, pos: BAND, rot: [0.18, 0, 0], col: W, alpha: 0.85 },
     /* 11 · model only: from the middle, the strip slowly starts to coil (white) */
-    { s: SHAPE.coil, pos: [5, 6.6, -12], rot: [lerp(0.5, PLS[3], 0.6), lerp(-0.1, PLS[4], 0.6), lerp(0, PLS[5], 0.6)], col: W, alpha: 0.9 },
+    { s: SHAPE.coil, order: { wv: [0, 0.45], L: [0, 0.6], w: [0.1, 0.7], s: [0.35, 1] }, lean: 0.55, pos: [5, 6.6, -12], rot: [lerp(0.5, PLS[3], 0.6), lerp(-0.1, PLS[4], 0.6), lerp(0, PLS[5], 0.6)], col: W, alpha: 0.9 },
     /* 12 · and finishes as Pre-Algebra's spiral, still white; it turns red only once we arrive at Pre-Algebra */
     { s: SHAPE.spiral, pos: [7, PLS[1], PLS[2]], rot: [PLS[3], PLS[4], PLS[5]], col: W, alpha: 1 }
   ];
@@ -1094,7 +1103,7 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
   function stagW(w, u) { if (!mix.stag) return w; var d = 0.5 - 0.5 * Math.cos(u * Math.PI * 2); return easeIO(clamp01(w * 1.6 - d * 0.6)); }
   function blendAt(u, v, o) {   /* the in-between shape at this scroll position */
     var w = stagW(mix.w, u);
-    if (mix.A.f === mix.B.f) { for (var n in mix.A.p) mixP[n] = lerp(mix.A.p[n], mix.B.p[n], w); return mix.A.f(mixP, u, v, mix.t, o); }   /* same recipe: ease its numbers, so it bends instead of tearing */
+    if (mix.A.f === mix.B.f) { for (var n in mix.A.p) { var wn = mix.pt && mix.pt[n] ? easeIO(clamp01((mix.w - mix.pt[n][0]) / (mix.pt[n][1] - mix.pt[n][0]))) : w; mixP[n] = lerp(mix.A.p[n], mix.B.p[n], wn); } return mix.A.f(mixP, u, v, mix.t, o); }   /* same recipe: ease its numbers (some later than others, if the step says so), so it bends instead of tearing */   /* same recipe: ease its numbers, so it bends instead of tearing */
     shapeAt(mix.A, u, v, mix.t, bA); shapeAt(mix.B, u, v, mix.t, bB); return o.copy(bA).lerp(bB, w);
   }
   var gP = []; for (var gi = 0; gi < (SU + 1) * (NV + 1); gi++) gP.push(new THREE.Vector3());
@@ -1103,7 +1112,7 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
     var k0 = Math.min(KEYS.length - 2, Math.floor(p)), w = ease(Math.min(1, p - k0)), A = KEYS[k0], B = KEYS[k0 + 1];
     var alpha = lerp(A.alpha, B.alpha, w);
     if (alpha < 0.004) return 0;
-    mix.t = t; mix.A = A.s; mix.B = B.s; mix.stag = !!B.stagger; mix.w = B.stagger ? Math.min(1, p - k0) : w;
+    mix.t = t; mix.A = A.s; mix.B = B.s; mix.stag = !!B.stagger; mix.pt = B.order || null; mix.w = B.stagger || B.order ? Math.min(1, p - k0) : w;
     var i, j, k = 0, minY = Infinity, maxY = -Infinity;
     for (j = 0; j <= NV; j++) for (i = 0; i <= SU; i++) { var P = gP[j * (SU + 1) + i]; blendAt(i / SU, j / NV, P); if (P.y < minY) minY = P.y; if (P.y > maxY) maxY = P.y; }
     coreC.copy(A.c).lerp(B.c, w); deepC.copy(A.d).lerp(B.d, w);
@@ -1120,7 +1129,7 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
     if (cam > K) { PA = KEYS[K].pos; PB = KEYS[K + 1].pos; wp = clamp01((cam - K) / (HANDOFF - K)); }   /* lands exactly on Pre-Algebra's model at the hand-over point */   /* the hand-off rides with the camera (and drifts into Pre-Algebra's spot), at the camera's even pace */
     surf.position.set(lerp(PA[0], PB[0], wp), lerp(PA[1], PB[1], wp), lerp(PA[2], PB[2], wp));
     var tilt = Math.max(0, 1 - Math.abs(p - B_LOOK) * 1.5), mid = Math.max(0, 1 - Math.abs(p - 1) * 1.2);
-    surf.rotation.set(lerp(A.rot[0], B.rot[0], w) + my * 0.3 * tilt,
+    surf.rotation.set(lerp(A.rot[0], B.rot[0], w) + my * 0.3 * tilt + (B.lean ? B.lean * Math.sin(Math.PI * w) : 0),   /* lean: tips the model toward you mid-move, so it never passes edge-on */
       lerp(A.rot[1], B.rot[1], w) + (reduce ? 0 : Math.sin(t * 0.25) * 0.12 + Math.sin(t * 0.3) * 0.5 * mid) + mx * 0.6 * tilt,   /* same gentle sway as every model; the centered knot turns a little more */
       lerp(A.rot[2], B.rot[2], w));
     return alpha;
@@ -1148,6 +1157,7 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
     window.scrollTo({ top: next * h, behavior: reduce ? 'auto' : 'smooth' });
   }, { passive: false });
   measureTitle(); window.addEventListener('resize', measureTitle); if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureTitle);
+  var looped = false;   /* true while the camera finishes gliding in after the Topology -> Pre-Algebra jump */
   var redF = 0;   /* how red the spiral is: rises from the bottom on screen 05 (about 2.5 s), drains back from the top if you scroll back */
   var lastMs = 0, morphF = 0, HANDOFF = K + 0.995;   /* the scroll point where the intro spiral hands over to Pre-Algebra's model */
 
@@ -1193,13 +1203,15 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
       window.scrollTo(0, docTop(main.children[K + 1]));
       h.style.scrollBehavior = sb;
       scrollTarget = K + 1; scrollF -= SL - (K + 1); /* keep the camera's leftover glide so the jump can't be seen */
-      redF = 1;   /* coming round from Topology: Pre-Algebra is already red */
+      redF = 1; looped = true;   /* coming round from Topology: Pre-Algebra is already red, and the intro stays out of it */
     }
     mx += (tmx - mx) * 0.045; my += (tmy - my) * 0.045;
     var base = Math.min(SL - 1, Math.floor(scrollF)), f = ease(Math.min(1, scrollF - base));
     var u = Math.max(0, scrollF - K);   /* camera travel: none during the intro beats */
     var zc = -u * GAP;
+    if (looped && (scrollF >= K + 0.995 || scrollTarget < K + 0.5)) looped = false;   /* the loop's glide has landed (or you scrolled away) */
     var A = STATIONS[base], B = STATIONS[base + 1];
+    if (looped && base === K) A = SUBJECTS[LAST];   /* still gliding in from the loop: the colors keep blending from Topology, as they did before the jump */
 
     skyU.uHorizon.value.copy(A.sky).lerp(B.sky, f);
     dustMat.color.copy(A.core).lerp(B.core, f);
@@ -1211,7 +1223,7 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
     var redT = scrollF > K - 0.12 ? 1 : 0;   /* on screen 05 (or past it) the spiral is red; back before it, white */
     redF = reduce ? redT : redF + Math.max(-dt / 2.6, Math.min(dt / 2.6, redT - redF));   /* moves toward that at one steady pace, either way, so it can reverse mid-fade */
     /* the white-to-red intro spiral stays up until it has arrived AND finished turning red; then Pre-Algebra's own (identical) model takes over */
-    var swapped = scrollF >= HANDOFF && (redF >= 1 || scrollF > K + 1.3);
+    var swapped = looped || (scrollF >= HANDOFF && (redF >= 1 || scrollF > K + 1.3));   /* after a loop jump the real Pre-Algebra model shows straight away; the intro spiral never appears */
     /* cover -> intro: the cover knot and the intro's knot are the same shape in the same spot. As the knot starts gliding to the
        middle they move together and slowly blend from one to the other, so the hand-over can't be seen */
     var cx = reduce ? (scrollF > 0.05 ? 1 : 0) : ease(clamp01((morphF - 0.02) / 0.5));
