@@ -333,6 +333,11 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
   </div>
 </div>
 <script>
+/* Every reload starts from the very beginning: no jumping back to where you were, and no #section left in the address
+   from a scroll link, so the loader and the whole intro play again */
+try { if ('scrollRestoration' in history) history.scrollRestoration = 'manual'; if (location.hash) history.replaceState(null, '', location.pathname + location.search); } catch (e) {}   /* some embedded previews don't allow touching the address */
+window.scrollTo(0, 0);
+window.addEventListener('load', function () { window.scrollTo(0, 0); });
 /* Loader: the count eases toward 90 while things load, then runs to 100 once the 3D scene has drawn its first frame */
 (function () {
   var el = document.getElementById('loader'), num = document.getElementById('ldNum'), curve = document.getElementById('ldCurve'), dot = document.getElementById('ldDot'), ticks = document.getElementById('ldTicks');
