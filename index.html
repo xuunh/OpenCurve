@@ -667,10 +667,11 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
     main.children[i].scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
   }
   /* Where we are, measured from each chapter's real top (chapters can differ in height) */
+  function docTop(el) { return el.getBoundingClientRect().top + window.scrollY; }   /* where an element starts on the page, measured from the very top */
   function chapterPos() {
-    var secs = main.children, y = window.scrollY - main.offsetTop, n = secs.length;   /* measured from the cover (the pre-cover screen sits above it) */
+    var secs = main.children, y = window.scrollY, n = secs.length;   /* every position is the element's true place on the page, so no wrapper or offset can throw the camera off */
     for (var i = 0; i < n - 1; i++) {
-      var a = secs[i].offsetTop, b = secs[i + 1].offsetTop;
+      var a = docTop(secs[i]), b = docTop(secs[i + 1]);
       if (y < b) return i + Math.max(0, Math.min(1, (y - a) / ((b - a) || 1)));
     }
     return n - 1;
@@ -1053,7 +1054,7 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
     spiral: Sh(windAt, { s: 1 })
   };
   function shapeAt(S, u, v, t, o) { return S.f(S.p, u, v, t, o); }
-  var W = '#E4E8F0', RIGHT = [14, 4.8, -8], MID = [3, 6.2, -8], BAND = [1, -0.35, 1];
+  var W = '#E4E8F0', RIGHT = [12.5, 4.6, -6], MID = [3, 6.2, -8], BAND = [1, -0.35, 1];
   var KEYS = [
     /* 0 · cover: exactly the cover knot */
     { s: SHAPE.knot, pos: [PLK[0], PLK[1], PLK[2]], rot: [PLK[3], PLK[4], PLK[5]], col: W, alpha: 1 },
@@ -1069,7 +1070,7 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
     /* 7 · the sheet slides to the usual right-hand spot and twists */
     { s: SHAPE.twist, pos: RIGHT, rot: [0.25, -0.35, 0.08], col: W, alpha: 1 },
     /* 8 · the sheet folds up like an accordion and slowly opens out again, like a topic being opened */
-    { s: SHAPE.fold, pos: [18, 5.6, -8], rot: [0.32, -0.45, 0], col: W, alpha: 1 },
+    { s: SHAPE.fold, pos: [16, 5.6, -8], rot: [0.32, -0.45, 0], col: W, alpha: 1 },
     /* 9 · a rolling wave (tilts with the mouse) */
     { s: SHAPE.wave, pos: RIGHT, rot: [0.35, -0.3, 0], col: W, alpha: 1 },
     /* 10 · words centered: the wave stretches into a long band that flows across the whole screen beneath them */
@@ -1136,7 +1137,7 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
      (the long tail of a trackpad swipe doesn't count as a second scroll) */
   var lastWheelT = 0, stepLock = 0;
   window.addEventListener('wheel', function (e) {
-    var mo = main.offsetTop, y = window.scrollY, now = performance.now();
+    var mo = docTop(main), y = window.scrollY, now = performance.now();
     if (y > mo + 2 || (y >= mo - 2 && e.deltaY > 0) || Math.abs(e.deltaY) < 1) return;   /* past the pre-cover: scrolling works as usual */
     e.preventDefault();
     var fresh = now - lastWheelT > 220; lastWheelT = now;
@@ -1189,7 +1190,7 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
     if (scrollTarget > SL - 0.002 && scrollF > SL - 0.2) { /* arrived at the copy: jump back to the real Pre-Algebra */
       var h = document.documentElement, sb = h.style.scrollBehavior;
       h.style.scrollBehavior = 'auto';
-      window.scrollTo(0, main.offsetTop + main.children[K + 1].offsetTop);
+      window.scrollTo(0, docTop(main.children[K + 1]));
       h.style.scrollBehavior = sb;
       scrollTarget = K + 1; scrollF -= SL - (K + 1); /* keep the camera's leftover glide so the jump can't be seen */
       redF = 1;   /* coming round from Topology: Pre-Algebra is already red */
@@ -1216,7 +1217,7 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
     var cx = reduce ? (scrollF > 0.05 ? 1 : 0) : ease(clamp01((morphF - 0.02) / 0.5));
     /* pre-cover: until you scroll down from it, only its words show; the scene and bars fade in on the way to the cover */
     /* pre-cover progress, in screens (0 = quote, 1 = "Introducing", 2 = cover). It trails the scroll on purpose, so every step plays out slowly */
-    var moT = main.offsetTop || 1, sy = window.scrollY, preTarget = 2 * clamp01(sy / moT), preCue = prelude.querySelector('.scroll-cue');
+    var moT = docTop(main) || 1, sy = window.scrollY, preTarget = 2 * clamp01(sy / moT), preCue = prelude.querySelector('.scroll-cue');
     if (!frame.preInit) { frame.preInit = true; preP = preTarget; }   /* opening the page partway down (a link to a subject) starts there, without replaying the intro */
     preP += (preTarget - preP) * (reduce ? 1 : 1 - Math.exp(-dt * 2));
     if (Math.abs(preTarget - preP) < 0.0005 || (preTarget === 2 && preP > 1.95)) preP = preTarget;   /* the last sliver of the glide is under a pixel, so finish it */
