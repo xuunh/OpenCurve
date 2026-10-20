@@ -221,7 +221,7 @@ a, img, svg { -webkit-user-drag: none; }
    scrolling never moves it, so it glides without the one-frame wobble a scrolling element gets; on arrival it hands
    over to the real cover title in the same spot */
 .pre-title { position: fixed; z-index: 3; left: 0; top: 0; pointer-events: none; font-size: clamp(72px, 15vw, 232px); font-weight: 200; letter-spacing: -0.02em; line-height: 0.84; color: var(--ink); }
-.pre-title > span { position: absolute; left: 0; top: 0; display: block; white-space: nowrap; visibility: hidden; filter: drop-shadow(0 0 40px rgba(0,0,0,0.6)); }   /* grown by real font size, not by scaling a picture of it, so it's sharp at every size and lands identical to the cover title */
+.pre-title > span { position: absolute; left: 0; top: 0; display: block; white-space: nowrap; transform-origin: 0 0; visibility: hidden; filter: drop-shadow(0 0 40px rgba(0,0,0,0.6)); }   /* moved with a transform so it glides smoothly between pixels; no will-change, so the browser redraws it sharp at every size */
 .pre-title .l2 { font-weight: 400; letter-spacing: -0.01em; }
 .pre-intro { font-size: clamp(20px, 1.6vw, 28px); font-weight: 300; letter-spacing: -0.01em; color: var(--mist); white-space: nowrap; }
 #intro h1 > span { justify-self: start; transform-origin: 0 0; text-shadow: none; filter: drop-shadow(0 0 40px rgba(0,0,0,0.6)); }   /* the soft dark glow is applied to each whole word, so overlapping letters don't shade each other */   /* each word measures to its own width, so it can travel on its own */
@@ -1141,7 +1141,7 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
   }
 
   var prelude = document.getElementById('prelude'), preQuote = document.querySelector('.pre-quote'), preIntro = document.querySelector('.pre-intro'), preP = 0, preReady = 0, preVeil = document.getElementById('preVeil'), huds = Array.prototype.slice.call(document.querySelectorAll('.hud'));
-  var words = null, wordEls = [], titleTravel = false, titleFs = 1, cloneEls = Array.prototype.slice.call(document.querySelectorAll('.pre-title > span'));   /* where each title word rests on the cover (page coordinates, no transform) */
+  var words = null, wordEls = [], titleTravel = false, handAt = -1, titleFs = 1, cloneEls = Array.prototype.slice.call(document.querySelectorAll('.pre-title > span'));   /* where each title word rests on the cover (page coordinates, no transform) */
   function measureTitle() {
     wordEls = Array.prototype.slice.call(coverIn.children); titleFs = parseFloat(getComputedStyle(coverIn).fontSize) || 1;
     words = wordEls.map(function (w) { var tr = w.style.transform; w.style.transform = ''; var r = w.getBoundingClientRect(); w.style.transform = tr; return { left: r.left, top: r.top + window.scrollY, w: r.width, h: r.height }; });
@@ -1267,12 +1267,17 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
         /* "Curve" drops to its line a little before it slides left, so the two words never run into each other */
         var kx = i ? easeIO(clamp01((kr - 0.25) / 0.75)) : kk, ky = i ? easeIO(clamp01(kr / 0.75)) : kk;
         var x = lerp(A[i].x, words[i].left, kx), y = lerp(A[i].y, words[i].top - rest, ky), sc = lerp(A[i].s, 1, kk);
-        el.style.fontSize = (titleFs * sc).toFixed(3) + 'px'; el.style.left = x.toFixed(2) + 'px'; el.style.top = y.toFixed(2) + 'px';   /* placed like ordinary text (not shifted by a transform), so its letters land on the same pixels as the real title */
+        el.style.transform = 'translate(' + x.toFixed(3) + 'px,' + y.toFixed(3) + 'px) scale(' + sc.toFixed(5) + ')';
         el.style.opacity = preP < 1 ? wi.toFixed(3) : String(1 - ease(clamp01(scrollF / 0.55))); el.style.filter = preP < 1 && wi < 0.99 ? 'blur(' + ((1 - wi) * 8).toFixed(2) + 'px)' : '';
         el.style.visibility = 'visible';
       });
-      if (!titleTravel) { wordEls.forEach(function (el) { el.style.visibility = 'hidden'; }); titleTravel = true; }   /* the real title waits on the cover, hidden, until the copy lands on it */
-    } else if (titleTravel) { cloneEls.forEach(function (el) { el.style.visibility = ''; }); wordEls.forEach(function (el) { el.style.visibility = ''; }); titleTravel = false; frame.ce = -1; }
+      if (!titleTravel) { wordEls.forEach(function (el) { el.style.visibility = 'hidden'; }); titleTravel = true; handAt = -1; }   /* the real title waits on the cover, hidden, until the copy lands on it */
+    } else if (titleTravel) { wordEls.forEach(function (el) { el.style.visibility = ''; }); titleTravel = false; handAt = t; frame.ce = -1; }   /* landed: the real title appears underneath... */
+    if (handAt >= 0) {   /* ...and the copy on top fades away over a third of a second, so even a half-pixel difference between them can't be seen */
+      var hh = reduce ? 1 : clamp01((t - handAt) / 0.35), cf = 1 - ease(clamp01(scrollF / 0.55));
+      cloneEls.forEach(function (el) { el.style.opacity = String((1 - hh) * cf); });
+      if (hh >= 1) { cloneEls.forEach(function (el) { el.style.visibility = ''; el.style.opacity = ''; }); handAt = -1; }
+    }
     var ce = ease(clamp01(scrollF / 0.55));   /* the cover title drifts up, fades and softens as you scroll away */
     if (ce !== frame.ce) {
       frame.ce = ce;
