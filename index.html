@@ -221,7 +221,7 @@ a, img, svg { -webkit-user-drag: none; }
    scrolling never moves it, so it glides without the one-frame wobble a scrolling element gets; on arrival it hands
    over to the real cover title in the same spot */
 .pre-title { position: fixed; z-index: 3; left: 0; top: 0; pointer-events: none; font-size: clamp(72px, 15vw, 232px); font-weight: 200; letter-spacing: -0.02em; line-height: 0.84; color: var(--ink); }
-.pre-title > span { position: absolute; left: 0; top: 0; display: block; white-space: nowrap; transform-origin: 0 0; visibility: hidden; will-change: transform; filter: drop-shadow(0 0 40px rgba(0,0,0,0.6)); }
+.pre-title > span { position: absolute; left: 0; top: 0; display: block; white-space: nowrap; visibility: hidden; filter: drop-shadow(0 0 40px rgba(0,0,0,0.6)); }   /* grown by real font size, not by scaling a picture of it, so it's sharp at every size and lands identical to the cover title */
 .pre-title .l2 { font-weight: 400; letter-spacing: -0.01em; }
 .pre-intro { font-size: clamp(20px, 1.6vw, 28px); font-weight: 300; letter-spacing: -0.01em; color: var(--mist); white-space: nowrap; }
 #intro h1 > span { justify-self: start; transform-origin: 0 0; text-shadow: none; filter: drop-shadow(0 0 40px rgba(0,0,0,0.6)); }   /* the soft dark glow is applied to each whole word, so overlapping letters don't shade each other */   /* each word measures to its own width, so it can travel on its own */
@@ -1267,7 +1267,7 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
         /* "Curve" drops to its line a little before it slides left, so the two words never run into each other */
         var kx = i ? easeIO(clamp01((kr - 0.25) / 0.75)) : kk, ky = i ? easeIO(clamp01(kr / 0.75)) : kk;
         var x = lerp(A[i].x, words[i].left, kx), y = lerp(A[i].y, words[i].top - rest, ky), sc = lerp(A[i].s, 1, kk);
-        el.style.transform = 'translate3d(' + x.toFixed(2) + 'px,' + y.toFixed(2) + 'px,0) scale(' + sc.toFixed(4) + ')';
+        el.style.fontSize = (titleFs * sc).toFixed(3) + 'px'; el.style.left = x.toFixed(2) + 'px'; el.style.top = y.toFixed(2) + 'px';   /* placed like ordinary text (not shifted by a transform), so its letters land on the same pixels as the real title */
         el.style.opacity = preP < 1 ? wi.toFixed(3) : String(1 - ease(clamp01(scrollF / 0.55))); el.style.filter = preP < 1 && wi < 0.99 ? 'blur(' + ((1 - wi) * 8).toFixed(2) + 'px)' : '';
         el.style.visibility = 'visible';
       });
