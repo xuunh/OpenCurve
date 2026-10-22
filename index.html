@@ -24,6 +24,8 @@
 }
 html, body { background: var(--void); color: var(--ink); }
 html { scroll-snap-type: y mandatory; }
+html.menu-open { overflow: hidden; }   /* the page behind the open Index stays put */
+.menu { overscroll-behavior: contain; }
 body { font-family: var(--display); font-weight: 300; }
 a { color: inherit; text-decoration: none; }
 :focus-visible { outline: none; } /* no focus boxes: keyboard focus shows as a color change instead */
@@ -357,6 +359,8 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
   var still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   for (var i = 1; i <= 8; i++) { var x = i * 90; ticks.insertAdjacentHTML('beforeend', '<line class="tick" x1="' + x + '" y1="115" x2="' + x + '" y2="125"/>'); }
   var p = 0, ready = false, start = performance.now(), MIN = still ? 300 : 1400, gone = false;
+  function hold(e) { if (!gone && (e.type !== 'keydown' || /^( |Page|Arrow|Home|End)/.test(e.key))) e.preventDefault(); }   /* no scrolling until the loader lifts, so the first screen is never skipped */
+  window.addEventListener('wheel', hold, { passive: false }); window.addEventListener('touchmove', hold, { passive: false }); window.addEventListener('keydown', hold);
   function y(x) { return 120 - Math.sin(x / 720 * Math.PI * 4) * 84; }
   function draw(f) {
     var n = Math.max(2, Math.round(f * 160)), d = '';
@@ -366,7 +370,9 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
     var v = String(Math.round(f * 100)); num.textContent = ('000' + v).slice(-3);
   }
   function finish() {
-    if (gone) return; gone = true;
+    if (gone) return; gone = true; window.ssLoaded = true;
+    window.removeEventListener('wheel', hold); window.removeEventListener('touchmove', hold); window.removeEventListener('keydown', hold);
+    if (window.scrollY) window.scrollTo(0, 0);
     el.classList.add('done');
     var pre = document.getElementById('prelude'); if (pre) pre.classList.add('on'); document.documentElement.classList.add('pre-ready');   /* the pre-cover line fades up as the loader lifts */
     el.setAttribute('aria-label', 'Loaded');
@@ -649,13 +655,13 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
   var tabs = Array.prototype.slice.call(ixList.querySelectorAll('button'));
   var picker = document.getElementById('picker'), menu = document.getElementById('menu'), pickerLabel = document.getElementById('pickerLabel'), pickerNum = document.getElementById('pickerNum'), pickerBar = document.getElementById('pickerBar');
   function openMenu() {
-    menu.hidden = false; picker.setAttribute('aria-expanded', 'true');
+    menu.hidden = false; picker.setAttribute('aria-expanded', 'true'); document.documentElement.classList.add('menu-open');
     var cur = ixList.querySelector('[aria-current="true"]') || tabs[0];
     tabs.forEach(function (b) { b.style.setProperty('--c', SUBJECTS[+b.dataset.go].css); b.parentNode.style.setProperty('--c', SUBJECTS[+b.dataset.go].css); });
     ixShow(+cur.dataset.go); cur.focus({ preventScroll: true });
   }
   function closeMenu(returnFocus) {
-    menu.hidden = true; picker.setAttribute('aria-expanded', 'false');
+    menu.hidden = true; picker.setAttribute('aria-expanded', 'false'); document.documentElement.classList.remove('menu-open');
     if (returnFocus) picker.focus();
   }
   picker.addEventListener('click', function () { if (menu.hidden) openMenu(); else closeMenu(true); });
@@ -676,7 +682,8 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
     b.addEventListener('mouseenter', show); b.addEventListener('focus', show);
     b.addEventListener('click', function () {
       closeMenu(false);
-      document.getElementById(SUBJECTS[+b.dataset.go].id).scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+      var el = document.getElementById(SUBJECTS[+b.dataset.go].id);
+      if (stepReady) { pending = 0; glideTo(el, performance.now()); } else el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
     });
   });
   var eqEl = document.getElementById('eq'), countEl = document.getElementById('count');
@@ -703,8 +710,9 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
   }
   window.addEventListener('scroll', syncMark, { passive: true });
   syncMark();
-  document.getElementById('prev').addEventListener('click', function () { goTo(currentIndex() - 1); });
-  document.getElementById('next').addEventListener('click', function () { goTo(currentIndex() + 1); });
+  var stepReady = false;   /* once the 3D scene is up, ↑ ↓ go through the one-step-at-a-time system further down */
+  document.getElementById('prev').addEventListener('click', function () { if (!stepReady) goTo(currentIndex() - 1); });
+  document.getElementById('next').addEventListener('click', function () { if (!stepReady) goTo(currentIndex() + 1); });
 
   if (typeof THREE === 'undefined') { if (window.ssReady) ssReady(); return; }
 
@@ -1160,10 +1168,11 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
     words = wordEls.map(function (w) { var tr = w.style.transform; w.style.transform = ''; var r = w.getBoundingClientRect(); w.style.transform = tr; return { left: r.left, top: r.top + window.scrollY, w: r.width, h: r.height }; });
   }
   var coverIn = document.querySelector('#intro h1')   /* only the title moves, so the scroll hint below keeps its place on the bottom line */, coverCue = document.querySelector('#intro .scroll-cue');
-  /* One screen per scroll, everywhere: a wheel flick or a trackpad swipe moves exactly one screen, and the next one
-     only goes once the model has caught up (camera arrived, shape finished changing). Scrolling fast can't leave the
-     model behind; it just plays each step in turn. The long tail of a trackpad swipe doesn't count as a new scroll. */
-  var lastWheelT = 0, stepLock = 0, stepGoal = -1;
+  /* One screen per scroll, everywhere: a wheel flick, a trackpad swipe, Space / Page Down / the arrow keys, the ↑ ↓ buttons and
+     the "scroll" hints all move exactly one screen, and the next one only goes once the model has caught up (camera arrived,
+     shape finished changing). Scrolling fast can't leave the model behind; it just plays each step in turn. A scroll that comes
+     a little early isn't thrown away: it waits (only the latest one) and plays as soon as the model is ready. */
+  var lastWheelT = -1e9, stepLock = 0, stepGoal = -1, pending = 0, pendingT = 0;
   function stops() { return Array.prototype.slice.call(document.querySelectorAll('.prelude')).concat(Array.prototype.slice.call(main.children)); }
   function modelSettled(now) {
     if (stepGoal >= 0 && Math.abs(window.scrollY - stepGoal) > 2 && now < stepLock + 2500) return false;   /* the page is still gliding to the last step */
@@ -1172,19 +1181,66 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
     var preOk = window.scrollY >= docTop(main) - 2 || Math.abs(2 * clamp01(window.scrollY / (docTop(main) || 1)) - preP) < 0.08;
     return camOk && shapeOk && preOk;
   }
-  window.addEventListener('wheel', function (e) {
-    if (e.ctrlKey || !menu.hidden || Math.abs(e.deltaY) < 1 || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;   /* zooming, the open index, sideways swipes: leave alone */
-    e.preventDefault();
-    var now = performance.now(), fresh = now - lastWheelT > 220; lastWheelT = now;
-    if (!fresh || now < stepLock || !modelSettled(now)) return;
+  function glideTo(el, now) {   /* every move goes through here, so the "wait for the model" rule always knows where we're headed */
+    stepLock = now + 700;   /* at least this long between steps, even when the model is quick */
+    stepGoal = Math.round(docTop(el));
+    window.scrollTo({ top: stepGoal, behavior: reduce ? 'auto' : 'smooth' });
+  }
+  function step(dir, now) {
     var list = stops(), y = window.scrollY, idx = 0, best = Infinity;
     list.forEach(function (el, i) { var d = Math.abs(docTop(el) - y); if (d < best) { best = d; idx = i; } });
-    var next = Math.max(0, Math.min(list.length - 1, idx + (e.deltaY > 0 ? 1 : -1)));
-    if (next === idx) return;
-    stepLock = now + 700;   /* at least this long between steps, even when the model is quick */
-    stepGoal = Math.round(docTop(list[next]));
-    window.scrollTo({ top: docTop(list[next]), behavior: reduce ? 'auto' : 'smooth' });
+    var next = Math.max(0, Math.min(list.length - 1, idx + dir));
+    if (next !== idx || best > 2) glideTo(list[next], now);   /* (if the page was left between two screens, this also tidies it onto one) */
+  }
+  function request(dir, wait) {   /* wait = false: if the model isn't ready, drop it (held-down keys repeat on their own) */
+    var now = performance.now();
+    if (now >= stepLock && modelSettled(now)) { pending = 0; step(dir, now); }
+    else if (wait) { pending = dir; pendingT = now; }
+  }
+  setInterval(function () {   /* the waiting scroll plays once the model is ready (and is forgotten if that takes too long) */
+    if (!pending) return;
+    var now = performance.now();
+    if (now - pendingT > 4000 || !menu.hidden) { pending = 0; return; }
+    if (now >= stepLock && modelSettled(now)) { var d = pending; pending = 0; step(d, now); }
+  }, 50);
+  window.addEventListener('wheel', function (e) {
+    if (!window.ssLoaded) { e.preventDefault(); return; }   /* nothing moves while the loader is up */
+    if (e.ctrlKey || !menu.hidden || Math.abs(e.deltaY) < 1 || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;   /* zooming, the open index, sideways swipes: leave alone */
+    e.preventDefault();
+    var t = e.timeStamp || performance.now(), fresh = t - lastWheelT > 220; lastWheelT = t;   /* the swipe's own time, so a stutter on the page can't split one swipe into several */
+    if (fresh) request(e.deltaY > 0 ? 1 : -1, true);
   }, { passive: false });
+  var navKeys = { ' ': 1, PageDown: 1, ArrowDown: 1, PageUp: -1, ArrowUp: -1 };
+  document.addEventListener('keydown', function (e) {
+    if (!window.ssLoaded) { e.preventDefault(); return; }
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (!menu.hidden) {   /* the open Index scrolls itself; the page behind it never moves (and doesn't jump once it closes) */
+      var mk = navKeys[e.key] || (e.key === 'Home' || e.key === 'End' ? 1 : 0);
+      if (!mk || (e.key === ' ' && e.target && e.target.tagName === 'BUTTON')) return;   /* Space on a subject still picks it */
+      e.preventDefault();
+      if (e.key === 'Home') menu.scrollTop = 0; else if (e.key === 'End') menu.scrollTop = menu.scrollHeight;
+      else menu.scrollBy({ top: (e.key === ' ' && e.shiftKey ? -1 : mk) * (/^Page| /.test(e.key) ? menu.clientHeight * 0.8 : 80), behavior: reduce ? 'auto' : 'smooth' });
+      return;
+    }
+    var tg = e.target, tag = tg && tg.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (tg && tg.isContentEditable)) return;
+    if (e.key === 'Home' || e.key === 'End') {   /* top of the site / the last subject (not the hidden copy of Pre-Algebra that makes the loop) */
+      e.preventDefault(); pending = 0;
+      glideTo(e.key === 'Home' ? stops()[0] : document.getElementById(SUBJECTS[LAST].id), performance.now()); return;
+    }
+    var d = navKeys[e.key]; if (!d) return;
+    if (e.key === ' ' && tag === 'A') return;   /* Space on a link: leave it to the browser */
+    if (e.key === ' ' && e.shiftKey) d = -1;
+    e.preventDefault();   /* the page never scrolls on its own: no half-way stops, no outrunning the model, and Space on a focused button scrolls instead of pressing it */
+    request(d, !e.repeat);
+  });
+  document.addEventListener('keyup', function (e) { if (e.key === ' ' && menu.hidden && e.target && e.target.tagName === 'BUTTON') e.preventDefault(); });   /* a button is "pressed" when Space comes back up: stop that */
+  document.getElementById('prev').addEventListener('click', function () { request(-1, true); });
+  document.getElementById('next').addEventListener('click', function () { request(1, true); });
+  stepReady = true;
+  Array.prototype.forEach.call(document.querySelectorAll('.scroll-cue'), function (a) {
+    a.addEventListener('click', function (e) { e.preventDefault(); request(1, true); });   /* one screen, like a scroll (no skipped screen, no #hash in the address) */
+  });
   measureTitle(); window.addEventListener('resize', measureTitle); if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureTitle);
   var looped = false;   /* true while the camera finishes gliding in after the Topology -> Pre-Algebra jump */
   var redF = 0;   /* how red the spiral is: rises from the bottom on screen 05 (about 2.5 s), drains back from the top if you scroll back */
@@ -1230,6 +1286,7 @@ window.addEventListener('load', function () { window.scrollTo(0, 0); });
       var h = document.documentElement, sb = h.style.scrollBehavior;
       h.style.scrollBehavior = 'auto';
       window.scrollTo(0, docTop(main.children[K + 1]));
+      stepGoal = Math.round(docTop(main.children[K + 1]));   /* so the next scroll isn't held back waiting for the old goal */
       h.style.scrollBehavior = sb;
       scrollTarget = K + 1; scrollF -= SL - (K + 1); /* keep the camera's leftover glide so the jump can't be seen */
       redF = 1; looped = true;   /* coming round from Topology: Pre-Algebra is already red, and the intro stays out of it */
