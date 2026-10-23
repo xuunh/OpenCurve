@@ -1,6 +1,6 @@
 # OpenCurve
 
-Math, meant to be seen. Every subject from Pre-Algebra to Topology, drawn as a glowing 3D model.
+Math, meant to be seen. Every subject from Pre-Algebra to Topology, drawn as a glowing 2D or 3D visual.
 
 **Live site:** https://xuunh.github.io/OpenCurve/
 
@@ -8,7 +8,7 @@ Math, meant to be seen. Every subject from Pre-Algebra to Topology, drawn as a g
 
 ## What it is
 
-OpenCurve is a place to look at math before you study it. It is not a textbook, and it doesn't try to teach everything. Each subject gets a 3D model drawn from real equations, so you can see the shape of an idea (how a curve behaves, what a limit approaches, how a surface bends) before the formulas.
+OpenCurve is a place to look at math before you study it. It is not a textbook, and it doesn't try to teach everything. Each subject gets a 2D or 3D visual drawn from real equations, so you can see the shape of an idea (how a curve behaves, what a limit approaches, how a surface bends) before the formulas.
 
 It's made for students, tutors, and teachers, and it's built to run on laptops, Chromebooks, and classroom projectors.
 
@@ -67,9 +67,12 @@ Then go to http://localhost:8000.
 
 ## Built with
 
-- [Three.js](https://threejs.org) r128 for the 3D models and the bloom glow
+- JavaScript and [Three.js](https://threejs.org) r128 for the 2D and 3D visuals and the bloom glow
+- HTML and CSS for the layout and design
+- [Blender](https://www.blender.org) for 3D design work
+- [Claude Code](https://claude.com/claude-code) as a coding partner, alongside my own code changes throughout
 - [Geist and Geist Mono](https://vercel.com/font) by Vercel, and [Instrument Serif](https://fonts.google.com/specimen/Instrument+Serif), loaded from Google Fonts
-- Plain HTML, CSS, and JavaScript, hosted on GitHub Pages
+- Hosted on [GitHub Pages](https://pages.github.com)
 
 ## Contributing
 
@@ -77,7 +80,7 @@ Found a math mistake, want a topic, or want to help build? See [CONTRIBUTING.md]
 
 ## Credits
 
-Made by Junayed Haider ([@xuunh](https://github.com/xuunh)), Biomedical Engineering student at The City College of New York.
+Made by Junayed Haider ([@xuunh](https://github.com/xuunh)), Biomedical Engineering student at The City College of New York, with help from Claude Code. Fonts, libraries, and tools are credited under [Built with](#built-with).
 
 ## License
 
