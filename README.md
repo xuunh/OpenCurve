@@ -4,7 +4,7 @@ Math, meant to be seen. Every subject from Pre-Algebra to Topology, drawn as a g
 
 **Live site:** https://xuunh.github.io/OpenCurve/
 
-![The OpenCurve cover: the name in large type beside a glowing wireframe torus knot](assets/screenshots/cover.jpg)
+![OpenCurve: math, meant to be seen](assets/slides/01-title.jpg)
 
 ## What it is
 
@@ -12,10 +12,7 @@ OpenCurve is a place to look at math before you study it. It is not a textbook, 
 
 It's made for students, tutors, and teachers, and it's built to run on laptops, Chromebooks, and classroom projectors.
 
-| | |
-|---|---|
-| ![Algebra 1: a green wireframe hyperboloid](assets/screenshots/algebra-1.jpg) | ![Pre-Calculus: a magenta ripple surface, z = cos(r) / r](assets/screenshots/pre-calculus.jpg) |
-| ![Differential Equations: the Lorenz system drawn in green](assets/screenshots/differential-equations.jpg) | ![Topology: a green Möbius strip](assets/screenshots/topology.jpg) |
+![Every formula is a shape first: y = x², z = cos(r) / r and a hyperboloid, each next to its 3D model](assets/slides/02-idea.jpg)
 
 ## How to use it
 
@@ -23,9 +20,9 @@ It's made for students, tutors, and teachers, and it's built to run on laptops, 
 - **Move your mouse** to tilt the view
 - **Index** at the top of the screen jumps to any subject
 
-![The Index menu listing every subject](assets/screenshots/index.jpg)
-
 ## Subjects
+
+![All 19 subject models in one grid](assets/slides/03-atlas.jpg)
 
 | # | Subject | Model | Status |
 |---|---|---|---|
@@ -50,6 +47,13 @@ It's made for students, tutors, and teachers, and it's built to run on laptops, 
 | 19 | Topology | Möbius strip | Planned |
 
 The cover model is the torus knot (2, 3). Topics inside each subject are being added one at a time, starting with Algebra 1, Algebra 2, and Pre-Calculus.
+
+## Slides
+
+A short overview deck for proposals, presentations, or sharing. Free to use with credit.
+
+- [OpenCurve-overview.pdf](assets/slides/OpenCurve-overview.pdf) (7 slides)
+- Single images in [assets/slides](assets/slides), including a 1280×640 link preview
 
 ## Run it locally
 
