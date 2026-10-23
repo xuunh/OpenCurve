@@ -1,0 +1,26 @@
+name: Math mistake
+description: A wrong equation, a label that doesn't match its model, or a shape drawn wrong
+title: "[Math] "
+labels: ["math"]
+body:
+  - type: dropdown
+    id: subject
+    attributes:
+      label: Subject
+      options: [Cover / intro, Pre-Algebra, Algebra 1, Geometry, Algebra 2, Trigonometry, Pre-Calculus, Statistics, Probability, Calculus 1, Calculus 2, Linear Algebra, Calculus 3, Differential Equations, Discrete Math, Number Theory, Real Analysis, Abstract Algebra, Complex Analysis, Topology]
+    validations:
+      required: true
+  - type: textarea
+    id: wrong
+    attributes:
+      label: What's wrong
+      description: Quote the label or describe what you see.
+    validations:
+      required: true
+  - type: textarea
+    id: right
+    attributes:
+      label: What it should be
+      description: The correct equation or shape, and a source if you have one.
+    validations:
+      required: true

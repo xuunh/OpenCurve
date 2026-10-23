@@ -1,0 +1,29 @@
+name: Topic or visual idea
+description: Something you or your students struggle to picture
+title: "[Topic] "
+labels: ["topic"]
+body:
+  - type: input
+    id: topic
+    attributes:
+      label: Topic
+      placeholder: e.g. End behavior of polynomials
+    validations:
+      required: true
+  - type: input
+    id: subject
+    attributes:
+      label: Which subject it belongs to
+      placeholder: e.g. Algebra 2
+  - type: textarea
+    id: why
+    attributes:
+      label: What's hard to picture
+      description: What part doesn't click from the formula alone?
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: How it could look (optional)
+      description: Any idea for the model or animation.
