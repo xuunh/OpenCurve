@@ -57,7 +57,7 @@ A short overview deck for proposals, presentations, or sharing. Free to use with
 
 ## Run it locally
 
-The whole site is one file, `index.html`, with no build step. Open it in a browser, or serve the folder:
+The site is four plain files with no build step: `index.html` (page structure), `style.css` (styling), `loader.js` (the loading screen), and `main.js` (the 2D and 3D visuals). Open `index.html` in a browser, or serve the folder:
 
 ```
 python3 -m http.server

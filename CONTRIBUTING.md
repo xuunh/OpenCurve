@@ -11,11 +11,16 @@ Thanks for helping. OpenCurve is a place to see math, so the most useful help is
 
 ## Working on the code
 
-The whole site lives in one file, `index.html`: styles at the top, page content in the middle, scripts at the bottom. There's no build step and nothing to install.
+The site is four plain files, with no build step and nothing to install:
+
+- `index.html`: page structure and content
+- `style.css`: all the styling
+- `loader.js`: the loading screen and reset-to-top on reload
+- `main.js`: the custom cursor, the subjects, and every 2D and 3D model
 
 1. Fork the repo and clone your fork.
 2. Run `python3 -m http.server` in the folder and open http://localhost:8000.
-3. Make your change in `index.html`.
+3. Make your change in the file that fits (see below).
 4. Check it in a desktop browser at laptop size, and if you can, on a Chromebook or a projector.
 5. Open a pull request that says what you changed and why.
 
@@ -27,14 +32,14 @@ The whole site lives in one file, `index.html`: styles at the top, page content 
 - **Respect reduced motion.** Anything that moves should calm down when the visitor's system asks for less motion.
 - **Desktop first.** There's no phone layout yet, so focus on laptops and classroom screens.
 
-### Where things are in `index.html`
+### Where things are
 
 | What | Where to look |
 |---|---|
-| Subject list (names, descriptions, colors, labels) | `var SUBJECTS` |
-| How each 3D model is built | the `BUILD` functions, keyed by `form` |
-| Where each model sits on screen | `var PLACE` |
-| The cover and intro screens | `#intro` and the `.beat` sections |
+| Subject list (names, descriptions, colors, labels) | `var SUBJECTS` in `main.js` |
+| How each 3D model is built | the `BUILD` functions in `main.js`, keyed by `form` |
+| Where each model sits on screen | `var PLACE` in `main.js` |
+| The cover and intro screens | `#intro` and the `.beat` sections in `index.html`, styled in `style.css` |
 
 ## License
 
