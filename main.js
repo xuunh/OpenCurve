@@ -828,7 +828,7 @@
     if (co !== frame.co) { frame.co = co; preCue.style.opacity = co < 1 ? String(0.45 * co) : ''; preCue.style.visibility = co < 0.01 ? 'hidden' : ''; }
     if (words && (sy < moT - 0.5 || preP < 1.999)) {   /* "Open" and "Curve": side by side under "Introducing", then into the one-line cover title */
       var vw = window.innerWidth, vh = window.innerHeight, gap = titleFs * 0.01, w0 = words[0], w1 = words[1], tot = w0.w + gap + w1.w;
-      var sA = Math.min(0.42, vw * 0.7 / tot);
+      var sA = Math.min(0.34, vw * 0.56 / tot);   /* the title on the "Introducing" screen, as a share of its cover size (about 20% smaller than before) */
       var ax = Math.round((vw - tot * sA) / 2), ay = Math.round(vh * 0.5 - w0.h * sA * 0.3);   /* held perfectly still, on whole pixels */
       preIntro.style.top = (ay - 34) + 'px';   /* "Introducing" sits just above the words */
       var A = [{ x: ax, y: ay, s: sA }, { x: ax + (w0.w + gap) * sA, y: ay, s: sA }];
