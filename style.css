@@ -239,6 +239,8 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
 #intro h1 .l2 { font-weight: 400; letter-spacing: -0.01em; }   /* "Curve" sits right after "Open" on the same line */
 .kr { margin: 0 -0.012em 0 -0.042em; }   /* the "r" in Curve: Geist leaves too much air after the u and too little before the v at this size */
 #intro .chapter-inner { gap: 36px; }
+#intro .chapter-inner { max-width: none; }   /* the big one-line title is wider than the usual 1280px column, so the cover uses the full width */
+#intro h1 { justify-self: center; margin-left: 0; }   /* cover title centered across the screen (the "Introducing" glide lands on it, since it measures where the title sits) */
 @media (max-width: 720px) { #intro .scroll-cue { display: none; } }
 
 /* Intro: short screens between the cover and Pre-Algebra. Six show only the model; the text screens all share one build:
