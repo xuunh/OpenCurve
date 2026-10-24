@@ -240,7 +240,7 @@ html:not(.pre-ready) #intro h1 { opacity: 0; }   /* the title fades up as the lo
 .kr { margin: 0 -0.012em 0 -0.042em; }   /* the "r" in Curve: Geist leaves too much air after the u and too little before the v at this size */
 #intro .chapter-inner { gap: 36px; }
 #intro .chapter-inner { max-width: none; }   /* the big one-line title is wider than the usual 1280px column, so the cover uses the full width */
-#intro h1 { justify-self: center; margin-left: 0; }   /* cover title centered across the screen (the "Introducing" glide lands on it, since it measures where the title sits) */
+#intro h1 { justify-self: center; margin-left: 0; position: relative; left: -0.007em; }   /* left nudge: the "O" has more empty space before it than the "e" has after it, so this centers the visible letters, not the text box (measured in Chrome: equal gap on both sides) */   /* cover title centered across the screen (the "Introducing" glide lands on it, since it measures where the title sits) */
 @media (max-width: 720px) { #intro .scroll-cue { display: none; } }
 
 /* Intro: short screens between the cover and Pre-Algebra. Six show only the model; the text screens all share one build:
